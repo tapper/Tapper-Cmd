@@ -74,11 +74,9 @@ sub new_precondition
         #print "opt  = ", Dumper($opt);
 
         my $shortname                       = $opt->{shortname}    || '';
-        my $repository_full_name            = $opt->{repository_full_name};
-        my $type                            = $opt->{type};
+        my $type                            = 'TODO: set me from condition-yaml';
         my $condition                       = $opt->{condition};
         my $condition_file                  = $opt->{condition_file};
-        my $reboot_needed_after_preparation = $opt->{reboot_needed_after_preparation};
         my $timeout                         = $opt->{timeout};
 
         $condition = read_condition_file($condition_file);
@@ -86,10 +84,8 @@ sub new_precondition
         my $precondition = Artemis->model('TestrunDB')->resultset('Precondition')->new
             ({
               shortname                       => $shortname,
-              repository_full_name            => $repository_full_name,
               type                            => $type,
               condition                       => $condition,
-              reboot_needed_after_preparation => $reboot_needed_after_preparation,
               timeout                         => $timeout,
              });
         $precondition->insert;
@@ -116,6 +112,6 @@ sub assign_preconditions {
 }
 
 
-# perl -Ilib bin/artemis-testrun newprecondition --shortname=perl-5.10 --repository_full_name=/package/redhat/5.2/64bit/perl-5.10 --type=foo
+# perl -Ilib bin/artemis-testrun newprecondition --shortname=perl-5.10 --type=foo
 
 1;
