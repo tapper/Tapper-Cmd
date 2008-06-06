@@ -13,20 +13,15 @@ sub opt_spec {
         return (
                 [ "verbose",                           "some more informational output"                                                                                        ],
                 [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                                                                    ],
-                [ "repository_full_name=s",            "TEXT; full pathname in precondition repository", { required => 1 }                                                     ],
-                [ "type=s",                            "STRING, default=Misc; one of: Kernel, Xen, KVM, Hardware, Distribution, Benchmark, Software, Misc",  { required => 1 } ],
-                [ "condition=s",                       "TEXT; full path to the test program to start"                                                                          ],
-                [ "condition_file=s",                  "STRING; filename that contains the condition"                                                                          ],
-                [ "reboot_needed_after_preparation=s", "BOOL, default=0; wait after testrun for human investigation"                                                           ],
-                [ "timeout=s",                         "INT, default=none; timeout for preparing this precondition"                                                            ],
+                [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                                                                 ],
+                [ "condition_file=s",                  "STRING; filename that contains the condition (alternative to --condition)"                                             ],
                 [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                                                                    ],
                );
 }
 
 sub usage_desc
 {
-        my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testrun newprecondition --shortname=s --repository_full_name=s --type=s [ --condition=s | --reboot_needed_after_preparation=s | --timeout=s ]*";
+        "artemis-testrun newprecondition --shortname=s  ( --condition=s | --condition_file=s ) ";
 }
 
 sub _allowed_opts {
@@ -40,12 +35,10 @@ sub validate_args {
 #         print "args = ", Dumper($args);
 
         print "Missing argument --shortname\n"            unless $opt->{shortname};
-        print "Missing argument --repository_full_name\n" unless $opt->{repository_full_name};
-        print "Missing argument --type\n"                 unless $opt->{type};
 
         print "Only one of --condition or --condition_file allowed.\n" if $opt->{condition} && $opt->{condition_file};
 
-        return 1 if $opt->{shortname} && $opt->{repository_full_name} && $opt->{type};
+        return 1 if $opt->{shortname};
         die $self->usage->text;
 }
 
