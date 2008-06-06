@@ -1,0 +1,29 @@
+---
+name: Artemis-Cmd
+version: 2.01
+author:
+  - 'OSRC SysInt Team <osrc-sysint@elbe.amd.com>'
+abstract: artemis-* commandline tools
+license: restrictive
+build_requires:
+  Test::More: 0
+provides:
+  Artemis::Cmd:
+    file: lib/Artemis/Cmd.pm
+    version: 2.01
+  Artemis::Cmd::Testrun:
+    file: lib/Artemis/Cmd/Testrun.pm
+  Artemis::Cmd::Testrun::Command::list:
+    file: lib/Artemis/Cmd/Testrun/Command/list.pm
+  Artemis::Cmd::Testrun::Command::listprecondition:
+    file: lib/Artemis/Cmd/Testrun/Command/listprecondition.pm
+  Artemis::Cmd::Testrun::Command::new:
+    file: lib/Artemis/Cmd/Testrun/Command/new.pm
+  Artemis::Cmd::Testrun::Command::newprecondition:
+    file: lib/Artemis/Cmd/Testrun/Command/newprecondition.pm
+  Artemis::Cmd::Testrun::Command::show:
+    file: lib/Artemis/Cmd/Testrun/Command/show.pm
+generated_by: Module::Build version 0.280801
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

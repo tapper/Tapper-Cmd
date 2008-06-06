@@ -1,0 +1,7 @@
+Artemis-*.*.tar.gz
+Artemis-Cmd-*.*
+_build
+blib
+^Build$
+MANIFEST.bak
+
