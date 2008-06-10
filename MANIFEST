@@ -1,4 +1,9 @@
 .cvsignore
+.gitignore
+bin/artemis-deploy-reportsdb
+bin/artemis-deploy-testrundb
+bin/artemis-hello
+bin/artemis-testrun
 Build.PL
 Changes
 lib/Artemis/Cmd.pm
@@ -13,5 +18,9 @@ MANIFEST
 MANIFEST.SKIP
 META.yml
 README
+scripts/dist_upload_wotan.sh
 t/00-load.t
+t/artemis_cmd_testrun.t
 t/boilerplate.t
+t/fixtures/testrundb/testrun_with_preconditions.yml
+t/Tools.pm

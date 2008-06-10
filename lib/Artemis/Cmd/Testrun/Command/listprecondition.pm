@@ -6,7 +6,8 @@ use warnings;
 use parent 'App::Cmd::Command';
 
 use Data::Dumper;
-use Artemis;
+use Artemis::Model 'model';
+use Artemis::Schema::TestrunDB;
 
 sub opt_spec {
         return (
@@ -59,7 +60,7 @@ sub print_colnames
 
         return unless $opt->{colnames};
 
-        my $columns = Artemis->model('TestrunDB')->resultset('Precondition')->result_source->{_ordered_columns};
+        my $columns = model('TestrunDB')->resultset('Precondition')->result_source->{_ordered_columns};
         print join( $Artemis::Schema::TestrunDB::DELIM, @$columns, '' ), "\n";
 }
 
@@ -70,7 +71,7 @@ sub all
         print "All testruns:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
-        my $preconditions = Artemis->model('TestrunDB')->resultset('Precondition')->all_preconditions->search({}, { order_by => 'id' });
+        my $preconditions = model('TestrunDB')->resultset('Precondition')->all_preconditions->search({}, { order_by => 'id' });
         while (my $precond = $preconditions->next) {
                 print $precond->to_string($opt)."\n";
         }
@@ -86,7 +87,7 @@ sub lonely
         print "Implement me. Now!\n";
         return;
 
-        my $preconditions = Artemis->model('TestrunDB')->resultset('Precondition')->lonely_preconditions->search({}, { order_by => 'id' });
+        my $preconditions = model('TestrunDB')->resultset('Precondition')->lonely_preconditions->search({}, { order_by => 'id' });
         while (my $precond = $preconditions->next) {
                 print $precond->to_string($opt)."\n";
         }
@@ -102,7 +103,7 @@ sub primary
         print "Implement me. Now!\n";
         return;
 
-        my $preconditions = Artemis->model('TestrunDB')->resultset('Precondition')->primary_preconditions->search({}, { order_by => 'id' });
+        my $preconditions = model('TestrunDB')->resultset('Precondition')->primary_preconditions->search({}, { order_by => 'id' });
         while (my $precond = $preconditions->next) {
                 print $precond->to_string($opt)."\n";
         }
@@ -118,7 +119,7 @@ sub pre
         print "Implement me. Now!\n";
         return;
 
-        my $preconditions = Artemis->model('TestrunDB')->resultset('Precondition')->pre_preconditions->search({}, { order_by => 'id' });
+        my $preconditions = model('TestrunDB')->resultset('Precondition')->pre_preconditions->search({}, { order_by => 'id' });
         while (my $precond = $preconditions->next) {
                 print $precond->to_string($opt)."\n";
         }
@@ -138,7 +139,7 @@ sub id
 
 sub _get_testrun_by_id {
         my ($id) = @_;
-        Artemis->model('TestrunDB')->resultset('Precondition')->find($id);
+        model('TestrunDB')->resultset('Precondition')->find($id);
 }
 
 1;

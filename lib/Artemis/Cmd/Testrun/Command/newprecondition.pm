@@ -6,16 +6,18 @@ use warnings;
 use parent 'App::Cmd::Command';
 use File::Slurp;
 
+use Artemis::Model 'model';
+use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
 
 sub opt_spec {
         return (
-                [ "verbose",                           "some more informational output"                                                                                        ],
-                [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                                                                    ],
-                [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                                                                 ],
-                [ "condition_file=s",                  "STRING; filename that contains the condition (alternative to --condition)"                                             ],
-                [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                                                                    ],
+                [ "verbose",                           "some more informational output"                                            ],
+                [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                        ],
+                [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                     ],
+                [ "condition_file=s",                  "STRING; filename that contains the condition (alternative to --condition)" ],
+                [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                        ],
                );
 }
 
@@ -81,7 +83,7 @@ sub new_precondition
 
         $condition = read_condition_file($condition_file);
 
-        my $precondition = Artemis->model('TestrunDB')->resultset('Precondition')->new
+        my $precondition = model('TestrunDB')->resultset('Precondition')->new
             ({
               shortname                       => $shortname,
               type                            => $type,
@@ -100,7 +102,7 @@ sub assign_preconditions {
 
         my $succession = 1;
         foreach (@ids) {
-                my $pre_precondition = Artemis->model('TestrunDB')->resultset('PrePrecondition')->new
+                my $pre_precondition = model('TestrunDB')->resultset('PrePrecondition')->new
                     ({
                       parent_precondition_id => $precondition->id,
                       child_precondition_id  => $_,

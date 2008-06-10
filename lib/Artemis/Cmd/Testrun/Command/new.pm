@@ -5,6 +5,8 @@ use warnings;
 
 use parent 'App::Cmd::Command';
 
+use Artemis::Model 'model';
+use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
 
@@ -71,7 +73,7 @@ sub new_runtest
         my $owner_user          = Artemis::Cmd::Testrun::_get_user_for_login( $owner );
         my $owner_user_id       = $owner_user ? $owner_user->id : undef;
 
-        my $testrun = Artemis->model('TestrunDB')->resultset('Testrun')->new
+        my $testrun = model('TestrunDB')->resultset('Testrun')->new
             ({
               notes                 => $notes,
               shortname             => $shortname,
@@ -92,7 +94,7 @@ sub assign_preconditions {
 
         my $succession = 1;
         foreach (@ids) {
-                my $testrun_precondition = Artemis->model('TestrunDB')->resultset('TestrunPrecondition')->new
+                my $testrun_precondition = model('TestrunDB')->resultset('TestrunPrecondition')->new
                     ({
                       testrun_id      => $testrun->id,
                       precondition_id => $_,

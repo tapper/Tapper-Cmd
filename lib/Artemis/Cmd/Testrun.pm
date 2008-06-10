@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use parent 'App::Cmd';
+use Artemis::Model 'model';
 
 sub opt_spec
 {
@@ -32,7 +33,7 @@ sub _get_user_for_login
 {
         my ($login) = @_;
 
-        my $user = Artemis->model('TestrunDB')->resultset('User')->search({ login => $login })->first;
+        my $user = model('TestrunDB')->resultset('User')->search({ login => $login })->first;
         return $user;
 }
 

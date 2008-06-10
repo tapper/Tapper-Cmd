@@ -6,7 +6,8 @@ use warnings;
 use parent 'App::Cmd::Command';
 
 use Data::Dumper;
-use Artemis;
+use Artemis::Model 'model';
+use Artemis::Schema::TestrunDB;
 
 sub opt_spec {
         return (
@@ -52,7 +53,7 @@ sub print_colnames
 
         return unless $opt->{colnames};
 
-        my $columns = Artemis->model('TestrunDB')->resultset('Testrun')->result_source->{_ordered_columns};
+        my $columns = model('TestrunDB')->resultset('Testrun')->result_source->{_ordered_columns};
         print join( $Artemis::Schema::TestrunDB::DELIM, @$columns, '' ), "\n";
 }
 
@@ -63,7 +64,7 @@ sub all
         print "All testruns:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
-        my $testruns = Artemis->model('TestrunDB')->resultset('Testrun')->all_testruns;#->search({}, { order_by => 'id' });
+        my $testruns = model('TestrunDB')->resultset('Testrun')->all_testruns;#->search({}, { order_by => 'id' });
         while (my $testrun = $testruns->next) {
                 print $testrun->to_string."\n";
         }
@@ -76,7 +77,7 @@ sub queued
         print "Queued testruns:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
-        my $testruns = Artemis->model('TestrunDB')->resultset('Testrun')->queued_testruns;#->search({}, { order_by => 'id' });
+        my $testruns = model('TestrunDB')->resultset('Testrun')->queued_testruns;#->search({}, { order_by => 'id' });
         while (my $testrun = $testruns->next) {
                 print $testrun->to_string."\n";
         }
@@ -89,7 +90,7 @@ sub running
         print "Running testruns:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
-        my $testruns = Artemis->model('TestrunDB')->resultset('Testrun')->running_testruns;#->search({}, { order_by => 'id' });
+        my $testruns = model('TestrunDB')->resultset('Testrun')->running_testruns;#->search({}, { order_by => 'id' });
         while (my $testrun = $testruns->next) {
                 print $testrun->to_string."\n";
         }
@@ -102,7 +103,7 @@ sub finished
         print "Finished testruns:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
-        my $testruns = Artemis->model('TestrunDB')->resultset('Testrun')->finished_testruns;# ->search({}, { order_by => 'id' });
+        my $testruns = model('TestrunDB')->resultset('Testrun')->finished_testruns;# ->search({}, { order_by => 'id' });
         while (my $testrun = $testruns->next) {
                 print $testrun->to_string."\n";
         }
@@ -122,7 +123,7 @@ sub id
 
 sub _get_testrun_by_id {
         my ($id) = @_;
-        Artemis->model('TestrunDB')->resultset('Testrun')->find($id);
+        model('TestrunDB')->resultset('Testrun')->find($id);
 }
 
 1;
