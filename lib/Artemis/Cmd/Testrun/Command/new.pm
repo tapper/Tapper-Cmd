@@ -9,6 +9,7 @@ use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
+use DateTime::Format::Natural;
 
 sub opt_spec {
         return (
@@ -20,6 +21,7 @@ sub opt_spec {
                 [ "hostname=s",         "INT; the hostname on which the test should be run"                                                     ],
                 [ "owner=s",            "STRING, default=\$USER; user login name"                                                               ],
                 [ "wait_after_tests=s", "BOOL, default=0; wait after testrun for human investigation"                                           ],
+                [ "earliest=s",         "STRING, default=now; don't start testrun before this time (format: YYYY-MM-DD hh:mm:ss or now)"        ],
                 [ "precondition=s@",    "assigned precondition ids"                                                                             ],
                );
 }
@@ -37,12 +39,29 @@ sub _allowed_opts {
 sub validate_args {
         my ($self, $opt, $args) = @_;
 
-#         print "opt  = ", Dumper($opt);
-#         print "args = ", Dumper($args);
+        #         print "opt  = ", Dumper($opt);
+        #         print "args = ", Dumper($args);
 
         print "Missing argument --topic\n"        unless $opt->{topic};
         print "Missing argument --test_program\n" unless $opt->{test_program};
         print "Missing argument --hostname\n"     unless $opt->{hostname};
+
+        if ($opt->{earliest}) {
+                my $parser = DateTime::Format::Natural->new;
+                my $dt = $parser->parse_datetime($opt->{earliest});
+                if ($parser->success) {
+                        print("%02d.%02d.%4d %02d:%02d:%02d\n", $dt->day,
+                               $dt->month,
+                               $dt->year,
+                               $dt->hour,
+                               $dt->min,
+                               $dt->sec) if $opt->{verbose};
+                        $opt->{earliest}=$dt;
+                } else {
+                        die $parser->error;
+                }
+        }
+
 
         return 1 if $opt->{topic} && $opt->{test_program} && $opt->{hostname};
         die $self->usage->text;
@@ -65,6 +84,7 @@ sub new_runtest
         my $notes        = $opt->{notes}        || '';
         my $shortname    = $opt->{shortname}    || '';
         my $topic_name   = $opt->{topic}        || 'Misc';
+        my $date         = $opt->{earliest}     || DateTime->now;
         my $test_program = $opt->{test_program};
         my $hostname     = $opt->{hostname};
         my $owner        = $opt->{owner}        || $ENV{USER};
@@ -79,6 +99,7 @@ sub new_runtest
               shortname             => $shortname,
               topic_name            => $topic_name,
               test_program          => $test_program,
+              starttime_earliest    => $date,
               owner_user_id         => ($owner_user_id || ''),
               hardwaredb_systems_id => $hardwaredb_systems_id,
              });

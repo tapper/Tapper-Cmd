@@ -15,6 +15,7 @@ sub opt_spec {
         return (
                 [ "verbose",                           "some more informational output"                                            ],
                 [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                        ],
+                [ "timeout=s",                         "INT; stop trying to fullfill this precondition after timeout second",      ],
                 [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                     ],
                 [ "condition_file=s",                  "STRING; filename that contains the condition (alternative to --condition)" ],
                 [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                        ],
@@ -76,7 +77,7 @@ sub new_precondition
         #print "opt  = ", Dumper($opt);
 
         my $shortname                       = $opt->{shortname}    || '';
-        my $type                            = 'TODO: set me from condition-yaml';
+        #my $type                            = 'TODO: set me from condition-yaml';
         my $condition                       = $opt->{condition};
         my $condition_file                  = $opt->{condition_file};
         my $timeout                         = $opt->{timeout};
@@ -85,10 +86,9 @@ sub new_precondition
 
         my $precondition = model('TestrunDB')->resultset('Precondition')->new
             ({
-              shortname                       => $shortname,
-              type                            => $type,
-              condition                       => $condition,
-              timeout                         => $timeout,
+              shortname    => $shortname,
+              precondition => $condition,
+              timeout      => $timeout,
              });
         $precondition->insert;
         $self->assign_preconditions($opt, $args, $precondition);
@@ -114,6 +114,6 @@ sub assign_preconditions {
 }
 
 
-# perl -Ilib bin/artemis-testrun newprecondition --shortname=perl-5.10 --type=foo
+# perl -Ilib bin/artemis-testrun newprecondition --shortname=perl-5.10 --condition_file=- --timeout=100
 
 1;
