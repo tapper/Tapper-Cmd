@@ -92,7 +92,7 @@ sub deploy_testrundb
         }
 
         my $schema = Artemis::Schema::TestrunDB->connect ($dsn, $user, $pw);
-        $schema->deploy;
+        $schema->deploy({ add_drop_table => 1 });
         insert_initial_values($schema);
 }
 

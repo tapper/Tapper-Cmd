@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use 5.010;
+
 use Artemis;
 use Artemis::Config;
 use Artemis::Schema::ReportsDB;
@@ -38,6 +40,7 @@ sub insert_initial_values {
                     );
 
         foreach (@users) {
+                say STDERR "Add ", join(", ", @$_);
                 my $user = $schema->resultset('User')->new
                     ({
                       name     => $_->[0],
@@ -45,6 +48,7 @@ sub insert_initial_values {
                       password => $_->[2],
                      });
                 $user->insert;
+                say STDERR "Got ID ", $user->id;
         }
 }
 
@@ -67,7 +71,7 @@ sub deploy_testrundb
         }
 
         my $schema = Artemis::Schema::ReportsDB->connect ($dsn, $user, $pw);
-        $schema->deploy;
+        $schema->deploy({ add_drop_table => 1 });
         insert_initial_values($schema);
 }
 
