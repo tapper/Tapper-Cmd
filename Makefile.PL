@@ -18,6 +18,7 @@ WriteMakefile
                            'parent' => 0,
                            'Artemis::Schema' => 0,
                            'Data::Dumper' => 0,
+                           'Artemis::Test' => 0,
                            'Artemis::Model' => 0,
                            'App::Cmd' => 0,
                            'Test::More' => 0,

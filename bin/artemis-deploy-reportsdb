@@ -48,7 +48,7 @@ sub insert_initial_values {
                       password => $_->[2],
                      });
                 $user->insert;
-                say STDERR "Got ID ", $user->id;
+                #say STDERR "Got ID ", $user->id;
         }
 }
 
