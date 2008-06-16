@@ -14,13 +14,17 @@ lib/Artemis/Cmd/Testrun/Command/new.pm
 lib/Artemis/Cmd/Testrun/Command/newprecondition.pm
 lib/Artemis/Cmd/Testrun/Command/show.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 README
 scripts/dist_upload_wotan.sh
+t/00-artemis-meta.t
 t/00-load.t
 t/artemis_cmd_testrun.t
+t/artemis_schema_reportsdb_test.sqlite
+t/artemis_schema_testrundb_test.sqlite
+t/artemis_schema_testsdb_testdb.sqlite
 t/boilerplate.t
 t/fixtures/testrundb/testrun_with_preconditions.yml
 t/Tools.pm
