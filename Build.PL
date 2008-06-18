@@ -22,6 +22,7 @@ my $builder = Module::Build->new
                   'Artemis::Model'  => 0,
                   'Artemis::Schema' => 0,
                   'Data::Dumper'    => 0,
+                  'DateTime::Format::Natural'    => 0,
                  },
      add_to_cleanup      => [ 'Artemis-Cmd-*' ],
      create_makefile_pl => 'traditional',
