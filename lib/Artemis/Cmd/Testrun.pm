@@ -26,7 +26,8 @@ sub validate_args
 
 sub _get_systems_id_for_hostname
 {
-        return 42;
+        my ($name) = @_;
+        return model('HardwareDB')->resultset('Systems')->search({systemname => $name})->first->lid
 }
 
 sub _get_user_for_login
