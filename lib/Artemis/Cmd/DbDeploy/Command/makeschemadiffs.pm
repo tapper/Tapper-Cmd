@@ -26,7 +26,7 @@ sub opt_spec {
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-db-deploy upgrade --db=DBNAME  [ --verbose | --env=s ]*";
+        "artemis-db-deploy makeschemadiffs --db=DBNAME  [ --verbose | --env=s ]*";
 }
 
 sub _allowed_opts {
@@ -63,6 +63,8 @@ sub validate_args {
 sub run
 {
         my ($self, $opt, $args) = @_;
+
+        local $DBIx::Class::Schema::Versioned::DBICV_DEBUG = 1;
 
         Artemis::Config::_switch_context($opt->{env});
 

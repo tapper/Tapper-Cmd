@@ -58,6 +58,8 @@ sub run
 {
         my ($self, $opt, $args) = @_;
 
+        local $DBIx::Class::Schema::Versioned::DBICV_DEBUG = 1;
+
         Artemis::Config::_switch_context($opt->{env});
 
         my $db = $opt->{db};
