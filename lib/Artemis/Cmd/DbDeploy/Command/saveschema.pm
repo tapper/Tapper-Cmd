@@ -20,6 +20,7 @@ sub opt_spec {
                 [ "really",  "Really do something."                 ],
                 [ "db=s",    "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",   "STRING, default=development; one of: live, development, test" ],
+                [ "upgradedir=s", "STRING, directory here upgradefiles are stored" ],
                );
 }
 
@@ -70,8 +71,13 @@ sub run
 
         Artemis::Config::_switch_context($opt->{env});
 
-        my $db = $opt->{db};
-        model($db)->create_ddl_dir([qw/MySQL SQLite/], undef, model($db)->upgrade_directory);
+        my $db         = $opt->{db};
+        my $upgradedir = $opt->{upgradedir};
+        model($db)->upgrade_directory($upgradedir) if $upgradedir;
+        model($db)->create_ddl_dir([qw/MySQL SQLite/],
+                                   undef,
+                                   ($upgradedir || model($db)->upgrade_directory)
+                                  );
 }
 
 # perl -Ilib bin/artemis-db-deploy saveschema --db=ReportsDB

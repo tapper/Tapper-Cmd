@@ -19,7 +19,8 @@ sub opt_spec {
                 [ "verbose",        "some more informational output"       ],
                 [ "db=s",           "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",          "STRING, default=development; one of: live, development, test" ],
-                [ "fromversion=s",  "STRING, one of: ReportsDB, TestrunDB" ],
+                [ "fromversion=s",  "STRING, the version against we make the diff" ],
+                [ "upgradedir=s", "STRING, directory here upgradefiles are stored" ],
                );
 }
 
@@ -70,10 +71,17 @@ sub run
 
         my $db          = $opt->{db};
         my $fromversion = $opt->{fromversion};
-        model($db)->create_ddl_dir([qw/MySQL SQLite/], undef, model($db)->upgrade_directory, $fromversion);
+        my $upgradedir  = $opt->{upgradedir};
+        model($db)->upgrade_directory($upgradedir) if $upgradedir;
+        model($db)->create_ddl_dir([qw/MySQL SQLite/],
+                                   undef,
+                                   ($upgradedir || model($db)->upgrade_directory),
+                                   $fromversion
+                                  );
 }
 
 
 # perl -Ilib bin/artemis-db-deploy makeschemadiffs --db=ReportsDB
+# perl -Ilib bin/artemis-db-deploy makeschemadiffs --upgradedir=$HOME/local/projects/Artemis/src/Artemis-Schema/upgrades/ --db=ReportsDB --fromversion=2.010009
 
 1;

@@ -19,6 +19,9 @@ sub opt_spec {
                 [ "verbose", "some more informational output"       ],
                 [ "db=s",    "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",   "STRING, default=development; one of: live, development, test" ],
+                [ "upgradedir=s", "STRING, directory here upgradefiles are stored" ],
+                [ "fromversion=s",  "STRING" ],
+                [ "toversion=s",  "STRING" ],
                );
 }
 
@@ -58,9 +61,13 @@ sub run
 {
         my ($self, $opt, $args) = @_;
 
+        local $DBIx::Class::Schema::Versioned::DBICV_DEBUG = 1;
+
         Artemis::Config::_switch_context($opt->{env});
 
         my $db = $opt->{db};
+        my $upgradedir  = $opt->{upgradedir};
+        model($db)->upgrade_directory($upgradedir) if $upgradedir;
         model($db)->upgrade;
 }
 
