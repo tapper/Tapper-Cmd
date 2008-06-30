@@ -17,6 +17,7 @@ use Data::Dumper;
 sub opt_spec {
         return (
                 [ "verbose", "some more informational output"       ],
+                [ "really",  "Really do something."                 ],
                 [ "db=s",    "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",   "STRING, default=development; one of: live, development, test" ],
                );
@@ -57,6 +58,13 @@ sub validate_args {
 sub run
 {
         my ($self, $opt, $args) = @_;
+
+        unless ($opt->{really}) {
+                say "You nearly never want to call me -- only if no previous schema exists.";
+                say "You probably want to call: artemis-db-deploy makeschemadiffs ...";
+                say "Or use option --really if you know what you do";
+                exit 1;
+        }
 
         local $DBIx::Class::Schema::Versioned::DBICV_DEBUG = 1;
 
