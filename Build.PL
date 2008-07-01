@@ -25,7 +25,6 @@ my $builder = Module::Build->new
                   'DateTime::Format::Natural'    => 0,
                  },
      add_to_cleanup      => [ 'Artemis-Cmd-*' ],
-     create_makefile_pl => 'traditional',
     );
 
 $builder->create_build_script();
