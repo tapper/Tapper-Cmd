@@ -10,6 +10,7 @@ use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
+use YAML::Syck;
 
 sub opt_spec {
         return (
@@ -70,6 +71,19 @@ sub read_condition_file
         return $condition;
 }
 
+sub yaml_ok {
+        my ($condition) = @_;
+
+        my $res;
+        eval {
+                $res = Load($condition);
+        };
+        if ($@) {
+                warn "Condition yaml contains errors: $@";
+                return 0;
+        }
+}
+
 sub new_precondition
 {
         my ($self, $opt, $args) = @_;
@@ -77,12 +91,13 @@ sub new_precondition
         #print "opt  = ", Dumper($opt);
 
         my $shortname                       = $opt->{shortname}    || '';
-        #my $type                            = 'TODO: set me from condition-yaml';
         my $condition                       = $opt->{condition};
         my $condition_file                  = $opt->{condition_file};
         my $timeout                         = $opt->{timeout};
 
-        $condition = read_condition_file($condition_file);
+        $condition ||= read_condition_file($condition_file);
+
+        exit -1 if ! yaml_ok($condition);
 
         my $precondition = model('TestrunDB')->resultset('Precondition')->new
             ({

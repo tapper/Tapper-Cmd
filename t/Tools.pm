@@ -31,9 +31,8 @@ sub setup_testrundb {
                                                                 Artemis::Config->subconfig->{test}{database}{TestrunDB}{password},
                                                                 { ignore_version => 1 }
                                                                );
-        $testrundb_schema->deploy({ add_drop_table => 1 });
-        eval { $testrundb_schema->upgrade; }
-        print STDERR $@ if $@;
+        $testrundb_schema->deploy;
+        $testrundb_schema->upgrade;
 }
 
 sub setup_reportsdb {
@@ -51,17 +50,14 @@ sub setup_reportsdb {
                                                                 Artemis::Config->subconfig->{test}{database}{ReportsDB}{password},
                                                                 { ignore_version => 1 }
                                                                );
-        $reportsdb_schema->deploy({ add_drop_table => 1 });
-        eval { $reportsdb_schema->upgrade };
-        print STDERR $@ if $@;
+        $reportsdb_schema->deploy;
+        $reportsdb_schema->upgrade;
 }
 
 sub setup_hardwaredb {
 
         # explicitely prefix into {test} subhash of the config file,
         # to avoid painful mistakes with deploy
-
-        print STDERR "\n\n*** SETUP HARDWAREDB *** \n";
 
         my $dsn = Artemis::Config->subconfig->{test}{database}{HardwareDB}{dsn};
 
@@ -72,9 +68,9 @@ sub setup_hardwaredb {
                                                                   Artemis::Config->subconfig->{test}{database}{HardwareDB}{username},
                                                                   Artemis::Config->subconfig->{test}{database}{HardwareDB}{password},
                                                                   { ignore_version => 1 }
-                                                               );
-        $hardwaredb_schema->deploy();
-        # not versioned: eval { $hardwaredb_schema->upgrade; }
+                                                                 );
+        $hardwaredb_schema->deploy;
+        $hardwaredb_schema->upgrade;
 }
 
 sub import {
