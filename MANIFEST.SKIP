@@ -4,4 +4,7 @@ _build
 blib
 ^Build$
 MANIFEST.bak
+t/artemis_schema_reportsdb_test.sqlite
+t/artemis_schema_testrundb_test.sqlite
+t/artemis_schema_hardwaredb_test.sqlite
 

@@ -6,6 +6,9 @@ use warnings;
 use parent 'App::Cmd';
 use Artemis::Model 'model';
 
+use Artemis::Schema::TestrunDB;
+use Artemis::Schema::HardwareDB;
+
 sub opt_spec
 {
         my ( $class, $app ) = @_;
