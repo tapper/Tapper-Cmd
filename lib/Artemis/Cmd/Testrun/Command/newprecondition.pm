@@ -1,5 +1,7 @@
 package Artemis::Cmd::Testrun::Command::newprecondition;
 
+use 5.010;
+
 use strict;
 use warnings;
 
@@ -50,7 +52,9 @@ sub run {
         my ($self, $opt, $args) = @_;
 
         require Artemis;
+        require Artemis::Config;
 
+        say STDERR "\n\n\n*** env: ", Artemis::Config::_getenv;
         $self->new_precondition ($opt, $args);
 }
 

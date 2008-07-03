@@ -34,3 +34,6 @@ is(Artemis::Cmd::Testrun::_get_user_for_login('sschwigo')->id, 12, "_get_user_fo
 
 #         isnt(Artemis::Cmd::Testrun::_get_systems_id_for_hostname("affe"), 42, "_get_systems_id_for_hostname");
 # }
+
+system q{/usr/bin/env perl -Ilib bin/artemis-testrun newprecondition --shortname="perl-5.10" --condition="affe:"};
+system q{/usr/bin/env perl -V};
