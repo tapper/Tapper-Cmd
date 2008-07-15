@@ -17,6 +17,7 @@ sub opt_spec {
                 [ "finished", "list finished testruns"         ],
                 [ "running",  "list running testruns"          ],
                 [ "queued",   "list queued testruns",          ],
+                [ "due",      "list due testruns",             ],
                 [ "id=s@",    "list particular testruns",      ],
                );
 }
@@ -49,7 +50,7 @@ sub validate_args {
 sub run {
         my ($self, $opt, $args) = @_;
 
-        $self->$_ ($opt, $args) foreach grep /^all|finished|running|queued|id$/, keys %$opt;
+        $self->$_ ($opt, $args) foreach grep /^all|finished|running|queued|due|id$/, keys %$opt;
 }
 
 sub print_colnames
@@ -83,6 +84,19 @@ sub queued
         $self->print_colnames($opt, $args);
 
         my $testruns = model('TestrunDB')->resultset('Testrun')->queued_testruns->search({}, { order_by => 'id' });
+        while (my $testrun = $testruns->next) {
+                print $testrun->to_string."\n";
+        }
+}
+
+sub due
+{
+        my ($self, $opt, $args) = @_;
+
+        print "Due testruns:\n" if $opt->{verbose};
+        $self->print_colnames($opt, $args);
+
+        my $testruns = model('TestrunDB')->resultset('Testrun')->due_testruns->search({}, { order_by => 'id' });
         while (my $testrun = $testruns->next) {
                 print $testrun->to_string."\n";
         }
