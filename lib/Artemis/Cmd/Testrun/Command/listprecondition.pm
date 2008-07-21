@@ -132,12 +132,12 @@ sub id
         my @ids = @{ $opt->{id} };
 
         $self->print_colnames($opt, $args);
-        print _get_testrun_by_id($_)->to_string($opt)."\n" foreach @ids;
+        print _get_entry_by_id($_)->to_string($opt)."\n" foreach @ids;
 }
 
 # --------------------------------------------------
 
-sub _get_testrun_by_id {
+sub _get_entry_by_id {
         my ($id) = @_;
         model('TestrunDB')->resultset('Precondition')->find($id);
 }
