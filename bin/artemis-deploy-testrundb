@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 
-use Artemis;
 use Artemis::Config;
 use Artemis::Schema::TestrunDB;
 
@@ -75,9 +74,9 @@ sub insert_initial_values {
 
 sub deploy_testrundb
 {
-        my $dsn  = Artemis->cfg->{database}{TestrunDB}{dsn};
-        my $user = Artemis->cfg->{database}{TestrunDB}{username};
-        my $pw   = Artemis->cfg->{database}{TestrunDB}{password};
+        my $dsn  = Artemis::Config->subconfig->{database}{TestrunDB}{dsn};
+        my $user = Artemis::Config->subconfig->{database}{TestrunDB}{username};
+        my $pw   = Artemis::Config->subconfig->{database}{TestrunDB}{password};
 
         # ----- really? -----
         print "dsn = $dsn\n";
