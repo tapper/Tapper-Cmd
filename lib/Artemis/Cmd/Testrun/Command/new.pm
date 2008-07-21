@@ -10,6 +10,7 @@ use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
 use DateTime::Format::Natural;
+require Artemis::Schema::TestrunDB::Result::Topic;
 
 sub opt_spec {
         return (
@@ -29,7 +30,7 @@ sub opt_spec {
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns new --topic=s --test_program=s --hostname=s [ --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
+        "artemis-testruns new --test_program=s --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
 }
 
 sub _allowed_opts {
@@ -42,9 +43,15 @@ sub validate_args {
         #         print "opt  = ", Dumper($opt);
         #         print "args = ", Dumper($args);
 
-        print "Missing argument --topic\n"        unless $opt->{topic};
         print "Missing argument --test_program\n" unless $opt->{test_program};
         print "Missing argument --hostname\n"     unless $opt->{hostname};
+
+
+        # -- topic constraints --
+        my $topic    = $opt->{topic} || '';
+        my $topic_re = '('.join('|', keys %Artemis::Schema::TestrunDB::Result::Topic::topic_description).')';
+        my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
+        print "Topic must match $topic_re.\n\n" unless $topic_ok;
 
         if ($opt->{earliest}) {
                 my $parser = DateTime::Format::Natural->new;
@@ -63,7 +70,7 @@ sub validate_args {
         }
 
 
-        return 1 if $opt->{topic} && $opt->{test_program} && $opt->{hostname};
+        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok;
         die $self->usage->text;
 }
 

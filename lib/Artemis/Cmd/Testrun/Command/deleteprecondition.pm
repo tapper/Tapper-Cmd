@@ -50,13 +50,8 @@ sub id
         my ($self, $opt, $args) = @_;
 
         my @ids = @{ $opt->{id} };
-
         die "Really? Then add --really to the options.\n" unless $opt->{really};
-
-        $self->print_colnames($opt, $args);
-        print "Delete: "._get_entry_by_id($_)->to_string."\n" foreach @ids;
-
-        #_get_entry_by_id($_)->delete foreach @ids;
+        _get_entry_by_id($_)->delete foreach @ids;
 }
 
 # --------------------------------------------------

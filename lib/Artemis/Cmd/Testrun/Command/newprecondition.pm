@@ -54,7 +54,7 @@ sub run {
         require Artemis;
         require Artemis::Config;
 
-        say STDERR "\n\n\n*** env: ", Artemis::Config::_getenv;
+        #say STDERR "\n\n\n*** env: ", Artemis::Config::_getenv;
         $self->new_precondition ($opt, $args);
 }
 
