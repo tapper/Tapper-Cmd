@@ -14,13 +14,17 @@ use Artemis::Cmd::Testrun;
 use Data::Dumper;
 use YAML::Syck;
 
+sub abstract {
+        'Create a new precondition'
+}
+
 sub opt_spec {
         return (
                 [ "verbose",                           "some more informational output"                                            ],
                 [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                        ],
                 [ "timeout=s",                         "INT; stop trying to fullfill this precondition after timeout second",      ],
                 [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                     ],
-                [ "condition_file=s",                  "STRING; filename that contains the condition (alternative to --condition)" ],
+                [ "condition_file=s",                  "STRING; filename from where to read condition, use - to read from STDIN"   ],
                 [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                        ],
                );
 }
@@ -41,7 +45,7 @@ sub validate_args {
 #         print "args = ", Dumper($args);
 
         print "Missing argument --shortname\n"            unless $opt->{shortname};
-
+        print "Missing --condition or --condition_file\n" unless $opt->{condition} || $opt->{condition_file};
         print "Only one of --condition or --condition_file allowed.\n" if $opt->{condition} && $opt->{condition_file};
 
         return 1 if $opt->{shortname};
@@ -86,6 +90,7 @@ sub yaml_ok {
                 warn "Condition yaml contains errors: $@";
                 return 0;
         }
+        return 1;
 }
 
 sub new_precondition

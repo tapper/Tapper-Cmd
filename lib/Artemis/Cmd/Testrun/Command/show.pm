@@ -9,6 +9,10 @@ use Data::Dumper;
 use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 
+sub abstract {
+        'Show details of a testrun'
+}
+
 sub opt_spec {
         return (
                 [ "verbose",  "some more informational output" ],

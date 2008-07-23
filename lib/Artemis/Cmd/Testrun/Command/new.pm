@@ -12,6 +12,10 @@ use Data::Dumper;
 use DateTime::Format::Natural;
 require Artemis::Schema::TestrunDB::Result::Topic;
 
+sub abstract {
+        'Create a new testrun'
+}
+
 sub opt_spec {
         return (
                 [ "verbose",            "some more informational output"                                                                        ],
