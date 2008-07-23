@@ -8,10 +8,14 @@ use Artemis::Cmd::Testrun;
 use Artemis::Cmd::Testrun::Command::list;
 use Artemis::Cmd::Testrun::Command::new;
 use Artemis::Cmd::Testrun::Command::newprecondition;
+use Artemis::Cmd::Testrun::Command::listprecondition;
 use Artemis::Schema::TestTools;
+use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 10;
+plan tests => 13;
+
+# --------------------------------------------------
 
 my $OK_YAML = '
 ---
@@ -38,6 +42,11 @@ start_time: 1213352566
   stop_time: 1213352568
 ';
 
+is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($OK_YAML), 1, "ok_yaml with correct yaml");
+is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), 0, "ok_yaml with error yaml");
+
+# --------------------------------------------------
+
 
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
@@ -58,14 +67,19 @@ is($testrun->test_program, '/usr/local/share/artemis/testsuites/perfmon/t/do_tes
 
 is(Artemis::Cmd::Testrun::_get_user_for_login('sschwigo')->id, 12, "_get_user_for_login");
 
+# --------------------------------------------------
+
 # TODO: {
 #         local $TODO = 'do not forget to implement some subs';
 
 #         isnt(Artemis::Cmd::Testrun::_get_systems_id_for_hostname("affe"), 42, "_get_systems_id_for_hostname");
 # }
 
-system q{/usr/bin/env perl -Ilib bin/artemis-testrun newprecondition --shortname="perl-5.10" --condition="affe:"};
-system q{/usr/bin/env perl -V};
+my $precond_id = `/usr/bin/env perl -Ilib bin/artemis-testrun newprecondition --shortname="perl-5.10" --condition="affe:"`;
+chomp $precond_id;
 
-is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($OK_YAML), 1, "ok_yaml with correct yaml");
-is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), 0, "ok_yaml with error yaml");
+my $precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
+ok($precond->id, 'inserted precond / id');
+is($precond->shortname, 'perl-5.10', 'inserted precond / shortname');
+is($precond->precondition, 'affe:', 'inserted precond / yaml');
+
