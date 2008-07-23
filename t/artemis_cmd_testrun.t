@@ -3,12 +3,14 @@
 use strict;
 use warnings;
 
-use t::Tools;
-use Test::Fixture::DBIC::Schema;
+use Test::More;
 use Artemis::Cmd::Testrun;
 use Artemis::Cmd::Testrun::Command::list;
 use Artemis::Cmd::Testrun::Command::new;
-use Test::More tests => 10;
+use Artemis::Schema::TestTools;
+use Test::Fixture::DBIC::Schema;
+
+plan tests => 10;
 
 my $OK_YAML = '
 ---
