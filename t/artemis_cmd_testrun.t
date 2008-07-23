@@ -7,6 +7,7 @@ use Test::More;
 use Artemis::Cmd::Testrun;
 use Artemis::Cmd::Testrun::Command::list;
 use Artemis::Cmd::Testrun::Command::new;
+use Artemis::Cmd::Testrun::Command::newprecondition;
 use Artemis::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 
@@ -45,7 +46,7 @@ construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb
 #construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
 # -----------------------------------------------------------------------------------------------------------------
 
-my $testrun = Artemis::Cmd::Testrun::Command::list::_get_testrun_by_id (23); # perfmon
+my $testrun = Artemis::Cmd::Testrun::Command::list::_get_entry_by_id (23); # perfmon
 
 is($testrun->id, 23, "testrun id");
 is($testrun->notes, 'perfmon', "testrun notes");
@@ -66,5 +67,5 @@ is(Artemis::Cmd::Testrun::_get_user_for_login('sschwigo')->id, 12, "_get_user_fo
 system q{/usr/bin/env perl -Ilib bin/artemis-testrun newprecondition --shortname="perl-5.10" --condition="affe:"};
 system q{/usr/bin/env perl -V};
 
-is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($OK_YAML), "ok_yaml with correct yaml");
-isnt(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), "ok_yaml with error yaml");
+is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($OK_YAML), 1, "ok_yaml with correct yaml");
+is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), 0, "ok_yaml with error yaml");
