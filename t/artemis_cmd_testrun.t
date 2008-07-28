@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 13;
+plan tests => 20;
 
 # --------------------------------------------------
 
@@ -52,7 +52,7 @@ is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), 0, "ok_y
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
 # -----------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------
-#construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
+construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
 # -----------------------------------------------------------------------------------------------------------------
 
 my $testrun = Artemis::Cmd::Testrun::Command::list::_get_entry_by_id (23); # perfmon
@@ -82,4 +82,26 @@ my $precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
 ok($precond->id, 'inserted precond / id');
 is($precond->shortname, 'perl-5.10', 'inserted precond / shortname');
 is($precond->precondition, 'affe:', 'inserted precond / yaml');
+
+# --------------------------------------------------
+
+my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --test_program=/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh --hostname=iring`;
+chomp $testrun_id;
+
+$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+ok($testrun->id, 'inserted testrun / id');
+is($testrun->test_program, '/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh', 'inserted testrun / test_program');
+is($testrun->hardwaredb_systems_id, 12, 'inserted testrun / systems_id');
+
+# --------------------------------------------------
+
+my $old_testrun_id = $testrun_id;
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun update --id=$old_testrun_id --topic=Hardware --test_program=/tmp/yet/another/test.sh --hostname=iring`;
+chomp $testrun_id;
+
+$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+is($testrun->id, $old_testrun_id, 'updated testrun / id');
+is($testrun->topic_name, "Hardware", 'updated testrun / topic');
+is($testrun->test_program, '/tmp/yet/another/test.sh', 'updated testrun / test_program');
+is($testrun->hardwaredb_systems_id, 12, 'updated testrun / systems_id');
 
