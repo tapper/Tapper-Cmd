@@ -1,5 +1,7 @@
 package Artemis::Cmd::Testrun::Command::listprecondition;
 
+use 5.010;
+
 use strict;
 use warnings;
 
@@ -136,7 +138,10 @@ sub id
         my @ids = @{ $opt->{id} };
 
         $self->print_colnames($opt, $args);
-        print _get_entry_by_id($_)->to_string($opt)."\n" foreach @ids;
+        foreach (@ids) {
+                my $entry = _get_entry_by_id($_);
+                say $entry ? $entry->to_string : "No such id $_";
+        }
 }
 
 # --------------------------------------------------

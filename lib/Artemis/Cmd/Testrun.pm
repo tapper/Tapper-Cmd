@@ -4,8 +4,9 @@ use strict;
 use warnings;
 
 use parent 'App::Cmd';
-use Artemis::Model 'model';
 
+use YAML::Syck;
+use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 use Artemis::Schema::HardwareDB;
 
@@ -39,6 +40,20 @@ sub _get_user_for_login
 
         my $user = model('TestrunDB')->resultset('User')->search({ login => $login })->first;
         return $user;
+}
+
+sub _yaml_ok {
+        my ($condition) = @_;
+
+        my $res;
+        eval {
+                $res = Load($condition);
+        };
+        if ($@) {
+                warn "Condition yaml contains errors: $@" unless $ENV{HARNESS_ACTIVE};
+                return 0;
+        }
+        return 1;
 }
 
 1;

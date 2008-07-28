@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 20;
+plan tests => 25;
 
 # --------------------------------------------------
 
@@ -42,8 +42,8 @@ start_time: 1213352566
   stop_time: 1213352568
 ';
 
-is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($OK_YAML), 1, "ok_yaml with correct yaml");
-is(Artemis::Cmd::Testrun::Command::newprecondition::yaml_ok($ERR_YAML), 0, "ok_yaml with error yaml");
+is(Artemis::Cmd::Testrun::_yaml_ok($OK_YAML), 1, "ok_yaml with correct yaml");
+is(Artemis::Cmd::Testrun::_yaml_ok($ERR_YAML), 0, "ok_yaml with error yaml");
 
 # --------------------------------------------------
 
@@ -85,6 +85,17 @@ is($precond->precondition, 'affe:', 'inserted precond / yaml');
 
 # --------------------------------------------------
 
+my $old_precond_id = $precond_id;
+$precond_id = `/usr/bin/env perl -Ilib bin/artemis-testrun updateprecondition --id=$old_precond_id --shortname="fobar-perl-5.11" --condition="not_affe_again:"`;
+chomp $precond_id;
+
+$precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
+is($precond->id, $old_precond_id, 'update precond / id');
+is($precond->shortname, 'fobar-perl-5.11', 'update precond / shortname');
+is($precond->precondition, 'not_affe_again:', 'update precond / yaml');
+
+# --------------------------------------------------
+
 my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --test_program=/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh --hostname=iring`;
 chomp $testrun_id;
 
@@ -104,4 +115,16 @@ is($testrun->id, $old_testrun_id, 'updated testrun / id');
 is($testrun->topic_name, "Hardware", 'updated testrun / topic');
 is($testrun->test_program, '/tmp/yet/another/test.sh', 'updated testrun / test_program');
 is($testrun->hardwaredb_systems_id, 12, 'updated testrun / systems_id');
+
+# --------------------------------------------------
+
+`/usr/bin/env perl -Ilib bin/artemis-testrun delete --id=$testrun_id --really`;
+$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+is($testrun, undef, "delete testrun");
+
+`/usr/bin/env perl -Ilib bin/artemis-testrun deleteprecondition --id=$precond_id --really`;
+$precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
+is($precond, undef, "delete precond");
+
+# --------------------------------------------------
 

@@ -12,7 +12,6 @@ use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
 use Data::Dumper;
-use YAML::Syck;
 
 sub abstract {
         'Create a new precondition'
@@ -81,20 +80,6 @@ sub read_condition_file
         return $condition;
 }
 
-sub yaml_ok {
-        my ($condition) = @_;
-
-        my $res;
-        eval {
-                $res = Load($condition);
-        };
-        if ($@) {
-                warn "Condition yaml contains errors: $@";
-                return 0;
-        }
-        return 1;
-}
-
 sub update_precondition
 {
         my ($self, $opt, $args) = @_;
@@ -109,7 +94,7 @@ sub update_precondition
 
         $condition ||= read_condition_file($condition_file);
 
-        exit -1 if ! yaml_ok($condition);
+        exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($condition);
 
         my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
 
