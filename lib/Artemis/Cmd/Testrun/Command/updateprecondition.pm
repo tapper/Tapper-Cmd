@@ -26,13 +26,13 @@ sub opt_spec {
                 [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                     ],
                 [ "condition_file=s",                  "STRING; filename from where to read condition, use - to read from STDIN"   ],
                 [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                        ],
-                [ "id=s",                              "INTM the precondition id to change",                                       ],
+                [ "id=s",                              "INT; the precondition id to change",                                       ],
                );
 }
 
 sub usage_desc
 {
-        "artemis-testrun updateprecondition --shortname=s  ( --condition=s | --condition_file=s ) ";
+        "artemis-testrun updateprecondition --id=s [ --shortname=s | --condition=s | --condition_file=s ) ";
 }
 
 sub _allowed_opts {
@@ -136,11 +136,10 @@ sub assign_preconditions {
         return unless @ids;
 
         # delete existing assignments
-        my $pre_precondition =
-            model('TestrunDB')
-                ->resultset('PrePrecondition')
-                    ->search ({ parent_precondition_id => $precondition->id })
-                        ->delete;
+        model('TestrunDB')
+            ->resultset('PrePrecondition')
+                ->search ({ parent_precondition_id => $precondition->id })
+                    ->delete;
 
         # re-assign
         my $succession = 1;
