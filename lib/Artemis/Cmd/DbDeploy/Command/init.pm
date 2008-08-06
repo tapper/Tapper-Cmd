@@ -92,11 +92,9 @@ sub insert_initial_values {
 
 sub init_testrundb
 {
-        my $dsn  = Artemis::Config->subconfig->{database}{ReportsDB}{dsn};
-        my $user = Artemis::Config->subconfig->{database}{ReportsDB}{username};
-        my $pw   = Artemis::Config->subconfig->{database}{ReportsDB}{password};
-
-        HIER WEITER;
+        my $dsn  = Artemis::Config->subconfig->{database}{TestrunDB}{dsn};
+        my $user = Artemis::Config->subconfig->{database}{TestrunDB}{username};
+        my $pw   = Artemis::Config->subconfig->{database}{TestrunDB}{password};
 
         # ----- really? -----
         print "dsn = $dsn\n";
@@ -110,7 +108,7 @@ sub init_testrundb
                 unlink $tmpfname;
         }
 
-        my $schema = Artemis::Schema::ReportsDB->connect ($dsn, $user, $pw);
+        my $schema = Artemis::Schema::TestrunDB->connect ($dsn, $user, $pw);
         $schema->deploy({ add_drop_table => 1 });
         insert_initial_values($schema);
 }
