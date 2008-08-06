@@ -56,25 +56,31 @@ sub validate_args {
 }
 
 sub no_live {
-        print "We currently don't do live deployment.\n";
+        print "We currently don't do live deployment. To protect *you*!\n";
         return -1;
 }
 
-sub insert_initial_values {
-        my ($schema) = @_;
+sub insert_initial_values
+{
+        my ($schema, $db) = @_;
 
-        # ---------- Topic ----------
+        if ($db eq 'TestrunDB')
+        {
+                # ---------- Topic ----------
 
-        # official topics
-        my %topic_description = %Artemis::Schema::TestrunDB::Result::Topic::topic_description;
+                # official topics
+                my %topic_description = %Artemis::Schema::TestrunDB::Result::Topic::topic_description;
 
-        foreach my $topic_name(keys %topic_description) {
-                my $topic = $schema->resultset('Topic')->new
-                    ({ name        => $topic_name,
-                       description => $topic_description{$topic_name},
-                     });
-                $topic->insert;
+                foreach my $topic_name(keys %topic_description) {
+                        my $topic = $schema->resultset('Topic')->new
+                            ({ name        => $topic_name,
+                               description => $topic_description{$topic_name},
+                             });
+                        $topic->insert;
+                }
         }
+
+        # both schema
 
         # ---------- User ----------
 
@@ -103,11 +109,13 @@ sub insert_initial_values {
         }
 }
 
-sub init_testrundb
+sub init_db
 {
-        my $dsn  = Artemis::Config->subconfig->{database}{TestrunDB}{dsn};
-        my $user = Artemis::Config->subconfig->{database}{TestrunDB}{username};
-        my $pw   = Artemis::Config->subconfig->{database}{TestrunDB}{password};
+        my ($self, $db) = @_;
+
+        my $dsn  = Artemis::Config->subconfig->{database}{$db}{dsn};
+        my $user = Artemis::Config->subconfig->{database}{$db}{username};
+        my $pw   = Artemis::Config->subconfig->{database}{$db}{password};
 
         # ----- really? -----
         print "dsn = $dsn\n";
@@ -121,12 +129,12 @@ sub init_testrundb
                 unlink $tmpfname;
         }
 
-        my $schema = Artemis::Schema::TestrunDB->connect ($dsn, $user, $pw);
-        $schema->deploy({ add_drop_table => 1 });
-        insert_initial_values($schema);
+        my $schema;
+        $schema = Artemis::Schema::TestrunDB->connect ($dsn, $user, $pw) if $db eq 'TestrunDB';
+        $schema = Artemis::Schema::ReportsDB->connect ($dsn, $user, $pw) if $db eq 'ReportsDB';
+        $schema->deploy({ add_drop_table => 1 }); # may fail, does not provide correct order to drop tables
+        insert_initial_values($schema, $db);
 }
-
-
 
 sub run
 {
@@ -138,7 +146,7 @@ sub run
         exit usage()   unless $env =~ /^test|development|live$/;
         exit no_live() if     $env eq 'live';
         Artemis::Config::_switch_context($env);
-        $self->init_testrundb();
+        $self->init_db($db);
 }
 
 
