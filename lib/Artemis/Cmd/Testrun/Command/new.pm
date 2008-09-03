@@ -110,8 +110,7 @@ sub new_runtest
         my $owner        = $opt->{owner}        || $ENV{USER};
 
         my $hardwaredb_systems_id = Artemis::Cmd::Testrun::_get_systems_id_for_hostname( $hostname );
-        my $owner_user          = Artemis::Cmd::Testrun::_get_user_for_login( $owner );
-        my $owner_user_id       = $owner_user ? $owner_user->id : undef;
+        my $owner_user_id         = Artemis::Cmd::Testrun::_get_user_id_for_login( $owner );
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->new
             ({
@@ -120,7 +119,7 @@ sub new_runtest
               topic_name            => $topic_name,
               test_program          => $test_program,
               starttime_earliest    => $date,
-              owner_user_id         => ($owner_user_id || ''),
+              owner_user_id         => $owner_user_id,
               hardwaredb_systems_id => $hardwaredb_systems_id,
              });
         $testrun->insert;

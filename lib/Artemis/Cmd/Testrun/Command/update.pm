@@ -111,8 +111,7 @@ sub update_runtest
         my $owner        = $opt->{owner}        || $ENV{USER};
 
         my $hardwaredb_systems_id = Artemis::Cmd::Testrun::_get_systems_id_for_hostname( $hostname );
-        my $owner_user          = Artemis::Cmd::Testrun::_get_user_for_login( $owner );
-        my $owner_user_id       = $owner_user ? $owner_user->id : undef;
+        my $owner_user_id         = Artemis::Cmd::Testrun::_get_user_id_for_login( $owner );
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 

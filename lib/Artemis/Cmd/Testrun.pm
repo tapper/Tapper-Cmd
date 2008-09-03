@@ -34,12 +34,13 @@ sub _get_systems_id_for_hostname
         return model('HardwareDB')->resultset('Systems')->search({systemname => $name})->first->lid
 }
 
-sub _get_user_for_login
+sub _get_user_id_for_login
 {
         my ($login) = @_;
 
         my $user = model('TestrunDB')->resultset('User')->search({ login => $login })->first;
-        return $user;
+        my $user_id = $user ? $user->id : 0;
+        return $user_id;
 }
 
 sub _yaml_ok {

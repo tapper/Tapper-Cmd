@@ -107,6 +107,14 @@ sub insert_initial_values
                 $user->insert;
                 #say STDERR "Got ID ", $user->id;
         }
+        my $user = $schema->resultset('User')->new
+            ({
+              id       => 0,
+              name     => 'unknown',
+              login    => 'unknown',
+              password => 'unknown',
+             });
+        $user->insert;
 }
 
 sub init_db

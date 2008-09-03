@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 25;
+plan tests => 26;
 
 # --------------------------------------------------
 
@@ -65,7 +65,9 @@ is($testrun->topic->name, 'Software', "testrun topic->name");
 is($testrun->topic->description, 'any non-kernel software, e.g., libraries, programs', "testrun topic->description");
 is($testrun->test_program, '/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh', "testrun test_program");
 
-is(Artemis::Cmd::Testrun::_get_user_for_login('sschwigo')->id, 12, "_get_user_for_login");
+is(Artemis::Cmd::Testrun::_get_user_id_for_login('sschwigo'), 12, "_get_user_id_for_login / existing");
+is(Artemis::Cmd::Testrun::_get_user_id_for_login('nonexistentuser'), 0, "_get_user_id_for_login / nonexisting");
+
 
 # --------------------------------------------------
 
