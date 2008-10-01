@@ -30,6 +30,8 @@ sub opt_spec {
                 [ "wait_after_tests=s", "BOOL, default=0; wait after testrun for human investigation"                                       ],
                 [ "earliest=s",         "STRING, default=now; don't start testrun before this time (format: YYYY-MM-DD hh:mm:ss or now)"    ],
                 [ "precondition=s@",    "assigned precondition ids"                                                                         ],
+                [ "macroprecond=s",     "STRING, use this macro precondition file"                                                          ],
+                [ "macrovalue=s%",      "Define a key=value pair used in macro preconditions"                                               ],
                );
 }
 
@@ -39,12 +41,12 @@ sub usage_desc
         "artemis-testruns new --test_program=s --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
 }
 
-sub _allowed_opts {
+sub _allowed_opts
+{
         my @allowed_opts = map { $_->[0] } opt_spec();
 }
 
 sub convert_format_datetime_natural
-
 {
         my ($self, $opt, $args) = @_;
         # handle natural datetimes
@@ -65,15 +67,16 @@ sub convert_format_datetime_natural
         }
 }
 
-sub validate_args {
+sub validate_args
+{
         my ($self, $opt, $args) = @_;
 
         #         print "opt  = ", Dumper($opt);
         #         print "args = ", Dumper($args);
 
-        print "Missing argument --test_program\n" unless $opt->{test_program};
-        print "Missing argument --hostname\n"     unless $opt->{hostname};
-
+        say "Missing argument --test_program"               unless  $opt->{test_program};
+        say "Missing argument --hostname"                   unless  $opt->{hostname};
+        say "Do not mix --precondition with --macroprecond" if     ($opt->{macroprecond} and $opt->{precondition});
 
         # -- topic constraints --
         my $topic    = $opt->{topic} || '';
@@ -81,9 +84,13 @@ sub validate_args {
         my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
         print "Topic must match $topic_re.\n\n" unless $topic_ok;
 
+        # -- precond vs. macro precond --
+        my $precond_ok = $opt->{macroprecond} and $opt->{precondition} ? 0 : 1;
+
         $self->convert_format_datetime_natural;
 
-        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok;
+        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok && $precond_ok;
+
         die $self->usage->text;
 }
 
