@@ -7,12 +7,15 @@ use warnings;
 
 use parent 'App::Cmd::Command';
 
+use YAML::Syck;
+use Data::Dumper;
+use File::Slurp 'slurp';
 use Artemis::Model 'model';
 use Artemis::Schema::TestrunDB;
 use Artemis::Cmd::Testrun;
-use Data::Dumper;
 use DateTime::Format::Natural;
 require Artemis::Schema::TestrunDB::Result::Topic;
+use Template;
 
 sub abstract {
         'Create a new testrun'
@@ -31,14 +34,14 @@ sub opt_spec {
                 [ "earliest=s",         "STRING, default=now; don't start testrun before this time (format: YYYY-MM-DD hh:mm:ss or now)"    ],
                 [ "precondition=s@",    "assigned precondition ids"                                                                         ],
                 [ "macroprecond=s",     "STRING, use this macro precondition file"                                                          ],
-                [ "macrovalue=s%",      "Define a key=value pair used in macro preconditions"                                               ],
+                [ "D=s%",               "Define a key=value pair used in macro preconditions"                                               ],
                );
 }
 
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns new --test_program=s --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
+        "artemis-testruns new --test_program=s --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s | --macroprecond=s | -Dkey=val ]*";
 }
 
 sub _allowed_opts
@@ -102,6 +105,43 @@ sub run {
         $self->new_runtest ($opt, $args);
 }
 
+sub create_macro_preconditions
+{
+        my ($self, $opt, $args) = @_;
+
+        #print "opt  = ", Dumper($opt);
+
+        my @ids = ();
+
+        my $macropreconds = eval slurp $opt->{macroprecond};
+        my $D             = $opt->{d}; # options are auto-down-cased
+        my $tt            = new Template ();
+
+        foreach my $macro (@$macropreconds)
+        {
+                # substiture placeholders
+                my $condition;
+
+                $tt->process(\$macro, $D, \$condition) || die $tt->error();
+
+                exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($condition);
+
+                my $precond_data = Load($condition);
+                my $shortname    = $precond_data->{shortname} || $precond_data->{name} || 'macro.'.$precond_data->{precondition_type};
+
+                my $precondition = model('TestrunDB')->resultset('Precondition')->new
+                    ({
+                      shortname    => $shortname,
+                      precondition => $condition,
+                     });
+                $precondition->insert;
+                push @ids, $precondition->id;
+                print $opt->{verbose} ? $precondition->to_string : $precondition->id, "\n";
+        }
+
+        return @ids;
+}
+
 sub new_runtest
 {
         my ($self, $opt, $args) = @_;
@@ -137,8 +177,15 @@ sub new_runtest
 sub assign_preconditions {
         my ($self, $opt, $args, $testrun) = @_;
 
-        my @ids = @{ $opt->{precondition} || [] };
-
+        my @ids;
+        if ($opt->{macroprecond})
+        {
+                @ids = $self->create_macro_preconditions($opt, $args);
+        }
+        else
+        {
+                @ids = @{ $opt->{precondition} || [] };
+        }
         my $succession = 1;
         foreach (@ids) {
                 my $testrun_precondition = model('TestrunDB')->resultset('TestrunPrecondition')->new
