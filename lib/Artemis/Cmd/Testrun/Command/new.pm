@@ -124,8 +124,6 @@ sub create_macro_preconditions
 {
         my ($self, $opt, $args) = @_;
 
-        #print "opt  = ", Dumper($opt);
-
         my @ids = ();
 
         my $D             = $opt->{d}; # options are auto-down-cased
@@ -133,7 +131,7 @@ sub create_macro_preconditions
 
         foreach my $macro (@{$self->macropreconds->{preconditions}})
         {
-                # substiture placeholders
+                # substitute placeholders
                 my $condition;
 
                 $tt->process(\$macro, $D, \$condition) || die $tt->error();
@@ -150,7 +148,6 @@ sub create_macro_preconditions
                      });
                 $precondition->insert;
                 push @ids, $precondition->id;
-                print $opt->{verbose} ? $precondition->to_string : $precondition->id, "\n";
         }
 
         return @ids;
