@@ -17,9 +17,14 @@ use DateTime::Format::Natural;
 require Artemis::Schema::TestrunDB::Result::Topic;
 use Template;
 
+use Moose;
+
+has macropreconds => ( is => "rw" );
+
 sub abstract {
         'Create a new testrun'
 }
+
 
 sub opt_spec {
         return (
@@ -85,14 +90,24 @@ sub validate_args
         my $topic    = $opt->{topic} || '';
         my $topic_re = '('.join('|', keys %Artemis::Schema::TestrunDB::Result::Topic::topic_description).')';
         my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
-        print "Topic must match $topic_re.\n\n" unless $topic_ok;
+        say "Topic must match $topic_re.\n" unless $topic_ok;
 
         # -- precond vs. macro precond --
         my $precond_ok = $opt->{macroprecond} and $opt->{precondition} ? 0 : 1;
 
         $self->convert_format_datetime_natural;
 
-        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok && $precond_ok;
+        my $macrovalues_ok = 1;
+        $self->macropreconds( eval slurp $opt->{macroprecond} );
+
+        foreach (@{$self->macropreconds->{mandatory_fields}}) {
+                if (not $opt->{d}{$_}) {
+                        say "Expected macro field '$_' missing.";
+                        $macrovalues_ok = 0;
+                }
+        }
+
+        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok && $precond_ok && $macrovalues_ok;
 
         die $self->usage->text;
 }
@@ -113,11 +128,10 @@ sub create_macro_preconditions
 
         my @ids = ();
 
-        my $macropreconds = eval slurp $opt->{macroprecond};
         my $D             = $opt->{d}; # options are auto-down-cased
         my $tt            = new Template ();
 
-        foreach my $macro (@$macropreconds)
+        foreach my $macro (@{$self->macropreconds->{preconditions}})
         {
                 # substiture placeholders
                 my $condition;
