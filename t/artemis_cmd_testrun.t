@@ -82,8 +82,8 @@ chomp $precond_id;
 
 my $precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
 ok($precond->id, 'inserted precond / id');
-is($precond->shortname, 'perl-5.10', 'inserted precond / shortname');
-is($precond->precondition, 'affe:', 'inserted precond / yaml');
+is($precond->shortname, "perl-5.10", 'inserted precond / shortname');
+is($precond->precondition, "affe:\n", 'inserted precond / yaml');
 
 # --------------------------------------------------
 

@@ -84,26 +84,32 @@ sub validate_args
 
         say "Missing argument --test_program"               unless  $opt->{test_program};
         say "Missing argument --hostname"                   unless  $opt->{hostname};
-        say "Do not mix --precondition with --macroprecond" if     ($opt->{macroprecond} and $opt->{precondition});
 
         # -- topic constraints --
         my $topic    = $opt->{topic} || '';
         my $topic_re = '('.join('|', keys %Artemis::Schema::TestrunDB::Result::Topic::topic_description).')';
         my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
-        say "Topic must match $topic_re.\n" unless $topic_ok;
+        say STDERR "Topic must match $topic_re." unless $topic_ok;
 
         # -- precond vs. macro precond --
-        my $precond_ok = $opt->{macroprecond} and $opt->{precondition} ? 0 : 1;
+        my $precond_ok = 1;
+        if ($opt->{macroprecond} and $opt->{precondition}) {
+                say STDERR "Do not mix --precondition with --macroprecond";
+                $precond_ok = 0;
+        }
 
         $self->convert_format_datetime_natural;
 
         my $macrovalues_ok = 1;
-        $self->macropreconds( eval slurp $opt->{macroprecond} );
+        if ($opt->{macroprecond}) {
+                $self->macropreconds( eval slurp $opt->{macroprecond} );
 
-        foreach (@{$self->macropreconds->{mandatory_fields}}) {
-                if (not $opt->{d}{$_}) {
-                        say "Expected macro field '$_' missing.";
-                        $macrovalues_ok = 0;
+                foreach (@{$self->macropreconds->{mandatory_fields} || []})
+                {
+                        if (not $opt->{d}{$_}) {
+                                say STDERR "Expected macro field '$_' missing.";
+                                $macrovalues_ok = 0;
+                        }
                 }
         }
 
@@ -112,7 +118,8 @@ sub validate_args
         die $self->usage->text;
 }
 
-sub run {
+sub run
+{
         my ($self, $opt, $args) = @_;
 
         require Artemis;
@@ -136,11 +143,12 @@ sub create_macro_preconditions
 
                 $tt->process(\$macro, $D, \$condition) || die $tt->error();
 
+                $condition .= "\n" unless $condition =~ /\n$/;
+
                 exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($condition);
 
                 my $precond_data = Load($condition);
-                my $shortname    = $precond_data->{shortname} || $precond_data->{name} || 'macro.'.$precond_data->{precondition_type};
-
+                my $shortname    = $opt->{shortname} || $precond_data->{shortname} || $precond_data->{name} || 'macro.'.$precond_data->{precondition_type};
                 my $precondition = model('TestrunDB')->resultset('Precondition')->new
                     ({
                       shortname    => $shortname,

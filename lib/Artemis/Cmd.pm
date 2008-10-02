@@ -3,7 +3,7 @@ package Artemis::Cmd;
 use warnings;
 use strict;
 
-our $VERSION = '2.010004';
+our $VERSION = '2.010005';
 
 
 =head1 NAME

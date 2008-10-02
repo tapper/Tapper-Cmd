@@ -20,39 +20,45 @@ sub abstract {
 
 sub opt_spec {
         return (
-                [ "verbose",                           "some more informational output"                                            ],
-                [ "shortname=s",                       "TEXT; shortname", { required => 1 }                                        ],
-                [ "timeout=s",                         "INT; stop trying to fullfill this precondition after timeout second",      ],
-                [ "condition=s",                       "TEXT; condition description in YAML format (see Spec)"                     ],
-                [ "condition_file=s",                  "STRING; filename from where to read condition, use - to read from STDIN"   ],
-                [ "precondition=s@",                   "INT; assigned pre-precondition ids"                                        ],
+                [ "verbose",          "some more informational output"                                            ],
+                [ "timeout=s",        "INT; stop trying to fullfill this precondition after timeout second",      ],
+                [ "condition=s",      "TEXT; condition description in YAML format (see Spec)"                     ],
+                [ "condition_file=s", "STRING; filename from where to read condition, use - to read from STDIN"   ],
+                [ "shortname=s",      "TEXT; shortname that overrides the one in the yaml"                        ],
+                [ "precondition=s@",  "INT; assigned pre-precondition ids"                                        ],
                );
 }
 
 sub usage_desc
 {
-        "artemis-testrun newprecondition --shortname=s  ( --condition=s | --condition_file=s ) ";
+        "artemis-testrun newprecondition ( --condition=s | --condition_file=s ) [ --shortname=s ] [ --timeout=n ] [ --precondition=n ]* ";
 }
 
-sub _allowed_opts {
+sub _allowed_opts
+{
         my @allowed_opts = map { $_->[0] } opt_spec();
 }
 
-sub validate_args {
+sub validate_args
+{
         my ($self, $opt, $args) = @_;
 
-#         print "opt  = ", Dumper($opt);
-#         print "args = ", Dumper($args);
+        my $precond_ok = 1;
+        if (not $opt->{condition} || $opt->{condition_file}) {
+                say "Missing --condition or --condition_file";
+                $precond_ok = 0;
+        }
+        if ($opt->{condition} && $opt->{condition_file}) {
+                say "Only one of --condition or --condition_file allowed.";
+                $precond_ok = 0;
+        }
 
-        print "Missing argument --shortname\n"            unless $opt->{shortname};
-        print "Missing --condition or --condition_file\n" unless $opt->{condition} || $opt->{condition_file};
-        print "Only one of --condition or --condition_file allowed.\n" if $opt->{condition} && $opt->{condition_file};
-
-        return 1 if $opt->{shortname};
+        return 1 if $precond_ok;
         die $self->usage->text;
 }
 
-sub run {
+sub run
+{
         my ($self, $opt, $args) = @_;
 
         require Artemis;
@@ -83,16 +89,18 @@ sub new_precondition
 {
         my ($self, $opt, $args) = @_;
 
-        #print "opt  = ", Dumper($opt);
-
-        my $shortname                       = $opt->{shortname}    || '';
         my $condition                       = $opt->{condition};
         my $condition_file                  = $opt->{condition_file};
         my $timeout                         = $opt->{timeout};
 
         $condition ||= read_condition_file($condition_file);
+        $condition .= "\n" unless $condition =~ /\n$/;
 
         exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($condition);
+
+        my $precond_data = Load($condition);
+
+        my $shortname    = $opt->{shortname} || $precond_data->{shortname} || '';
 
         my $precondition = model('TestrunDB')->resultset('Precondition')->new
             ({
@@ -124,6 +132,6 @@ sub assign_preconditions {
 }
 
 
-# perl -Ilib bin/artemis-testrun newprecondition --shortname=perl-5.10 --condition_file=- --timeout=100
+# perl -Ilib bin/artemis-testrun newprecondition --condition_file=- --timeout=100
 
 1;
