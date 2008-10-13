@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 26;
+plan tests => 23;
 
 # --------------------------------------------------
 
@@ -63,7 +63,6 @@ is($testrun->shortname, 'perfmon', "testrun shortname");
 is($testrun->topic_name, 'Software', "testrun topic_name");
 is($testrun->topic->name, 'Software', "testrun topic->name");
 is($testrun->topic->description, 'any non-kernel software, e.g., libraries, programs', "testrun topic->description");
-is($testrun->test_program, '/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh', "testrun test_program");
 
 is(Artemis::Cmd::Testrun::_get_user_id_for_login('sschwigo'), 12, "_get_user_id_for_login / existing");
 is(Artemis::Cmd::Testrun::_get_user_id_for_login('nonexistentuser'), 0, "_get_user_id_for_login / nonexisting");
@@ -98,24 +97,22 @@ is($precond->precondition, 'not_affe_again:', 'update precond / yaml');
 
 # --------------------------------------------------
 
-my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --test_program=/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh --hostname=iring`;
+my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --hostname=iring`;
 chomp $testrun_id;
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
 ok($testrun->id, 'inserted testrun / id');
-is($testrun->test_program, '/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh', 'inserted testrun / test_program');
 is($testrun->hardwaredb_systems_id, 12, 'inserted testrun / systems_id');
 
 # --------------------------------------------------
 
 my $old_testrun_id = $testrun_id;
-$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun update --id=$old_testrun_id --topic=Hardware --test_program=/tmp/yet/another/test.sh --hostname=iring`;
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun update --id=$old_testrun_id --topic=Hardware --hostname=iring`;
 chomp $testrun_id;
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
 is($testrun->id, $old_testrun_id, 'updated testrun / id');
 is($testrun->topic_name, "Hardware", 'updated testrun / topic');
-is($testrun->test_program, '/tmp/yet/another/test.sh', 'updated testrun / test_program');
 is($testrun->hardwaredb_systems_id, 12, 'updated testrun / systems_id');
 
 # --------------------------------------------------

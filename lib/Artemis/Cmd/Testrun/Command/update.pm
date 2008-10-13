@@ -24,7 +24,6 @@ sub opt_spec {
                 [ "notes=s",            "TEXT; notes"                                                                                       ],
                 [ "shortname=s",        "TEXT; shortname"                                                                                   ],
                 [ "topic=s",            "STRING, default=Misc; one of: Kernel, Xen, KVM, Hardware, Distribution, Benchmark, Software, Misc" ],
-                [ "test_program=s",     "STRING; full path to the test program to start"                                                    ],
                 [ "hostname=s",         "INT; the hostname on which the test should be run"                                                 ],
                 [ "owner=s",            "STRING, default=\$USER; user login name"                                                           ],
                 [ "wait_after_tests=s", "BOOL, default=0; wait after testrun for human investigation"                                       ],
@@ -37,7 +36,7 @@ sub opt_spec {
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns update --id=s [ --test_program=s | --hostname=s | --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
+        "artemis-testruns update --id=s [ --hostname=s | --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s ]*";
 }
 
 sub _allowed_opts {
@@ -72,8 +71,6 @@ sub validate_args {
         #         print "args = ", Dumper($args);
 
         say "Missing argument --id"                   unless $opt->{id};
-        #print "Missing argument --test_program\n" unless $opt->{test_program};
-        #print "Missing argument --hostname\n"     unless $opt->{hostname};
 
         # -- topic constraints --
         my $topic    = $opt->{topic} || '';
@@ -106,7 +103,6 @@ sub update_runtest
         my $shortname    = $opt->{shortname}    || '';
         my $topic_name   = $opt->{topic}        || 'Misc';
         my $date         = $opt->{earliest}     || DateTime->now;
-        my $test_program = $opt->{test_program};
         my $hostname     = $opt->{hostname};
         my $owner        = $opt->{owner}        || $ENV{USER};
 
@@ -118,7 +114,6 @@ sub update_runtest
         $testrun->notes                 ( $notes                 ) if $notes;
         $testrun->shortname             ( $shortname             ) if $shortname;
         $testrun->topic_name            ( $topic_name            ) if $topic_name;
-        $testrun->test_program          ( $test_program          ) if $test_program;
         $testrun->starttime_earliest    ( $date                  ) if $date;
         $testrun->owner_user_id         ( $owner_user_id         ) if $owner_user_id;
         $testrun->hardwaredb_systems_id ( $hardwaredb_systems_id ) if $hardwaredb_systems_id;
@@ -156,6 +151,6 @@ sub assign_preconditions {
 }
 
 
-# perl -Ilib bin/artemis-testrun update --id=12 --topic=Software --test_program=/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh --hostname=iring
+# perl -Ilib bin/artemis-testrun update --id=12 --topic=Software  --hostname=iring
 
 1;

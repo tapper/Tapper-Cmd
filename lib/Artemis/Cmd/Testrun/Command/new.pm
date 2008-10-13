@@ -32,7 +32,6 @@ sub opt_spec {
                 [ "notes=s",            "TEXT; notes"                                                                                       ],
                 [ "shortname=s",        "TEXT; shortname"                                                                                   ],
                 [ "topic=s",            "STRING, default=Misc; one of: Kernel, Xen, KVM, Hardware, Distribution, Benchmark, Software, Misc" ],
-                [ "test_program=s",     "STRING; full path to the test program to start"                                                    ],
                 [ "hostname=s",         "INT; the hostname on which the test should be run"                                                 ],
                 [ "owner=s",            "STRING, default=\$USER; user login name"                                                           ],
                 [ "wait_after_tests=s", "BOOL, default=0; wait after testrun for human investigation"                                       ],
@@ -46,7 +45,7 @@ sub opt_spec {
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns new --test_program=s --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s | --macroprecond=s | -Dkey=val ]*";
+        "artemis-testruns new --hostname=s [ --topic=s --notes=s | --shortname=s | --owner=s | --wait_after_tests=s | --macroprecond=s | -Dkey=val ]*";
 }
 
 sub _allowed_opts
@@ -82,7 +81,6 @@ sub validate_args
         #         print "opt  = ", Dumper($opt);
         #         print "args = ", Dumper($args);
 
-        say "Missing argument --test_program"               unless  $opt->{test_program};
         say "Missing argument --hostname"                   unless  $opt->{hostname};
 
         # -- topic constraints --
@@ -113,7 +111,7 @@ sub validate_args
                 }
         }
 
-        return 1 if $opt->{test_program} && $opt->{hostname} && $topic_ok && $precond_ok && $macrovalues_ok;
+        return 1 if $opt->{hostname} && $topic_ok && $precond_ok && $macrovalues_ok;
 
         die $self->usage->text;
 }
@@ -171,7 +169,6 @@ sub new_runtest
         my $shortname    = $opt->{shortname}    || '';
         my $topic_name   = $opt->{topic}        || 'Misc';
         my $date         = $opt->{earliest}     || DateTime->now;
-        my $test_program = $opt->{test_program};
         my $hostname     = $opt->{hostname};
         my $owner        = $opt->{owner}        || $ENV{USER};
 
@@ -183,7 +180,6 @@ sub new_runtest
               notes                 => $notes,
               shortname             => $shortname,
               topic_name            => $topic_name,
-              test_program          => $test_program,
               starttime_earliest    => $date,
               owner_user_id         => $owner_user_id,
               hardwaredb_systems_id => $hardwaredb_systems_id,
@@ -219,6 +215,6 @@ sub assign_preconditions {
 }
 
 
-# perl -Ilib bin/artemis-testrun new --topic=Software --test_program=/usr/local/share/artemis/testsuites/perfmon/t/do_test.sh --hostname=iring
+# perl -Ilib bin/artemis-testrun new --topic=Software --precondition=14  --hostname=iring --owner=ss5
 
 1;
