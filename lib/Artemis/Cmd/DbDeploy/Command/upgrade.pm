@@ -20,10 +20,13 @@ sub opt_spec {
                 [ "db=s",    "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",   "STRING, default=development; one of: live, development, test" ],
                 [ "upgradedir=s", "STRING, directory here upgradefiles are stored" ],
-                [ "fromversion=s",  "STRING" ],
+                [ "fromversion=s","STRING" ],
                 [ "toversion=s",  "STRING" ],
                );
 }
+
+# aktuelle Version und Diff erzeugen zur gewünschten vorherigen
+# perl -Ilib -MArtemis::Schema::ReportsDB -e 'Artemis::Schema::ReportsDB->connect("DBI:SQLite:foo")->create_ddl_dir([qw/MySQL SQLite/], undef, "upgrades/", "2.010012") or die'
 
 sub usage_desc
 {
