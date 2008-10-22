@@ -22,7 +22,7 @@ sub opt_spec {
                 [ "verbose",       "some more informational output" ],
                 [ "reportid=s",    "INT; the testrun id to change", ],
                 [ "file=s",        "STRING; the file to upload, use '-' for STDIN", ],
-                [ "contenttype=s", "STRING; content-type, default 'application/octed-stream', use 'plain' for easy viewing in browser", ],
+                [ "contenttype=s", "STRING; content-type, default 'plain', use 'application/octed-stream' for binaries", ],
                );
 }
 
@@ -89,17 +89,22 @@ sub upload
 
         my $reportid    = $opt->{reportid};
         my $file        = $opt->{file};
-        my $contenttype = $opt->{contenttype} || '';
-        my $content     = $self->read_file($opt, $args);
+        my $contenttype = $opt->{contenttype} || 'plain';
+        my $content     = $self->_read_file($opt, $args);
 
-        my $cmdline = "#! upload $reportid $file $contenttype";
-        say Dumper("UPLOAD", $opt, $args);
+        my $cmdline     = "#! upload $reportid $file $contenttype\n";
 
-        my $REMOTEAPI = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port);
-        my $oldfh     = select $REMOTEAPI;
-        say $REMOTEAPI $cmdline;
-        print $REMOTEAPI $content; # no additional \n!
-        select($oldfh);
+        my $REMOTEAPI   = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port);
+        if ($REMOTEAPI) {
+                #my $oldfh       = select $REMOTEAPI;
+                print $REMOTEAPI $cmdline;
+                print $REMOTEAPI $content;
+                #select($oldfh);
+                close ($REMOTEAPI);
+        }
+        else {
+                say "Cannot open remote receiver $host:$port.";
+        }
 }
 
 # perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552 --file ~/xyz     --contenttype plain
