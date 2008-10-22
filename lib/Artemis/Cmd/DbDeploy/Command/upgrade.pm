@@ -28,6 +28,10 @@ sub opt_spec {
 # aktuelle Version und Diff erzeugen zur gewünschten vorherigen
 # perl -Ilib -MArtemis::Schema::ReportsDB -e 'Artemis::Schema::ReportsDB->connect("DBI:SQLite:foo")->create_ddl_dir([qw/MySQL SQLite/], undef, "upgrades/", "2.010012") or die'
 
+sub abstract {
+        'Upgrade a database schema'
+}
+
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();

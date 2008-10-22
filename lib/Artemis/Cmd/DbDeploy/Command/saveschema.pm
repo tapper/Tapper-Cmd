@@ -24,6 +24,10 @@ sub opt_spec {
                );
 }
 
+sub abstract {
+        'Save an initial database schema if no previous schema exists'
+}
+
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();

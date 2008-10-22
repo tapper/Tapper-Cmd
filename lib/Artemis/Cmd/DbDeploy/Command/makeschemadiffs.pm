@@ -24,6 +24,10 @@ sub opt_spec {
                );
 }
 
+sub abstract {
+        'Save schema diff files for later upgrade'
+}
+
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();

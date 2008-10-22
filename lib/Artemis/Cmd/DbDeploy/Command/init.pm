@@ -23,10 +23,14 @@ sub opt_spec {
                );
 }
 
+sub abstract {
+        'Initialize a database from scratch. DANGEROUS! Think twice.'
+}
+
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-db-deploy upgrade --db=DBNAME  [ --verbose ]";
+        "artemis-db-deploy init --db=DBNAME  [ --verbose ]";
 }
 
 sub _allowed_opts {
