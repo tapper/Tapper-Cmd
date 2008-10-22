@@ -1,7 +1,7 @@
 
 Artemis
 
-Automatic Regression Test Environment and Measurement Instrument System
+Collection of Artemis Command line utils
 
 INSTALLATION
 
@@ -17,7 +17,7 @@ SUPPORT AND DOCUMENTATION
 After installing, you can find documentation for this module with the
 perldoc command.
 
-    perldoc Artemis
+    perldoc Artemis::Cmd
 
 
 COPYRIGHT AND LICENCE

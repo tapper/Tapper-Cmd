@@ -95,6 +95,7 @@ sub upload
         my $reportid    = $opt->{reportid};
         my $file        = $opt->{file};
         my $contenttype = $opt->{contenttype} || '';
+        my $content     = $self->read_file($opt, $args);
 
         my $cmdline = "#! upload $reportid $file $contenttype";
         say Dumper("UPLOAD", $opt, $args);
@@ -106,7 +107,7 @@ sub upload
         select($oldfh);
 }
 
-
-# perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552
+# perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552 --file ~/xyz     --contenttype plain
+# perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552 --file=$HOME/xyz --contenttype plain
 
 1;
