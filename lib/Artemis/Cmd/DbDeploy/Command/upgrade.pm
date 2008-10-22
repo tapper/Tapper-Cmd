@@ -19,7 +19,7 @@ sub opt_spec {
                 [ "verbose", "some more informational output"       ],
                 [ "db=s",    "STRING, one of: ReportsDB, TestrunDB" ],
                 [ "env=s",   "STRING, default=development; one of: live, development, test" ],
-                [ "upgradedir=s", "STRING, directory here upgradefiles are stored" ],
+                [ "upgradedir=s", "STRING, directory where upgradefiles are stored" ],
                 [ "fromversion=s","STRING" ],
                 [ "toversion=s",  "STRING" ],
                );
