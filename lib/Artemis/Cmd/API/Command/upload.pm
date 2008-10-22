@@ -63,7 +63,7 @@ sub run
         $self->upload ($opt, $args);
 }
 
-sub read_file
+sub _read_file
 {
         my ($self, $opt, $args) = @_;
 
@@ -72,9 +72,9 @@ sub read_file
 
         # read from file or STDIN if filename == '-'
         if ($file eq '-') {
-                $content = read_file (\*STDIN);
+                $content = slurp (\*STDIN);
         } else {
-                $content = read_file ($file);
+                $content = slurp ($file);
         }
         return $content;
 }
