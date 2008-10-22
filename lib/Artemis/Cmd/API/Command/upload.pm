@@ -9,7 +9,6 @@ use parent 'App::Cmd::Command';
 
 use IO::Socket;
 use Artemis::Config;
-use Artemis::Model 'model';
 use File::Slurp 'slurp';
 use Data::Dumper;
 use Moose;
@@ -33,30 +32,26 @@ sub usage_desc
         "artemis-api upload --reportid=s --file=s [ --contenttype=s ]";
 }
 
-sub _allowed_opts {
+sub _allowed_opts
+{
         my @allowed_opts = map { $_->[0] } opt_spec();
 }
 
-sub validate_args {
+sub validate_args
+{
         my ($self, $opt, $args) = @_;
-
-        #         print "opt  = ", Dumper($opt);
-        #         print "args = ", Dumper($args);
-
-        say "Missing argument --reportid" unless $opt->{reportid};
-        say "Missing argument --file"     unless $opt->{file};
 
         # -- file constraints --
         my $file    = $opt->{file};
-        my $file_ok = $file eq '-' || -r $file;
+        my $file_ok = $file && ($file eq '-' || -r $file);
+        say "Missing argument --file"                        unless $file;
         say "Error: file '$file' must be readable or STDIN." unless $file_ok;
 
         # -- report constraints --
         my $reportid  = $opt->{reportid};
-        my $report    = model('ReportsDB')->resultset('Report')->find($reportid);
-        $report    = model('ReportsDB')->resultset('Report')->find($reportid);
-        my $report_ok = $report;
-        say "Error: report '$reportid' must exist." unless $report_ok;
+        my $report_ok = $reportid && $reportid =~ /^\d+$/;
+        say "Missing argument --reportid"           unless $reportid;
+        say "Error: Strange report id '$reportid'." unless $report_ok;
 
         return 1 if $opt->{reportid} && $file_ok && $report_ok;
         die $self->usage->text;
