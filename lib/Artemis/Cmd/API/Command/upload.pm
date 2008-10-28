@@ -22,6 +22,7 @@ sub opt_spec {
                 [ "verbose",       "some more informational output" ],
                 [ "reportid=s",    "INT; the testrun id to change", ],
                 [ "file=s",        "STRING; the file to upload, use '-' for STDIN", ],
+                [ "filename=s",     "STRING; alternate file name, especially when reading from STDIN", ],
                 [ "contenttype=s", "STRING; content-type, default 'plain', use 'application/octed-stream' for binaries", ],
                );
 }
@@ -89,10 +90,11 @@ sub upload
 
         my $reportid    = $opt->{reportid};
         my $file        = $opt->{file};
+        my $filename    = $opt->{filename};
         my $contenttype = $opt->{contenttype} || 'plain';
         my $content     = $self->_read_file($opt, $args);
 
-        my $cmdline     = "#! upload $reportid $file $contenttype\n";
+        my $cmdline     = "#! upload $reportid ".($filename || $file)." $contenttype\n";
 
         my $REMOTEAPI   = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port);
         if ($REMOTEAPI) {

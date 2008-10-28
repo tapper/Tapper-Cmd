@@ -3,8 +3,8 @@ package Artemis::Cmd::DbDeploy;
 use strict;
 use warnings;
 
-use parent 'App::Cmd';
 use Artemis::Model 'model';
+use parent 'App::Cmd';
 
 sub opt_spec
 {

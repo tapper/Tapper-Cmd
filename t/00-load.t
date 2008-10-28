@@ -1,6 +1,9 @@
 use Test::More tests => 18;
 
 BEGIN {
+        use Class::C3;
+        use MRO::Compat;
+
         use_ok( 'Artemis::Cmd::API::Command::upload' );
         use_ok( 'Artemis::Cmd::DbDeploy' );
         use_ok( 'Artemis::Cmd::Testrun::Command::delete' );
