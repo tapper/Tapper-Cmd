@@ -19,11 +19,13 @@ sub abstract {
 
 sub opt_spec {
         return (
-                [ "verbose",       "some more informational output" ],
-                [ "reportid=s",    "INT; the testrun id to change", ],
-                [ "file=s",        "STRING; the file to upload, use '-' for STDIN", ],
-                [ "filename=s",     "STRING; alternate file name, especially when reading from STDIN", ],
-                [ "contenttype=s", "STRING; content-type, default 'plain', use 'application/octed-stream' for binaries", ],
+                [ "verbose",         "some more informational output" ],
+                [ "reportid=s",      "INT; the testrun id to change", ],
+                [ "file=s",          "STRING; the file to upload, use '-' for STDIN", ],
+                [ "filename=s",      "STRING; alternate file name, especially when reading from STDIN", ],
+                [ "reportserver=s",  "STRING; use this host for upload", ],
+                [ "reportport=s",    "STRING; use this port for upload", ],
+                [ "contenttype=s",   "STRING; content-type, default 'plain', use 'application/octed-stream' for binaries", ],
                );
 }
 
@@ -85,8 +87,8 @@ sub upload
 {
         my ($self, $opt, $args) = @_;
 
-        my $host = Artemis::Config->subconfig->{report_server};
-        my $port = Artemis::Config->subconfig->{report_api_port};
+        my $host = $opt->{reportserver} || Artemis::Config->subconfig->{report_server};
+        my $port = $opt->{reportport}   || Artemis::Config->subconfig->{report_api_port};
 
         my $reportid    = $opt->{reportid};
         my $file        = $opt->{file};
@@ -109,7 +111,8 @@ sub upload
         }
 }
 
-# perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552 --file ~/xyz     --contenttype plain
-# perl -Ilib bin/artemis-api upload --file=/var/log/messages --report_id=552 --file=$HOME/xyz --contenttype plain
+# perl -Ilib bin/artemis-api upload --reportid=552 --file ~/xyz
+# perl -Ilib bin/artemis-api upload --reportid=552 --file=$HOME/xyz
+# dmesg | perl -Ilib bin/artemis-api upload --reportid=552 --file=- --filename="dmesg"
 
 1;
