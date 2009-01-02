@@ -32,7 +32,7 @@ sub opt_spec {
 
 sub usage_desc {
         my $allowed_opts = join ' | ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns list [ " . $allowed_opts ." ]";
+        "artemis-testruns listprecondition [ " . $allowed_opts ." ]";
 }
 
 sub _allowed_opts {
@@ -75,7 +75,7 @@ sub all
 {
         my ($self, $opt, $args) = @_;
 
-        print "All testruns:\n" if $opt->{verbose};
+        print "All preconditions:\n" if $opt->{verbose};
         print "| Id |\n------\n" if $opt->{id_only};
         $self->print_colnames($opt, $args);
 
@@ -89,11 +89,29 @@ sub all
         }
 }
 
+sub grep
+{
+        my ($self, $opt, $args) = @_;
+        die "No search string given" if not $opt->{grep};
+        print "Preconditions matching '",$opt->{grep},"':\n" if $opt->{verbose};
+
+        my $preconditions = model('TestrunDB')->resultset('Precondition')->all_preconditions->search_like({precondition => $opt->{'%grep%'}}, { order_by => 'id' });
+        while (my $precond = $preconditions->next) {
+                if ($opt->{id_only}) {
+                        print "| ",$precond->id," |\n";
+                } else {
+                        print $precond->to_string($opt)."\n";
+                }
+        }
+
+        
+}
+
 sub lonely
 {
         my ($self, $opt, $args) = @_;
 
-        print "Queued testruns:\n" if $opt->{verbose};
+        print "Preconditions referenced by neither precondition nor testrun:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
         print "Implement me. Now!\n";
@@ -109,7 +127,7 @@ sub primary
 {
         my ($self, $opt, $args) = @_;
 
-        print "Running testruns:\n" if $opt->{verbose};
+        print "Preconditions directly referenced by a testrun:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
         print "Implement me. Now!\n";
@@ -125,7 +143,7 @@ sub pre
 {
         my ($self, $opt, $args) = @_;
 
-        print "Finished testruns:\n" if $opt->{verbose};
+        print "Preconditions directly referenced by another precondition:\n" if $opt->{verbose};
         $self->print_colnames($opt, $args);
 
         print "Implement me. Now!\n";
