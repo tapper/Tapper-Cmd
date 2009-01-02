@@ -18,6 +18,7 @@ sub abstract {
 sub opt_spec {
         return (
                 [ "verbose",         "some more informational output"                      ],
+                [ "id_only",         "only show ids of matching preconditions"             ],
                 [ "nonewlines",      "escape newlines in values to avoid multilines"       ],
                 [ "quotevalues",     "put quotes around the values"                        ],
                 [ "colnames",        "print out column names"                              ],
@@ -75,11 +76,16 @@ sub all
         my ($self, $opt, $args) = @_;
 
         print "All testruns:\n" if $opt->{verbose};
+        print "| Id |\n------\n" if $opt->{id_only};
         $self->print_colnames($opt, $args);
 
         my $preconditions = model('TestrunDB')->resultset('Precondition')->all_preconditions->search({}, { order_by => 'id' });
         while (my $precond = $preconditions->next) {
-                print $precond->to_string($opt)."\n";
+                if ($opt->{id_only}) {
+                        print "| ",$precond->id," |\n";
+                } else {
+                        print $precond->to_string($opt)."\n";
+                }
         }
 }
 
