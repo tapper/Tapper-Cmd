@@ -89,23 +89,6 @@ sub all
         }
 }
 
-sub grep
-{
-        my ($self, $opt, $args) = @_;
-        die "No search string given" if not $opt->{grep};
-        print "Preconditions matching '",$opt->{grep},"':\n" if $opt->{verbose};
-
-        my $preconditions = model('TestrunDB')->resultset('Precondition')->all_preconditions->search_like({precondition => $opt->{'%grep%'}}, { order_by => 'id' });
-        while (my $precond = $preconditions->next) {
-                if ($opt->{id_only}) {
-                        print "| ",$precond->id," |\n";
-                } else {
-                        print $precond->to_string($opt)."\n";
-                }
-        }
-
-        
-}
 
 sub lonely
 {
