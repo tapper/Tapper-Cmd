@@ -31,7 +31,7 @@ sub validate_args
 sub _get_systems_id_for_hostname
 {
         my ($name) = @_;
-        return model('HardwareDB')->resultset('Systems')->search({systemname => $name})->first->lid
+        return model('HardwareDB')->resultset('Systems')->search({systemname => $name, active => 1})->first->lid
 }
 
 sub _get_user_id_for_login
