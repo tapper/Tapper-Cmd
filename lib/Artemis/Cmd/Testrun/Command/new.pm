@@ -100,15 +100,21 @@ sub validate_args
 
         my $macrovalues_ok = 1;
         if ($opt->{macroprecond}) {
-                $self->macropreconds( eval slurp $opt->{macroprecond} );
-
-                foreach (@{$self->macropreconds->{mandatory_fields} || []})
+                my @precond_lines =  slurp $opt->{macroprecond};
+                my @mandatory;
+                if ($precond_lines[0] =~/# (artemis[_-])?mandatory[_-]fields:(.+)/) {
+                        @mandatory = split (" ", $2);
+                        shift @precond_lines;
+                }
+                
+                foreach my $field(@mandatory)
                 {
-                        if (not $opt->{d}{$_}) {
-                                say STDERR "Expected macro field '$_' missing.";
+                        if (not $opt->{d}{$field}) {
+                                say STDERR "Expected macro field '$field' missing.";
                                 $macrovalues_ok = 0;
                         }
                 }
+                $self->{macropreconds} = join '',@precond_lines;
         }
 
         return 1 if $opt->{hostname} && $topic_ok && $precond_ok && $macrovalues_ok;
@@ -133,29 +139,26 @@ sub create_macro_preconditions
 
         my $D             = $opt->{d}; # options are auto-down-cased
         my $tt            = new Template ();
+        my $macro         = $self->{macropreconds};
+        my $ttapplied;
 
-        foreach my $macro (@{$self->macropreconds->{preconditions}})
+        $tt->process(\$macro, $D, \$ttapplied) || die $tt->error();
+        exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($ttapplied);
+        my @precond_data = Load($ttapplied);
+
+ CONDITION:
+        foreach my $condition (@precond_data)
         {
-                # substitute placeholders
-                my $condition;
-
-                $tt->process(\$macro, $D, \$condition) || die $tt->error();
-
-                $condition .= "\n" unless $condition =~ /\n$/;
-
-                exit -1 if ! Artemis::Cmd::Testrun::_yaml_ok($condition);
-
-                my $precond_data = Load($condition);
-                my $shortname    = $opt->{shortname} || $precond_data->{shortname} || $precond_data->{name} || 'macro.'.$precond_data->{precondition_type};
+                next CONDITION if not $condition->{precondition_type};
+                my $shortname    = $opt->{shortname} || $condition->{shortname} || $condition->{name} || 'macro.'.$condition->{precondition_type};
                 my $precondition = model('TestrunDB')->resultset('Precondition')->new
                     ({
                       shortname    => $shortname,
-                      precondition => $condition,
+                      precondition => Dump($condition),
                      });
                 $precondition->insert;
                 push @ids, $precondition->id;
         }
-
         return @ids;
 }
 
