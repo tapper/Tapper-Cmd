@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 23;
+plan tests => 24;
 
 # --------------------------------------------------
 
@@ -126,4 +126,8 @@ $precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
 is($precond, undef, "delete precond");
 
 # --------------------------------------------------
+
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --macroprecondition=t/files/kernel_boot.mpc -Dkernel_version=2.6.19 --hostname=iring`;
+chomp $testrun_id;
+$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
 
