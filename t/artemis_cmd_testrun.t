@@ -87,12 +87,12 @@ is($precond->precondition, "affe:\n", 'inserted precond / yaml');
 # --------------------------------------------------
 
 my $old_precond_id = $precond_id;
-$precond_id = `/usr/bin/env perl -Ilib bin/artemis-testrun updateprecondition --id=$old_precond_id --shortname="fobar-perl-5.11" --condition="not_affe_again:"`;
+$precond_id = `/usr/bin/env perl -Ilib bin/artemis-testrun updateprecondition --id=$old_precond_id --shortname="foobar-perl-5.11" --condition="not_affe_again:"`;
 chomp $precond_id;
 
 $precond = model('TestrunDB')->resultset('Precondition')->find($precond_id);
 is($precond->id, $old_precond_id, 'update precond / id');
-is($precond->shortname, 'fobar-perl-5.11', 'update precond / shortname');
+is($precond->shortname, 'foobar-perl-5.11', 'update precond / shortname');
 is($precond->precondition, 'not_affe_again:', 'update precond / yaml');
 
 # --------------------------------------------------
