@@ -131,6 +131,20 @@ sub run
         $self->new_runtest ($opt, $args);
 }
 
+=head2 create_macro_preconditions
+
+Process a macroprecondition. This includes substitions using
+Template::Toolkit, separating the individual preconditions that are part of
+the macroprecondition and putting them into the database. Parameters fit the
+App::Cmd::Command API.
+
+@param hashref - hash containing options
+@param hashref - hash containing arguments
+
+@returnlist array containing precondition ids
+
+=cut 
+
 sub create_macro_preconditions
 {
         my ($self, $opt, $args) = @_;
@@ -149,7 +163,6 @@ sub create_macro_preconditions
  CONDITION:
         foreach my $condition (@precond_data)
         {
-                next CONDITION if not $condition->{precondition_type};
                 my $shortname    = $opt->{shortname} || $condition->{shortname} || $condition->{name} || 'macro.'.$condition->{precondition_type};
                 my $precondition = model('TestrunDB')->resultset('Precondition')->new
                     ({
