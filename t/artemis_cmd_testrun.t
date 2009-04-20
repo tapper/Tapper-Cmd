@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 24;
+plan tests => 27;
 
 # --------------------------------------------------
 
@@ -127,7 +127,13 @@ is($precond, undef, "delete precond");
 
 # --------------------------------------------------
 
-$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --macroprecondition=t/files/kernel_boot.mpc -Dkernel_version=2.6.19 --hostname=iring`;
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --macroprecond=t/files/kernel_boot.mpc -Dkernel_version=2.6.19 --hostname=iring`;
 chomp $testrun_id;
-$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+$testrun = model('TestrunDB')->resultset('Testrun')->search({id => $testrun_id,})->first();
 
+my @precond_array = $testrun->ordered_preconditions;
+
+is($precond_array[0]->precondition_as_hash->{precondition_type}, "package",'Parsing macropreconditions, first sub precondition');
+is($precond_array[1]->precondition_as_hash->{precondition_type}, "exec",'Parsing macropreconditions, second sub precondition');
+is($precond_array[1]->precondition_as_hash->{options}->[0], "2.6.19",'Parsing macropreconditions, template toolkit substitution');
+is($precond_array[0]->precondition_as_hash->{filename}, "kernel/linux-2.6.19.tar.gz",'Parsing macropreconditions, template toolkit with if block');

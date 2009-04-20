@@ -1,0 +1,9 @@
+[% kernelpkg = BLOCK %][% IF kernelpkg %][% kernelpkg %][%ELSE%]kernel/linux-[% kernel_version %].tar.gz[% END %][% END %]
+precondition_type: package
+filename: [% kernelpkg %]
+---
+precondition_type: exec
+filename: /bin/gen_initrd.sh
+options:
+  - [% kernel_version %]
+---
