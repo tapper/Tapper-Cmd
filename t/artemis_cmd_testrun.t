@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 27;
+plan tests => 28;
 
 # --------------------------------------------------
 
@@ -137,3 +137,8 @@ is($precond_array[0]->precondition_as_hash->{precondition_type}, "package",'Pars
 is($precond_array[1]->precondition_as_hash->{precondition_type}, "exec",'Parsing macropreconditions, second sub precondition');
 is($precond_array[1]->precondition_as_hash->{options}->[0], "2.6.19",'Parsing macropreconditions, template toolkit substitution');
 is($precond_array[0]->precondition_as_hash->{filename}, "kernel/linux-2.6.19.tar.gz",'Parsing macropreconditions, template toolkit with if block');
+
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --macroprecond=t/files/kernel_boot.mpc --hostname=iring 2>&1`;
+chomp $testrun_id;
+like($testrun_id, qr/Expected macro field 'kernel_version' missing./, "missing mandatory field recognized");
+
