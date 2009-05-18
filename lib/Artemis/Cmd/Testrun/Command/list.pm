@@ -15,22 +15,32 @@ sub abstract {
         'List testruns'
 }
 
+my $options = { "verbose"     => { text => "some more informational output" },
+                "colnames" => { text => "print out column names" },
+                "all" => { text => "list all testruns", needed => 1 },
+                "finished" => { text => "list finished testruns", needed => 1 },
+                "running" => { text => "list running testruns", needed => 1 },
+                "queued" => { text => "list queued testruns", needed => 1 },
+                "due" => { text => "list due testruns", needed => 1 },
+                "id" => { text => "list particular testruns", type => 'int', needed => 1 },
+
+              };
+                
+
 sub opt_spec {
+        my @opt_spec;
+        foreach my $key (keys %$options) {
+                my $pushkey = defined $options->{$key}->{type} ? $key."=s@" : $key;
+                push @opt_spec, [$pushkey, $options->{$key}->{text}];
+        }
         return (
-                [ "verbose",  "some more informational output" ],
-                [ "colnames", "print out column names"         ],
-                [ "all",      "list all testruns",             ],
-                [ "finished", "list finished testruns"         ],
-                [ "running",  "list running testruns"          ],
-                [ "queued",   "list queued testruns",          ],
-                [ "due",      "list due testruns",             ],
-                [ "id=s@",    "list particular testruns",      ],
+                @opt_spec
                );
 }
 
 sub usage_desc {
         my $allowed_opts = join ' | ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns list [ " . $allowed_opts ." ]";
+        "artemis-testruns listprecondition [ " . $allowed_opts ." ]";
 }
 
 sub _allowed_opts {
@@ -43,11 +53,12 @@ sub _extract_bare_option_names {
 
 sub validate_args {
         my ($self, $opt, $args) = @_;
-
-#         print "opt  = ", Dumper($opt);
-#         print "args = ", Dumper($args);
-
-        my $allowed_opts_re = join '|', _extract_bare_option_names();
+        my @allowed_opts;
+        foreach my $key (keys %$options) {
+                push @allowed_opts, $key if  $options->{$key}->{needed};
+        }
+        
+        my $allowed_opts_re = join '|', @allowed_opts;
 
         return 1 if grep /$allowed_opts_re/, keys %$opt;
         die $self->usage->text;
