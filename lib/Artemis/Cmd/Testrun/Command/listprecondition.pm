@@ -15,18 +15,27 @@ sub abstract {
         'List preconditions'
 }
 
+my $options = { "verbose"     => { text => "some more informational output" },
+                "id_only"     => { text => "only show ids of matching preconditions" },
+                "nonewlines"  => { text => "escape newlines in values to avoid multilines" },
+                "quotevalues" => { text => "put quotes around the values" },
+                "colnames"    => { text => "print out column names" },
+                "all"         => { text => "list all testruns", needed => 1 },
+                "lonely"      => { text => "neither a preprecondition nor assigned to a testrun", needed => 1 },
+                "primary"     => { text => "assigned to one or more testruns", needed => 1 },
+                "pre"         => { text => "only prepreconditions not assigned to a testrun", needed => 1 },
+                "id"          => { text => "list particular precondition", needed => 1, type => 'int'  },
+              };
+                
+
 sub opt_spec {
+        my @opt_spec;
+        foreach my $key (keys %$options) {
+                my $pushkey = defined $options->{$key}->{type} ? $key."=s@" : $key;
+                push @opt_spec, [$pushkey, $options->{$key}->{text}];
+        }
         return (
-                [ "verbose",         "some more informational output"                      ],
-                [ "id_only",         "only show ids of matching preconditions"             ],
-                [ "nonewlines",      "escape newlines in values to avoid multilines"       ],
-                [ "quotevalues",     "put quotes around the values"                        ],
-                [ "colnames",        "print out column names"                              ],
-                [ "all",             "list all testruns",                                  ],
-                [ "lonely",          "neither a preprecondition nor assigned to a testrun" ],
-                [ "primary",         "assigned to one or more testruns"                    ],
-                [ "pre",             "only prepreconditions not assigned to a testrun",    ],
-                [ "id=s@",           "list particular precondition",                       ],
+                @opt_spec
                );
 }
 
