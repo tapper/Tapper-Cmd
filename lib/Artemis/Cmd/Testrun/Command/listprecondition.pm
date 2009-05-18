@@ -54,11 +54,12 @@ sub _extract_bare_option_names {
 
 sub validate_args {
         my ($self, $opt, $args) = @_;
-
-#         print "opt  = ", Dumper($opt);
-#         print "args = ", Dumper($args);
-
-        my $allowed_opts_re = join '|', _extract_bare_option_names();
+        my @allowed_opts;
+        foreach my $key (keys %$options) {
+                push @allowed_opts, $key if  $options->{$key}->{needed};
+        }
+        
+        my $allowed_opts_re = join '|', @allowed_opts;
 
         return 1 if grep /$allowed_opts_re/, keys %$opt;
         die $self->usage->text;
