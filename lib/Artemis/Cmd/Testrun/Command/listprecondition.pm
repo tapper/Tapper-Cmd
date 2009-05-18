@@ -20,9 +20,10 @@ my $options = { "verbose"     => { text => "some more informational output" },
                 "nonewlines"  => { text => "escape newlines in values to avoid multilines" },
                 "quotevalues" => { text => "put quotes around the values" },
                 "colnames"    => { text => "print out column names" },
-                "all"         => { text => "list all testruns", needed => 1 },
+                "all"         => { text => "list all preconditions", needed => 1 },
                 "lonely"      => { text => "neither a preprecondition nor assigned to a testrun", needed => 1 },
                 "primary"     => { text => "assigned to one or more testruns", needed => 1 },
+                "testrun"     => { text => "assigned to given testrun id", needed => 1, type => 'int' },
                 "pre"         => { text => "only prepreconditions not assigned to a testrun", needed => 1 },
                 "id"          => { text => "list particular precondition", needed => 1, type => 'int'  },
               };
@@ -68,7 +69,36 @@ sub validate_args {
 sub run {
         my ($self, $opt, $args) = @_;
 
-        $self->$_ ($opt, $args) foreach grep /^all|lonely|primary|pre|id$/, keys %$opt;
+        $self->$_ ($opt, $args) foreach grep /^(all|lonely|primary|pre|id|testrun)$/, keys %$opt;
+}
+
+=head2 testrun
+
+Return all preconditions for a given testrun id.
+
+=cut
+
+sub testrun
+{ 
+        my ($self, $opt, $args) = @_;
+        print "All preconditions:\n" if $opt->{verbose};
+        print "| Id |\n------\n" if $opt->{id_only};
+        my @ids = @{ $opt->{testrun} };
+        $self->print_colnames($opt, $args);
+        
+        my $preconditions = model('TestrunDB')->resultset('TestrunPrecondition')->search({testrun_id => @ids}, { order_by => 'precondition_id' });
+        while (my $precond = $preconditions->next) {
+                if ($opt->{id_only}) {
+                        print "| ",join (", ",$precond->id)," |\n";
+                } else {
+                        my $precond_yaml = model('TestrunDB')->resultset('Precondition')->search({id => $precond->precondition_id});
+                        foreach my $yaml($precond_yaml->next) {
+                                print $yaml->to_string()."\n";
+                        }
+                }
+        }
+        
+
 }
 
 sub print_colnames
