@@ -22,7 +22,7 @@ use Moose;
 has macropreconds => ( is => "rw" );
 
 sub abstract {
-        'Create a new testrun'
+        'Create a new testrun based on existing one'
 }
 
 
@@ -40,7 +40,7 @@ sub opt_spec {
 sub usage_desc
 {
         my $allowed_opts = join ' ', map { '--'.$_ } _allowed_opts();
-        "artemis-testruns new --testrun=s [ --notes=s | --owner=s | --hostname=s | --earliest=s ]*";
+        "artemis-testruns rerun --testrun=s [ --notes=s | --owner=s | --hostname=s | --earliest=s ]*";
 }
 
 sub _allowed_opts
@@ -77,7 +77,6 @@ sub validate_args
                 say "Missing argument --testrun";
                 die $self->usage->text;
         }
-        
         return 1;
 }
 
@@ -96,15 +95,12 @@ sub new_runtest
         my ($self, $opt, $args) = @_;
 
         #print "opt  = ", Dumper($opt);
-        my $id = $opt->{testrun};
-        my $date         = $opt->{earliest}     || DateTime->now;
-        my $hardwaredb_systems_id;
-        $hardwaredb_systems_id = Artemis::Cmd::Testrun::_get_systems_id_for_hostname( $opt->{hostname} ) if $opt->{hostname};
-        my $owner_user_id;
-        $owner_user_id = Artemis::Cmd::Testrun::_get_user_id_for_login( $opt->{owner} ) if $opt->{owner};
-        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
-
-        my $testrun_new = model('TestrunDB')->resultset('Testrun')->new
+        my $id                    = $opt->{testrun};
+        my $date                  = $opt->{earliest} || DateTime->now;
+        my $testrun               = model('TestrunDB')->resultset('Testrun')->find( $id );
+        my $owner_user_id         = Artemis::Cmd::Testrun::_get_user_id_for_login(       $opt->{owner}    ) if $opt->{owner};
+        my $hardwaredb_systems_id = Artemis::Cmd::Testrun::_get_systems_id_for_hostname( $opt->{hostname} ) if $opt->{hostname};
+        my $testrun_new           = model('TestrunDB')->resultset('Testrun')->new
             ({
               notes                 => $opt->{notes} || $testrun->notes,
               shortname             => $testrun->shortname,
@@ -127,13 +123,10 @@ sub new_runtest
                 $precond_new->insert;
         }
 
-
         print $opt->{verbose} ? $testrun_new->to_string : $testrun_new->id, "\n";
 }
 
 
-
-
-# perl -Ilib bin/artemis-testrun new --topic=Software --precondition=14  --hostname=iring --owner=ss5
+# perl -Ilib bin/artemis-testrun rerun --testrun=1234
 
 1;
