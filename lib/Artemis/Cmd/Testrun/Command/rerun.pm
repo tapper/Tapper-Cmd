@@ -110,8 +110,9 @@ sub new_runtest
               shortname             => $testrun->shortname,
               topic_name            => $testrun->topic_name,
               starttime_earliest    => $date,
+              test_program          => '',
               owner_user_id         => $owner_user_id || $testrun->owner_user_id,
-              hardwaredb_systems_id => $hardwaredb_systems_id || $testrun->{hardwaredb_systems_id},
+              hardwaredb_systems_id => $hardwaredb_systems_id || $testrun->hardwaredb_systems_id,
              });
 
         $testrun_new->insert;
