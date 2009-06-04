@@ -26,21 +26,36 @@ sub abstract {
 }
 
 
+my $options = { "verbose"          => { text => "some more informational output" },
+                "notes"            => { text => "TEXT; notes", type => 'string' },
+                "shortname"        => { text => "TEXT; shortname", type => 'string' },
+                "topic"            => { text => "STRING, default=Misc; one of: Kernel, Xen, KVM, Hardware, Distribution, Benchmark, Software, Misc", type => 'string' },
+                "hostname"         => { text => "INT; the hostname on which the test should be run", type => 'string' },
+                "owner"            => { text => "STRING, default=\$USER; user login name", type => 'string' },
+                "wait_after_tests" => { text => "BOOL, default=0; wait after testrun for human investigation", type => 'string' },
+                "earliest"         => { text => "STRING, default=now; don't start testrun before this time (format: YYYY-MM-DD hh:mm:ss or now)", type => 'string' },
+                "precondition"     => { text => "assigned precondition ids", needed => 1, type => 'manystring'  },
+                "macroprecond"     => { text => "STRING, use this macro precondition file", needed => 1 , type => 'string' },
+                "D"                => { text => "Define a key=value pair used in macro preconditions", type => 'keyvalue' },
+                };
+
 sub opt_spec {
+        my @opt_spec;
+        foreach my $key (keys %$options) {
+                my $pushkey;
+                given($options->{$key}->{type}){
+                        when ("string")     {$pushkey = $key ."=s";}
+                        when ("manystring") {$pushkey = $key ."=s@";}
+                        when ("keyvalue")   {$pushkey = $key ."=s%";}
+                        default             {$pushkey = $key; }
+                }
+                push @opt_spec, [$pushkey, $options->{$key}->{text}];
+        }
         return (
-                [ "verbose",            "some more informational output"                                                                    ],
-                [ "notes=s",            "TEXT; notes"                                                                                       ],
-                [ "shortname=s",        "TEXT; shortname"                                                                                   ],
-                [ "topic=s",            "STRING, default=Misc; one of: Kernel, Xen, KVM, Hardware, Distribution, Benchmark, Software, Misc" ],
-                [ "hostname=s",         "INT; the hostname on which the test should be run"                                                 ],
-                [ "owner=s",            "STRING, default=\$USER; user login name"                                                           ],
-                [ "wait_after_tests=s", "BOOL, default=0; wait after testrun for human investigation"                                       ],
-                [ "earliest=s",         "STRING, default=now; don't start testrun before this time (format: YYYY-MM-DD hh:mm:ss or now)"    ],
-                [ "precondition=s@",    "assigned precondition ids"                                                                         ],
-                [ "macroprecond=s",     "STRING, use this macro precondition file"                                                          ],
-                [ "D=s%",               "Define a key=value pair used in macro preconditions"                                               ],
+                @opt_spec
                );
 }
+
 
 sub usage_desc
 {
@@ -89,12 +104,20 @@ sub validate_args
         my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
         say STDERR "Topic must match $topic_re." unless $topic_ok;
 
-        # -- precond vs. macro precond --
-        my $precond_ok = 1;
-        if ($opt->{macroprecond} and $opt->{precondition}) {
-                say STDERR "Do not mix --precondition with --macroprecond";
-                $precond_ok = 0;
+        my @needed_opts;
+        my $precondition_ok;
+        foreach my $key (keys %$options) {
+                push @needed_opts, $key if  $options->{$key}->{needed};
         }
+        
+        my $needed_opts_re = join '|', @needed_opts;
+
+        if (grep /$needed_opts_re/, keys %$opt) {
+                $precondition_ok = 1;
+        } else {
+                say STDERR "At least one of ",join ", ",@needed_opts," is required.";
+        }
+
 
         $self->convert_format_datetime_natural;
 
@@ -117,7 +140,7 @@ sub validate_args
                 $self->{macropreconds} = join '',@precond_lines;
         }
 
-        return 1 if $opt->{hostname} && $topic_ok && $precond_ok && $macrovalues_ok;
+        return 1 if $opt->{hostname} and $topic_ok and $precondition_ok and $macrovalues_ok;
 
         die $self->usage->text;
 }
