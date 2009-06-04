@@ -13,7 +13,7 @@ use Artemis::Schema::TestTools;
 use Artemis::Model 'model';
 use Test::Fixture::DBIC::Schema;
 
-plan tests => 28;
+plan tests => 29;
 
 # --------------------------------------------------
 
@@ -97,7 +97,7 @@ is($precond->precondition, 'not_affe_again:', 'update precond / yaml');
 
 # --------------------------------------------------
 
-my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --hostname=iring`;
+my $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --topic=Software --hostname=iring --precondition=1`;
 chomp $testrun_id;
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
@@ -142,3 +142,6 @@ $testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --macroprecond=t/
 chomp $testrun_id;
 like($testrun_id, qr/Expected macro field 'kernel_version' missing./, "missing mandatory field recognized");
 
+$testrun_id = `/usr/bin/env perl -Ilib bin/artemis-testrun new --hostname=iring 2>&1`;
+chomp $testrun_id;
+like($testrun_id, qr/At least one of .+ is required./, "Prevented testrun without precondition");
