@@ -15,14 +15,14 @@ sub abstract {
         'List testruns'
 }
 
-my $options = { "verbose"     => { text => "some more informational output" },
+my $options = { "verbose"  => { text => "some more informational output" },
                 "colnames" => { text => "print out column names" },
-                "all" => { text => "list all testruns", needed => 1 },
+                "all"      => { text => "list all testruns", needed => 1 },
                 "finished" => { text => "list finished testruns", needed => 1 },
-                "running" => { text => "list running testruns", needed => 1 },
-                "queued" => { text => "list queued testruns", needed => 1 },
-                "due" => { text => "list due testruns", needed => 1 },
-                "id" => { text => "list particular testruns", type => 'int', needed => 1 },
+                "running"  => { text => "list running testruns", needed => 1 },
+                "queued"   => { text => "list queued testruns", needed => 1 },
+                "due"      => { text => "list due testruns", needed => 1 },
+                "id"       => { text => "list particular testruns", type => 'int', needed => 1 },
 
               };
                 
