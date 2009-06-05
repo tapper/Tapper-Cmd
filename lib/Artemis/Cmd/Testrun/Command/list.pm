@@ -57,6 +57,13 @@ sub validate_args {
         foreach my $key (keys %$options) {
                 push @allowed_opts, $key if  $options->{$key}->{needed};
         }
+
+        
+        my $msg = "Unknown option";
+        $msg   .= ($args and $#{$args} >=1) ? 's' : '';
+        $msg   .= ": ";
+        say STDERR $msg, join(', ',@$args) if ($args and @$args);
+        
         
         my $allowed_opts_re = join '|', @allowed_opts;
 
