@@ -43,6 +43,11 @@ sub validate_args {
 
 #         print "opt  = ", Dumper($opt);
 #         print "args = ", Dumper($args);
+        
+        my $msg = "Unknown option";
+        $msg   .= ($args and $#{$args} >=1) ? 's' : '';
+        $msg   .= ": ";
+        say STDERR $msg, join(', ',@$args) if ($args and @$args);
 
         say "Missing argument --id"                   unless $opt->{id};
         #say "Missing argument --shortname"            unless $opt->{shortname};
