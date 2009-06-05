@@ -103,6 +103,12 @@ sub validate_args
         my $topic_re = '('.join('|', keys %Artemis::Schema::TestrunDB::Result::Topic::topic_description).')';
         my $topic_ok = (!$topic || ($topic =~ /^$topic_re$/)) ? 1 : 0;
         say STDERR "Topic must match $topic_re." unless $topic_ok;
+        
+        my $msg = "Unknown option";
+        $msg   .= ($args and $#{$args} >=1) ? 's' : '';
+        $msg   .= ": ";
+        say STDERR $msg, join(', ',@$args) if ($args and @$args);
+        
 
         my @needed_opts;
         my $precondition_ok;
