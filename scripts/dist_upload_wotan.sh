@@ -1,6 +1,16 @@
 #! /bin/bash
 
+EXECDIR=$(dirname $0)
 DISTFILES='Artemis*-*.*.tar.gz '
+$EXECDIR/artemis_version_increment.pl $EXECDIR/../lib/Artemis/Cmd.pm
+cd $EXECDIR/..
+
+rm MANIFEST
+./Build manifest || exit -1
+
+perl Build.PL || exit -1
+./Build dist || exit -1
+
 
 # -----------------------------------------------------------------
 # It is important to not overwrite existing files.
@@ -16,4 +26,4 @@ rsync -vv --progress --ignore-existing ${DISTFILES} artemis@wotan:/home/artemis/
 echo ""
 echo '----- re-index -------------------------------------------------'
 ssh artemis@wotan /home/artemis/perl510/bin/cpansite -vl index /home/artemis/CPANSITE/CPAN/
-
+ssh artemis@wotan 'echo "/home/artemis/perl510/bin/cpansite install Artemis::Cmd" | bash -l'
