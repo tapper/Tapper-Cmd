@@ -43,6 +43,13 @@ sub validate_args
 {
         my ($self, $opt, $args) = @_;
 
+        
+        my $msg = "Unknown option";
+        $msg   .= ($args and $#{$args} >=1) ? 's' : '';
+        $msg   .= ": ";
+        say STDERR $msg, join(', ',@$args) if ($args and @$args);
+        
+
         my $precond_ok = 1;
         if (not $opt->{condition} || $opt->{condition_file}) {
                 say "Missing --condition or --condition_file";
