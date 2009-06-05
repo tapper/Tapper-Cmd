@@ -39,6 +39,11 @@ sub validate_args {
 #         print "opt  = ", Dumper($opt);
 #         print "args = ", Dumper($args);
 
+        my $msg = "Unknown option";
+        $msg   .= ($args and $#{$args} >=1) ? 's' : '';
+        $msg   .= ": ";
+        say STDERR $msg, join(', ',@$args) if ($args and @$args);
+        
         my $allowed_opts_re = join '|', _extract_bare_option_names();
 
         return 1 if grep /$allowed_opts_re/, keys %$opt;
