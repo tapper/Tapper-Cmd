@@ -55,7 +55,8 @@ useful for macro preconditions.
                 my @precond_ids;
 
                 foreach my $precond_data (@precond_list) {
-                        next if not (ref($precond_data) eq 'HASH' and $precond_data->{precondition_type});
+                        # (XXX) decide how to handle empty preconditions
+                        next if not (ref($precond_data) eq 'HASH');
                         my $shortname    = $precond_data->{shortname} || '';
                         my $timeout      = $precond_data->{timeout};
                         my $precondition = model('TestrunDB')->resultset('Precondition')->new
