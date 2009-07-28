@@ -1,0 +1,11 @@
+*.pyc
+Session.vim
+rss2msg.etag
+*swp
+*gz
+*bz2
+*tgz
+python/opt/test_suites/*
+testsuite.tar
+MANIFEST
+build_wrappers.sh
