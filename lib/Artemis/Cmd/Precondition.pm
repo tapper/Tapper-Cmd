@@ -19,7 +19,7 @@ testruns or preconditions in the database. This module handles the precondition 
 
 =head1 FUNCTIONS
 
-=cut 
+=cut
 
 class Artemis::Cmd::Precondition extends Artemis::Cmd {
         use Artemis::Model 'model';
@@ -35,20 +35,20 @@ precondition (i.e. those with a precondition_type) will be added. This is
 useful for macro preconditions.
 
 
-@param string - preconditions in YAML format. 
+@param string - preconditions in YAML format.
 
 @return success - precondition id
 @return error   - undef
 
 
 =cut
-        
+
         method add($yaml)
         {
                 $yaml .= "\n" unless $yaml =~ /\n$/;
                 my $yaml_error = $self->_yaml_ok($yaml);
                 die Artemis::Exception::Param->new($yaml_error) if $yaml_error;
-                
+
 
 
                 my @precond_list = Load($yaml);
@@ -71,6 +71,37 @@ useful for macro preconditions.
                 return @precond_ids;
         }
 
+=head update
+
+Update a given precondition.
+
+@param int    - precondition id
+@param string - precondition as it should be
+
+@return success - precondition id
+@return error   - error string
+
+=cut
+
+        method update($id, $condition)
+        {
+                my $yaml_error = $self->_yaml_ok($condition);
+                die Artemis::Exception::Param->new($yaml_error) if $yaml_error;
+
+                my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+                die Artemis::Exception::Param->new("Precondition with id $id not found") if not $precondition;
+
+                my $cond_hash = Load($condition);
+
+                $precondition->shortname( $cond_hash->{shortname} ) if $cond_hash->{shortname};
+                $precondition->precondition( $condition );
+                $precondition->timeout( $cond_hash->{timeout} ) if $cond_hash->{timeout};
+                $precondition->update;
+
+
+                return $precondition->id;
+        }
+
 
 =head2 _yaml_ok
 
@@ -81,9 +112,9 @@ Check whether given string is valid yaml.
 @return success - undef
 @return error   - error string
 
-=cut 
+=cut
 
-        method _yaml_ok($condition) 
+        method _yaml_ok($condition)
         {
                 my @res;
                 eval {
