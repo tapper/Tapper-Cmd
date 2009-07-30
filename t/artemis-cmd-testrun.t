@@ -4,7 +4,10 @@ use Artemis::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
-use Test::More tests => 5;
+use warnings;
+use strict;
+
+use Test::More tests => 7;
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -51,3 +54,18 @@ my $retval = {hostname    => $testrun->hardwaredb_systems_id,
 $testrun_args->{hostname} =  15;
 $testrun_args->{owner}    =  12;
 is_deeply($retval, $testrun_args, 'Values of added test run');
+
+
+my $testrun_id_new = $cmd->update($testrun_id, {hostname => 'iring'});
+is($testrun_id_new, $testrun_id, 'Updated testrun without creating a new one');
+
+$testrun_args->{hostname} = 12;
+$testrun = model('TestrunDB')->resultset('Testrun')->search({id => $testrun_id})->first;
+$retval = {hostname    => $testrun->hardwaredb_systems_id,
+           owner       => $testrun->owner_user_id,
+           notes       => $testrun->notes,
+           shortname   => $testrun->shortname,
+           topic       => $testrun->topic_name,
+           earliest    => $testrun->starttime_earliest,
+          };
+is_deeply($retval, $testrun_args, 'Values of updated test run');
