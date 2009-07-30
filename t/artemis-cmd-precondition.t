@@ -8,7 +8,7 @@ use Test::Fixture::DBIC::Schema;
 use 5.010;
 
 use TryCatch;
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 use Artemis::Cmd::Precondition;
 use Artemis::Model 'model';
@@ -61,3 +61,8 @@ is_deeply(\@precond_hashes, [{
                               'filename' => '/bin/gen_initrd.sh',
                               'precondition_type' => 'exec'
                              }], 'Assigning preconditions to testrun');
+
+my $retval = $precondition->del($precond_ids[0]);
+is($retval, 0, 'Delete precondition');
+my $precond_search = model('TestrunDB')->resultset('Precondition')->find($precond_ids[0]);
+is($precond_search, undef, 'Delete correct precondition');
