@@ -20,9 +20,9 @@ testruns or preconditions in the database. This module handles the testrun part.
 
 =head2 add
 
-Add a new testrun to database. 
+Add a new testrun to database.
 
-=cut 
+=cut
 
 class Artemis::Cmd::Testrun extends Artemis::Cmd {
         use Artemis::Model 'model';
@@ -44,22 +44,21 @@ Add a new testrun. It expects a has reference with the following options:
 @return success - testrun id
 @return error   - undef
 
-
 =cut
-        
+
         method add($args)
         {
-                
+
                 my $notes        = $args->{notes}        || '';
                 my $shortname    = $args->{shortname}    || '';
                 my $topic_name   = $args->{topic}        || 'Misc';
                 my $date         = $args->{earliest}     || DateTime->now;
                 my $hostname     = $args->{hostname};
                 my $owner        = $args->{owner}        || $ENV{USER};
-                
+
                 my $hardwaredb_systems_id = $self->_get_systems_id_for_hostname( $hostname );
                 my $owner_user_id         = $self->_get_user_id_for_login( $owner );
-                
+
                 my $testrun = model('TestrunDB')->resultset('Testrun')->new
                   ({
                     notes                 => $notes,
@@ -73,16 +72,52 @@ Add a new testrun. It expects a has reference with the following options:
                 $self->assign_preconditions($args, $testrun);
                 return $testrun->id;
         }
-          
-          
+
+
+=head2 update
+
+Changes values of an existing testrun. It expects a has reference with the
+following options (at least one should be given):
+* hostname  - string
+* notes     - string
+* shortname - string
+* topic     - string
+* date      - DateTime
+* owner     - string
+
+@param int      - testrun id
+@param hash ref - options for new testrun
+
+@return success - testrun id
+@return error   - undef
+
+=cut
+
+        method update($id, $args)
+        {
+                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+
+                $args->{hardwaredb_systems_id} = $self->_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
+                $args->{owner_user_id}         = $self->_get_user_id_for_login( $args->{owner} ) if $args->{owner};
+
+                $testrun->notes                 ( $args->{notes}                 ) if $args->{notes};
+                $testrun->shortname             ( $args->{shortname}             ) if $args->{shortname};
+                $testrun->topic_name            ( $args->{topic}                 ) if $args->{topic};
+                $testrun->starttime_earliest    ( $args->{date}                  ) if $args->{date};
+                $testrun->owner_user_id         ( $args->{owner_user_id}         ) if $args->{owner_user_id};
+                $testrun->hardwaredb_systems_id ( $args->{hardwaredb_systems_id} ) if $args->{hardwaredb_systems_id};
+                $testrun->update;
+                return $testrun->id;
+        }
+
         method _get_systems_id_for_hostname($name)
         {
                 return model('HardwareDB')->resultset('Systems')->search({systemname => $name, active => 1})->first->lid
         }
-        
+
         method _get_user_id_for_login($login)
         {
-                
+
                 my $user = model('TestrunDB')->resultset('User')->search({ login => $login })->first;
                 my $user_id = $user ? $user->id : 0;
                 return $user_id;
