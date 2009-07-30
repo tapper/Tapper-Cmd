@@ -110,6 +110,26 @@ following options (at least one should be given):
                 return $testrun->id;
         }
 
+=head2 del
+
+Delete a testrun with given id. Its named del instead of delete to
+prevent confusion with the buildin delete function.
+
+@param int - testrun id
+
+@return success - 0
+@return error   - error string
+
+=cut
+
+        method del($id)
+        {
+                my $precondition = model('TestrunDB')->resultset('Testrun')->find($id);
+                $precondition->delete();
+                return 0;
+        }
+
+
         method _get_systems_id_for_hostname($name)
         {
                 return model('HardwareDB')->resultset('Systems')->search({systemname => $name, active => 1})->first->lid
