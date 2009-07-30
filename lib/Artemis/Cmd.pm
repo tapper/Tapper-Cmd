@@ -68,6 +68,7 @@ ids.
                         $testrun_precondition->insert;
                         $succession++;
                 }
+                return 0;
         }
 }
 
