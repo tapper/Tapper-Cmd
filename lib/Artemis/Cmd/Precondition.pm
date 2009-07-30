@@ -40,6 +40,7 @@ useful for macro preconditions.
 @return success - precondition id
 @return error   - undef
 
+@exception Artemis::Exception::Param
 
 =cut
 
@@ -71,7 +72,7 @@ useful for macro preconditions.
                 return @precond_ids;
         }
 
-=head update
+=head2 update
 
 Update a given precondition.
 
@@ -80,6 +81,9 @@ Update a given precondition.
 
 @return success - precondition id
 @return error   - error string
+
+@exception Artemis::Exception::Param
+
 
 =cut
 
@@ -100,6 +104,26 @@ Update a given precondition.
 
 
                 return $precondition->id;
+        }
+
+
+=head2 del
+
+Delete a precondition with given id. Its named del instead of delete to
+prevent confusion with the buildin delete function.
+
+@param int - precondition id
+
+@return success - 0
+@return error   - error string
+
+=cut
+
+        method del($id)
+        {
+                my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+                $precondition->delete();
+                return 0;
         }
 
 
