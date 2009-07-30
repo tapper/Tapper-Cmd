@@ -17,13 +17,13 @@ construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardware
 # -----------------------------------------------------------------------------------------------------------------
 
 
-my $testrun = Artemis::Cmd::Testrun->new();
-isa_ok($testrun, 'Artemis::Cmd::Testrun', '$testrun');
+my $cmd = Artemis::Cmd::Testrun->new();
+isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
 
-my $hardwaredb_systems_id = $testrun->_get_systems_id_for_hostname('bascha');
+my $hardwaredb_systems_id = $cmd->_get_systems_id_for_hostname('bascha');
 is($hardwaredb_systems_id, 15, 'get system id for hostname');
 
-my $user_id = $testrun->_get_user_id_for_login('sschwigo');
+my $user_id = $cmd->_get_user_id_for_login('sschwigo');
 is($user_id, 12, 'get user id for login');
 
 my $testrun_args = {hostname  => 'bascha',
@@ -38,10 +38,10 @@ my $testrun_args = {hostname  => 'bascha',
                                                 second => 47),
                     owner      => 'sschwigo'};
 
-my $testrun_id = $testrun->add($testrun_args);
+my $testrun_id = $cmd->add($testrun_args);
 ok(defined($testrun_id), 'Adding testrun');
-$testrun = model('TestrunDB')->resultset('Testrun')->search({id => $testrun_id})->first;
-my $retval = {hostname    => $testrun->hardwaredb_systems_id, 
+my $testrun = model('TestrunDB')->resultset('Testrun')->search({id => $testrun_id})->first;
+my $retval = {hostname    => $testrun->hardwaredb_systems_id,
               owner       => $testrun->owner_user_id,
               notes       => $testrun->notes,
               shortname   => $testrun->shortname,
