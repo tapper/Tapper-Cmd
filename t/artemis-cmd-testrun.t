@@ -7,7 +7,7 @@ use 5.010;
 use warnings;
 use strict;
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -69,3 +69,8 @@ $retval = {hostname    => $testrun->hardwaredb_systems_id,
            earliest    => $testrun->starttime_earliest,
           };
 is_deeply($retval, $testrun_args, 'Values of updated test run');
+
+$retval = $cmd->del($testrun_id);
+is($retval, 0, 'Delete testrun');
+$testrun = model('TestrunDB')->resultset('Precondition')->find($testrun_id);
+is($testrun, undef, 'Delete correct testrun');
