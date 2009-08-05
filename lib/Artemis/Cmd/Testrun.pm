@@ -26,6 +26,7 @@ Add a new testrun to database.
 
 class Artemis::Cmd::Testrun extends Artemis::Cmd {
         use Artemis::Model 'model';
+        use DateTime;
 
 =head2 add
 
@@ -124,11 +125,50 @@ prevent confusion with the buildin delete function.
 
         method del($id)
         {
-                my $precondition = model('TestrunDB')->resultset('Testrun')->find($id);
-                $precondition->delete();
+                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+                $testrun->delete();
                 return 0;
         }
 
+=head2 rerun
+
+Insert a new testrun into the database. All values not given are taken from
+the existing testrun given as first argument.
+
+@param int      - id of original testrun
+@param hash ref - different values for new testrun
+
+@return success - testrun id
+@return error   - error string
+
+=cut
+
+        method rerun($id, $args?)
+        {
+                my $testrun               = model('TestrunDB')->resultset('Testrun')->find( $id );
+                my $owner_user_id         = Artemis::CLI::Testrun::_get_user_id_for_login(       $args->{owner}    ) if $args->{owner};
+                my $hardwaredb_systems_id = Artemis::CLI::Testrun::_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
+                my $testrun_new           = model('TestrunDB')->resultset('Testrun')->new
+                  ({
+                    notes                 => $args->{notes}         || $testrun->notes,
+                    shortname             => $args->{shortname}     || $testrun->shortname,
+                    topic_name            => $args->{topic_name}    || $testrun->topic_name,
+                    starttime_earliest    => $args->{date}          || DateTime->now,
+                    test_program          => '',
+                    owner_user_id         => $owner_user_id         || $testrun->owner_user_id,
+                    hardwaredb_systems_id => $hardwaredb_systems_id || $testrun->hardwaredb_systems_id,
+                   });
+
+                $testrun_new->insert;
+
+                my $preconditions = model('TestrunDB')->resultset('TestrunPrecondition')->search({testrun_id => $testrun->id}, { order_by => 'precondition_id' });
+                my @preconditions;
+                while (my $precond = $preconditions->next) {
+                        push @preconditions, $precond->id;
+                }
+                $self->assign_preconditions($testrun_new->id, @preconditions);
+                return $testrun_new->id;
+        }
 
         method _get_systems_id_for_hostname($name)
         {
