@@ -7,7 +7,7 @@ use 5.010;
 use warnings;
 use strict;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -115,9 +115,12 @@ $testrun_args = {hostname    => $testrun_new->hardwaredb_systems_id,
                  shortname   => $testrun_new->shortname,
                  topic       => $testrun_new->topic_name,
           };
-
-
 is_deeply($retval, $testrun_args, 'Values of rerun test run');
+
+my @precond_array     = $testrun_new->ordered_preconditions;
+my @precond_array_old = $testrun->ordered_preconditions;
+is_deeply(\@precond_array, \@precond_array_old, 'Rerun testrun with same preconditions');
+
 
 
 #######################################################
@@ -128,5 +131,5 @@ is_deeply($retval, $testrun_args, 'Values of rerun test run');
 
 $retval = $cmd->del($testrun_id);
 is($retval, 0, 'Delete testrun');
-$testrun = model('TestrunDB')->resultset('Precondition')->find($testrun_id);
+$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
 is($testrun, undef, 'Delete correct testrun');
