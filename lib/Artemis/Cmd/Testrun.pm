@@ -70,7 +70,6 @@ Add a new testrun. It expects a has reference with the following options:
                     hardwaredb_systems_id => $hardwaredb_systems_id,
                    });
                 $testrun->insert;
-                $self->assign_preconditions($args, $testrun);
                 return $testrun->id;
         }
 
@@ -153,7 +152,7 @@ the existing testrun given as first argument.
                     notes                 => $args->{notes}         || $testrun->notes,
                     shortname             => $args->{shortname}     || $testrun->shortname,
                     topic_name            => $args->{topic_name}    || $testrun->topic_name,
-                    starttime_earliest    => $args->{date}          || DateTime->now,
+                    starttime_earliest    => $args->{earliest}      || DateTime->now,
                     test_program          => '',
                     owner_user_id         => $owner_user_id         || $testrun->owner_user_id,
                     hardwaredb_systems_id => $hardwaredb_systems_id || $testrun->hardwaredb_systems_id,
@@ -161,7 +160,7 @@ the existing testrun given as first argument.
 
                 $testrun_new->insert;
 
-                my $preconditions = model('TestrunDB')->resultset('TestrunPrecondition')->search({testrun_id => $testrun->id}, { order_by => 'precondition_id' });
+                my $preconditions = $testrun->preconditions->search({}, {order_by => 'succession'});
                 my @preconditions;
                 while (my $precond = $preconditions->next) {
                         push @preconditions, $precond->id;
