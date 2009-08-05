@@ -7,7 +7,7 @@ use 5.010;
 use warnings;
 use strict;
 
-use Test::More tests => 9;
+use Test::More tests => 11;
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -23,11 +23,25 @@ construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardware
 my $cmd = Artemis::Cmd::Testrun->new();
 isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
 
+
+#######################################################
+#
+#   check support methods
+#
+#######################################################
+
 my $hardwaredb_systems_id = $cmd->_get_systems_id_for_hostname('bascha');
 is($hardwaredb_systems_id, 15, 'get system id for hostname');
 
 my $user_id = $cmd->_get_user_id_for_login('sschwigo');
 is($user_id, 12, 'get user id for login');
+
+
+#######################################################
+#
+#   check add method
+#
+#######################################################
 
 my $testrun_args = {hostname  => 'bascha',
                     notes     => 'foo',
@@ -56,6 +70,12 @@ $testrun_args->{owner}    =  12;
 is_deeply($retval, $testrun_args, 'Values of added test run');
 
 
+#######################################################
+#
+#   check update method
+#
+#######################################################
+
 my $testrun_id_new = $cmd->update($testrun_id, {hostname => 'iring'});
 is($testrun_id_new, $testrun_id, 'Updated testrun without creating a new one');
 
@@ -69,6 +89,42 @@ $retval = {hostname    => $testrun->hardwaredb_systems_id,
            earliest    => $testrun->starttime_earliest,
           };
 is_deeply($retval, $testrun_args, 'Values of updated test run');
+
+
+#######################################################
+#
+#   check rerun method
+#
+#######################################################
+
+$testrun_id_new = $cmd->rerun($testrun_id);
+isnt($testrun_id_new, $testrun_id, 'Rerun testrun with new id');
+
+$testrun        = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+my $testrun_new = model('TestrunDB')->resultset('Testrun')->find($testrun_id_new);
+
+$retval = {hostname    => $testrun->hardwaredb_systems_id,
+           owner       => $testrun->owner_user_id,
+           notes       => $testrun->notes,
+           shortname   => $testrun->shortname,
+           topic       => $testrun->topic_name,
+          };
+$testrun_args = {hostname    => $testrun_new->hardwaredb_systems_id,
+                 owner       => $testrun_new->owner_user_id,
+                 notes       => $testrun_new->notes,
+                 shortname   => $testrun_new->shortname,
+                 topic       => $testrun_new->topic_name,
+          };
+
+
+is_deeply($retval, $testrun_args, 'Values of rerun test run');
+
+
+#######################################################
+#
+#   check del method
+#
+#######################################################
 
 $retval = $cmd->del($testrun_id);
 is($retval, 0, 'Delete testrun');
