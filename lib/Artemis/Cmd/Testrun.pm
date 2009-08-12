@@ -30,14 +30,21 @@ class Artemis::Cmd::Testrun extends Artemis::Cmd {
 
 =head2 add
 
-Add a new testrun. It expects a has reference with the following options:
+Add a new testrun. Hostname/hardwaredb_systems_id and owner/owner_user_id
+allow to specify the associated value as id or string which will be converted
+to the associated id. If both values are given the id is used and the string
+is ignored. The function expects a hash reference with the following options:
 -- required --
+* hardwaredb_systems_id - int
+or
 * hostname - string
 -- optional --
 * notes - string
 * shortname - string
 * topic - string
 * date - DateTime
+* owner_user_id - int
+or
 * owner - string
 
 @param hash ref - options for new testrun
@@ -47,8 +54,7 @@ Add a new testrun. It expects a has reference with the following options:
 
 =cut
 
-        method add($args)
-        {
+        method add($args) {
 
                 my $notes        = $args->{notes}        || '';
                 my $shortname    = $args->{shortname}    || '';
@@ -57,8 +63,8 @@ Add a new testrun. It expects a has reference with the following options:
                 my $hostname     = $args->{hostname};
                 my $owner        = $args->{owner}        || $ENV{USER};
 
-                my $hardwaredb_systems_id = $self->_get_systems_id_for_hostname( $hostname );
-                my $owner_user_id         = $self->_get_user_id_for_login( $owner );
+                my $hardwaredb_systems_id = $args->{hardwaredb_systems_id} || $self->_get_systems_id_for_hostname( $hostname );
+                my $owner_user_id         = $args->{owner_user_id}         || $self->_get_user_id_for_login( $owner );
 
                 my $testrun = model('TestrunDB')->resultset('Testrun')->new
                   ({
@@ -76,13 +82,21 @@ Add a new testrun. It expects a has reference with the following options:
 
 =head2 update
 
-Changes values of an existing testrun. It expects a has reference with the
-following options (at least one should be given):
+Changes values of an existing testrun. Hostname/hardwaredb_systems_id and
+owner/owner_user_id allow to specify the associated value as id or string
+which will be converted to the associated id. If both values are given the id
+is used and the string is ignored. The function expects a hash reference with
+the following options (at least one should be given):
+
+* hardwaredb_systems_id - int
+or
 * hostname  - string
 * notes     - string
 * shortname - string
 * topic     - string
 * date      - DateTime
+* owner_user_id - int
+or
 * owner     - string
 
 @param int      - testrun id
@@ -93,12 +107,11 @@ following options (at least one should be given):
 
 =cut
 
-        method update($id, $args)
-        {
+        method update($id, $args) {
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-                $args->{hardwaredb_systems_id} = $self->_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
-                $args->{owner_user_id}         = $self->_get_user_id_for_login( $args->{owner} ) if $args->{owner};
+                $args->{hardwaredb_systems_id} = $args->{hardwaredb_systems_id} || $self->_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
+                $args->{owner_user_id}         = $args->{owner_user_id}         || $self->_get_user_id_for_login( $args->{owner} ) if $args->{owner};
 
                 $testrun->notes                 ( $args->{notes}                 ) if $args->{notes};
                 $testrun->shortname             ( $args->{shortname}             ) if $args->{shortname};
@@ -122,8 +135,7 @@ prevent confusion with the buildin delete function.
 
 =cut
 
-        method del($id)
-        {
+        method del($id) {
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
                 $testrun->delete();
                 return 0;
@@ -142,11 +154,10 @@ the existing testrun given as first argument.
 
 =cut
 
-        method rerun($id, $args?)
-        {
+        method rerun($id, $args?) {
                 my $testrun               = model('TestrunDB')->resultset('Testrun')->find( $id );
-                my $owner_user_id         = Artemis::CLI::Testrun::_get_user_id_for_login(       $args->{owner}    ) if $args->{owner};
-                my $hardwaredb_systems_id = Artemis::CLI::Testrun::_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
+                my $owner_user_id         = $args->{hardwaredb_systems_id} || $args->{owner}    ? Artemis::CLI::Testrun::_get_user_id_for_login(       $args->{owner}    ) : undef;
+                my $hardwaredb_systems_id = $args->{owner_user_id}         || $args->{hostname} ? Artemis::CLI::Testrun::_get_systems_id_for_hostname( $args->{hostname} ) : undef;
                 my $testrun_new           = model('TestrunDB')->resultset('Testrun')->new
                   ({
                     notes                 => $args->{notes}         || $testrun->notes,
@@ -169,13 +180,11 @@ the existing testrun given as first argument.
                 return $testrun_new->id;
         }
 
-        method _get_systems_id_for_hostname($name)
-        {
+        method _get_systems_id_for_hostname($name) {
                 return model('HardwareDB')->resultset('Systems')->search({systemname => $name, active => 1})->first->lid
         }
 
-        method _get_user_id_for_login($login)
-        {
+        method _get_user_id_for_login($login) {
 
                 my $user = model('TestrunDB')->resultset('User')->search({ login => $login })->first;
                 my $user_id = $user ? $user->id : 0;
