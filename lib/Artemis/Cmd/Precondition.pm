@@ -37,12 +37,13 @@ useful for macro preconditions.
 
 @param string - preconditions in YAML format.
 
-@return success - precondition id
+@return success - list of precondition ids
 @return error   - undef
 
-@exception Artemis::Exception::Param
+@throws Artemis::Exception::Param
 
 =cut
+
 
         method add($yaml)
         {
@@ -82,7 +83,7 @@ Update a given precondition.
 @return success - precondition id
 @return error   - error string
 
-@exception Artemis::Exception::Param
+@throws Artemis::Exception::Param
 
 
 =cut
