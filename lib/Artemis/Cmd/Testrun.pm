@@ -65,8 +65,8 @@ or
                 my $hostname     = $args->{hostname};
                 my $owner        = $args->{owner}        || $ENV{USER};
 
-                my $owner_user_id         = $args->{owner_user_id}         || Artemis::Model::_get_user_id_for_login(       $owner    );
-                my $hardwaredb_systems_id = $args->{hardwaredb_systems_id} || Artemis::Model::_get_systems_id_for_hostname( $hostname );
+                my $owner_user_id         = $args->{owner_user_id}         || Artemis::Model::get_user_id_for_login(       $owner    );
+                my $hardwaredb_systems_id = $args->{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $hostname );
 
                 my $testrun = model('TestrunDB')->resultset('Testrun')->new
                   ({
@@ -112,8 +112,8 @@ or
         method update($id, $args) {
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-                $args->{hardwaredb_systems_id} = $args->{hardwaredb_systems_id} || Artemis::Model::_get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
-                $args->{owner_user_id}         = $args->{owner_user_id}         || Artemis::Model::_get_user_id_for_login( $args->{owner} ) if $args->{owner};
+                $args->{hardwaredb_systems_id} = $args->{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
+                $args->{owner_user_id}         = $args->{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args->{owner} ) if $args->{owner};
 
                 $testrun->notes                 ( $args->{notes}                 ) if $args->{notes};
                 $testrun->shortname             ( $args->{shortname}             ) if $args->{shortname};
@@ -158,8 +158,8 @@ the existing testrun given as first argument.
 
         method rerun($id, $args?) {
                 my $testrun               = model('TestrunDB')->resultset('Testrun')->find( $id );
-                my $owner_user_id         = $args->{hardwaredb_systems_id} || $args->{owner}    ? Artemis::Model::_get_user_id_for_login(       $args->{owner}    ) : undef;
-                my $hardwaredb_systems_id = $args->{owner_user_id}         || $args->{hostname} ? Artemis::Model::_get_systems_id_for_hostname( $args->{hostname} ) : undef;
+                my $owner_user_id         = $args->{hardwaredb_systems_id} || $args->{owner}    ? Artemis::Model::get_user_id_for_login(       $args->{owner}    ) : undef;
+                my $hardwaredb_systems_id = $args->{owner_user_id}         || $args->{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args->{hostname} ) : undef;
                 my $testrun_new           = model('TestrunDB')->resultset('Testrun')->new
                   ({
                     notes                 => $args->{notes}         || $testrun->notes,
@@ -181,7 +181,6 @@ the existing testrun given as first argument.
                 $self->assign_preconditions($testrun_new->id, @preconditions);
                 return $testrun_new->id;
         }
-
 }
 
 
