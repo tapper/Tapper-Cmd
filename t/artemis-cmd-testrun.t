@@ -12,17 +12,13 @@ use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
 
-# -----------------------------------------------------------------------------------------------------------------
-construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
-# -----------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
 construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
-# -----------------------------------------------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------------
 
 my $cmd = Artemis::Cmd::Testrun->new();
 isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
-
 
 #######################################################
 #
@@ -30,10 +26,10 @@ isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
 #
 #######################################################
 
-my $hardwaredb_systems_id = $cmd->_get_systems_id_for_hostname('bascha');
+my $hardwaredb_systems_id = Artemis::Model::_get_systems_id_for_hostname('bascha');
 is($hardwaredb_systems_id, 15, 'get system id for hostname');
 
-my $user_id = $cmd->_get_user_id_for_login('sschwigo');
+my $user_id = Artemis::Model::_get_user_id_for_login('sschwigo');
 is($user_id, 12, 'get user id for login');
 
 
