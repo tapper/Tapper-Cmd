@@ -13,7 +13,7 @@ Version 0.01
 {
         # just for CPAN
         package Artemis::Cmd;
-        our $VERSION = '0.01';
+        our $VERSION = '2.010017';
 }
 
 
