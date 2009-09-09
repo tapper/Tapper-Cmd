@@ -55,20 +55,11 @@ ids.
 
 =cut
 
-        method assign_preconditions($testrun_id, @preconditions) {
-                
-                my $succession = 1;
-                foreach my $precondition_id (@preconditions) {
-                        my $testrun_precondition = model('TestrunDB')->resultset('TestrunPrecondition')->new
-                          ({
-                            testrun_id      => $testrun_id,
-                            precondition_id => $precondition_id,
-                            succession      => $succession,
-                           });
-                        $testrun_precondition->insert;
-                        $succession++;
-                }
-                return 0;
+        method assign_preconditions($testrun_id, @preconditions)
+        {
+                my $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+                return $testrun->assign_preconditions(@preconditions);
+
         }
 }
 

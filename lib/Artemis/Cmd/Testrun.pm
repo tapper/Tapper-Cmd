@@ -58,40 +58,17 @@ or
 
         method add($args) {
 
-                my $notes        = $args->{notes}        || '';
-                my $shortname    = $args->{shortname}    || '';
-                my $topic_name   = $args->{topic}        || 'Misc';
-                my $date         = $args->{earliest}     || DateTime->now;
-                my $hostname     = $args->{hostname};
-                my $owner        = $args->{owner}        || $ENV{USER};
-                my $queue_id     = $args->{queue_id}     || undef; # TODO: get id from AdHoc queue
-                my $host_id      = $args->{host_id}      || undef;
+                my %args = %{$args}; # copy
 
-                my $owner_user_id         = $args->{owner_user_id}         || Artemis::Model::get_user_id_for_login(       $owner    );
-                my $hardwaredb_systems_id = $args->{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $hostname );
+                $args{notes}                 ||= '';
+                $args{shortname}             ||=  '';
+                $args{topic_name}              = $args->{topic}    || 'Misc';
+                $args{earliest}              ||= DateTime->now;
+                $args{owner}                 ||= $ENV{USER};
+                $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
+                $args{hardwaredb_systems_id} ||= Artemis::Model::get_systems_id_for_hostname( $args->{hostname} );
 
-                my $testrun = model('TestrunDB')->resultset('Testrun')->new
-                  ({
-                    notes                 => $notes,
-                    shortname             => $shortname,
-                    topic_name            => $topic_name,
-                    starttime_earliest    => $date,
-                    owner_user_id         => $owner_user_id,
-                    hardwaredb_systems_id => $hardwaredb_systems_id,
-                   });
-                $testrun->insert;
-
-                print STDERR "testrun.id: ", $testrun->id;
-                my $testrunscheduling = model('TestrunDB')->resultset('TestrunScheduling')->new
-                    ({
-                      testrun_id => $testrun->id,
-                      queue_id   => $queue_id,
-                      host_id    => $host_id,
-                      status     => "schedule",
-                     });
-                $testrunscheduling->insert;
-
-                return $testrun->id;
+                return model('TestrunDB')->resultset('Testrun')->add(\%args);
         }
 
 
@@ -123,19 +100,14 @@ or
 =cut
 
         method update($id, $args) {
+                my %args = %{$args}; # copy
+
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-                $args->{hardwaredb_systems_id} = $args->{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args->{hostname} ) if $args->{hostname};
-                $args->{owner_user_id}         = $args->{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args->{owner} ) if $args->{owner};
+                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) if $args{hostname};
+                $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
 
-                $testrun->notes                 ( $args->{notes}                 ) if $args->{notes};
-                $testrun->shortname             ( $args->{shortname}             ) if $args->{shortname};
-                $testrun->topic_name            ( $args->{topic}                 ) if $args->{topic};
-                $testrun->starttime_earliest    ( $args->{date}                  ) if $args->{date};
-                $testrun->owner_user_id         ( $args->{owner_user_id}         ) if $args->{owner_user_id};
-                $testrun->hardwaredb_systems_id ( $args->{hardwaredb_systems_id} ) if $args->{hardwaredb_systems_id};
-                $testrun->update;
-                return $testrun->id;
+                return $testrun->update_content(\%args);
         }
 
 =head2 del
@@ -170,55 +142,16 @@ the existing testrun given as first argument.
 =cut
 
         method rerun($id, $args?) {
-                my $testrun               = model('TestrunDB')->resultset('Testrun')->find( $id );
+                my %args = %{$args || {}}; # copy
 
-                my $owner_user_id         = $args->{owner_user_id}         || $args->{owner}    ? Artemis::Model::get_user_id_for_login(       $args->{owner}    ) : undef;
-                my $hardwaredb_systems_id = $args->{hardwaredb_systems_id} || $args->{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args->{hostname} ) : undef;
-                my $testrun_new           = model('TestrunDB')->resultset('Testrun')->new
-                    ({
-                      notes                 => $args->{notes}         || $testrun->notes,
-                      shortname             => $args->{shortname}     || $testrun->shortname,
-                      topic_name            => $args->{topic_name}    || $testrun->topic_name,
-                      starttime_earliest    => $args->{earliest}      || DateTime->now,
-                      test_program          => '',
-                      owner_user_id         => $owner_user_id         || $testrun->owner_user_id,
-                      hardwaredb_systems_id => $hardwaredb_systems_id || $testrun->hardwaredb_systems_id,
-                     });
+                my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
 
-                # prepare job scheduling infos
-                my $testrunscheduling = model('TestrunDB')->resultset('TestrunScheduling')->search({ testrun_id => $id })->first;
-                my $queue_id;
-                my $host_id;
-                if ($testrunscheduling) {
-                        $queue_id = $testrunscheduling->queue_id;
-                        $host_id  = $testrunscheduling->host_id;
-                } else {
-                        my $host  = model('TestrunDB')->resultset('Host')->search({ name => $args->{hostname}} );
-                        $host_id  = $host->id;
-                        my $queue = model('TestrunDB')->resultset('Queue')->search({ name => "AdHoc"} );
-                        $queue_id = $queue->id;
-                }
+                $args{owner_user_id}         = $args{owner_user_id}         || $args{owner}    ? Artemis::Model::get_user_id_for_login(       $args{owner}    ) : undef;
+                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || $args{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) : undef;
 
-                # create testrun and job
-                $testrun_new->insert;
-                my $testrunscheduling_new = model('TestrunDB')->resultset('TestrunScheduling')->new
-                    ({
-                      testrun_id => $testrun_new->id,
-                      queue_id   => $args->{queue_id} || $queue_id,
-                      host_id    => $args->{host_id}  || $host_id,
-                      status     => "schedule",
-                     });
-                $testrunscheduling_new->insert;
-
-                # assign preconditions
-                my $preconditions = $testrun->preconditions->search({}, {order_by => 'succession'});
-                my @preconditions;
-                while (my $precond = $preconditions->next) {
-                        push @preconditions, $precond->id;
-                }
-                $self->assign_preconditions($testrun_new->id, @preconditions);
-                return $testrun_new->id;
+                return $testrun->rerun(\%args);
         }
+
 }
 
 
