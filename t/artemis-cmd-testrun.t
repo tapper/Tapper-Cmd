@@ -86,7 +86,6 @@ $retval = {hostname    => $testrun->hardwaredb_systems_id,
           };
 is_deeply($retval, $testrun_args, 'Values of updated test run');
 
-
 #######################################################
 #
 #   check rerun method
