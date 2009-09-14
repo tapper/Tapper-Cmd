@@ -104,7 +104,7 @@ prevent confusion with the buildin delete function.
 =cut
 
         method del($id) {
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+                my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
                 $testrun->delete();
                 return 0;
         }
