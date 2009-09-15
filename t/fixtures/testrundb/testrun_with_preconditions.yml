@@ -133,3 +133,30 @@
     child_precondition_id: 11
     succession: 1
 
+- schema: Queue
+  name: Xen Queue
+  data:
+    id: 1
+    name: Xen
+    priority: 300
+
+- schema: Queue
+  name: KVM Queue
+  data:
+    id: 2
+    name: KVM
+    priority: 200
+
+- schema: Queue
+  name: Kernel Queue
+  data:
+    id: 3
+    name: Kernel
+    priority: 10
+
+- schema: Queue
+  name: AdHoc
+  data:
+    id: 4
+    name: AdHoc
+    priority: 1000
