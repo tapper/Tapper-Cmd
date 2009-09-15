@@ -68,7 +68,10 @@ or
                 $args{owner}                 ||= $ENV{USER};
                 $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
                 $args{hardwaredb_systems_id} ||= Artemis::Model::get_systems_id_for_hostname( $args->{hostname} );
-
+                if (not $args{queue_id}) {
+                        $args{queue} ||= 'AdHoc';
+                        $args{queue_id} = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}})->first->id;
+                }
                 return model('TestrunDB')->resultset('Testrun')->add(\%args);
         }
 
