@@ -144,26 +144,11 @@ the existing testrun given as first argument.
 
         method rerun($id, $args?) {
                 my %args = %{$args || {}}; # copy
-
-                say STDERR "V id: $id";
-
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-
-                #say STDERR Dumper($testrun);
-
-                say STDERR "V args.hostname: ", $args{hostname};
-                say STDERR "V args.hardwaredb_systems_id: ", $args{hardwaredb_systems_id};
-                say STDERR "V testrun.hardwaredb_systems_id: ", $testrun->hardwaredb_systems_id;
 
                 $args{owner_user_id}         = $args{owner_user_id}         || $args{owner}    ? Artemis::Model::get_user_id_for_login(       $args{owner}    ) : $testrun->owner_user_id;
                 $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || $args{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) : $testrun->hardwaredb_systems_id;
-
-                say STDERR "N args.hardwaredb_systems_id: ", $args{hardwaredb_systems_id};
-                say STDERR "N testrun.hardwaredb_systems_id: ", $testrun->hardwaredb_systems_id;
-
                 $args{hostname}            ||= Artemis::Model::get_hostname_for_systems_id( $args{hardwaredb_systems_id} );
-
-                say STDERR "N args.hostname: ", $args{hostname};
 
                 return $testrun->rerun(\%args);
         }
