@@ -148,11 +148,6 @@ the existing testrun given as first argument.
         method rerun($id, $args?) {
                 my %args = %{$args || {}}; # copy
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-
-                $args{owner_user_id}         = $args{owner_user_id}         || $args{owner}    ? Artemis::Model::get_user_id_for_login(       $args{owner}    ) : $testrun->owner_user_id;
-                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || $args{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) : $testrun->hardwaredb_systems_id;
-                $args{hostname}            ||= Artemis::Model::get_hostname_for_systems_id( $args{hardwaredb_systems_id} );
-
                 return $testrun->rerun(\%args);
         }
 
