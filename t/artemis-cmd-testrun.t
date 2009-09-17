@@ -98,14 +98,12 @@ isnt($testrun_id_new, $testrun_id, 'Rerun testrun with new id');
 $testrun        = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
 my $testrun_new = model('TestrunDB')->resultset('Testrun')->find($testrun_id_new);
 
-$retval = {hostname    => $testrun->hardwaredb_systems_id,
-           owner       => $testrun->owner_user_id,
-           notes       => $testrun->notes,
-           shortname   => $testrun->shortname,
-           topic       => $testrun->topic_name,
+$retval = { owner       => $testrun->owner_user_id,
+            notes       => $testrun->notes,
+            shortname   => $testrun->shortname,
+            topic       => $testrun->topic_name,
           };
-$testrun_args = {hostname    => $testrun_new->hardwaredb_systems_id,
-                 owner       => $testrun_new->owner_user_id,
+$testrun_args = {owner       => $testrun_new->owner_user_id,
                  notes       => $testrun_new->notes,
                  shortname   => $testrun_new->shortname,
                  topic       => $testrun_new->topic_name,
