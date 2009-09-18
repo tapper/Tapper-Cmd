@@ -63,7 +63,10 @@ or
 
                 $args{notes}                 ||= '';
                 $args{shortname}             ||=  '';
+
                 $args{topic_name}              = $args->{topic}    || 'Misc';
+                my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
+                
                 $args{earliest}              ||= DateTime->now;
                 $args{owner}                 ||= $ENV{USER};
                 $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
