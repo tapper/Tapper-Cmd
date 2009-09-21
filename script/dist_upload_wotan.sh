@@ -2,7 +2,7 @@
 
 EXECDIR=$(dirname $0)
 DISTFILES='Artemis*-*.*.tar.gz '
-# $EXECDIR/../../Artemis/scripts/artemis_version_increment.pl $EXECDIR/../lib/Artemis/Cmd.pm
+$EXECDIR/../../Artemis/scripts/artemis_version_increment.pl $EXECDIR/../lib/Artemis/Cmd.pm
 cd $EXECDIR/..
 
 if [[ -e MANIFEST ]]
