@@ -36,9 +36,9 @@ Add a new queue.
 * name - string
 * priority - int
 
-@param hash ref - options for new testrun
+@param hash ref - options for new queue
 
-@return success - testrun id
+@return success - queue id
 @return error   - undef
 
 =cut
@@ -55,27 +55,12 @@ Add a new queue.
 
 =head2 update
 
-Changes values of an existing testrun. Hostname/hardwaredb_systems_id and
-owner/owner_user_id allow to specify the associated value as id or string
-which will be converted to the associated id. If both values are given the id
-is used and the string is ignored. The function expects a hash reference with
-the following options (at least one should be given):
+Changes values of an existing queue. 
 
-* hardwaredb_systems_id - int
-or
-* hostname  - string
-* notes     - string
-* shortname - string
-* topic     - string
-* date      - DateTime
-* owner_user_id - int
-or
-* owner     - string
+@param int      - queue id
+@param hash ref - overwrite these options
 
-@param int      - testrun id
-@param hash ref - options for new testrun
-
-@return success - testrun id
+@return success - queue id
 @return error   - undef
 
 =cut
@@ -83,20 +68,17 @@ or
         method update($id, $args) {
                 my %args = %{$args}; # copy
 
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+                my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
 
-                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) if $args{hostname};
-                $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
-
-                return $testrun->update_content(\%args);
+                return $queue->update_content(\%args);
         }
 
 =head2 del
 
-Delete a testrun with given id. Its named del instead of delete to
+Delete a queue with given id. Its named del instead of delete to
 prevent confusion with the buildin delete function.
 
-@param int - testrun id
+@param int - queue id
 
 @return success - 0
 @return error   - error string
@@ -108,32 +90,6 @@ prevent confusion with the buildin delete function.
                 $testrun->delete();
                 return 0;
         }
-
-=head2 rerun
-
-Insert a new testrun into the database. All values not given are taken from
-the existing testrun given as first argument.
-
-@param int      - id of original testrun
-@param hash ref - different values for new testrun
-
-@return success - testrun id
-@return error   - error string
-
-=cut
-
-        method rerun($id, $args?) {
-                my %args = %{$args || {}}; # copy
-
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-
-                $args{owner_user_id}         = $args{owner_user_id}         || $args{owner}    ? Artemis::Model::get_user_id_for_login(       $args{owner}    ) : undef;
-                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || $args{hostname} ? Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) : undef;
-
-                return $testrun->rerun(\%args);
-        }
-
-}
 
 
 
