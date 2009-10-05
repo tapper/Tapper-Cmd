@@ -30,6 +30,7 @@ class Artemis::Cmd::Testrun
         use Artemis::Model 'model';
         use DateTime;
         use Data::Dumper;
+        use Artemis::Exception;
 
 =head2 add
 
@@ -72,8 +73,10 @@ or
                 $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
                 $args{hardwaredb_systems_id} ||= Artemis::Model::get_systems_id_for_hostname( $args->{hostname} );
                 if (not $args{queue_id}) {
-                        $args{queue} ||= 'AdHoc';
-                        $args{queue_id} = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}})->first->id;
+                        $args{queue}   ||= 'AdHoc';
+                        my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
+                        return if not $queue_result;
+                        $args{queue_id}  = $queue_id->first->id;
                 }
                 return model('TestrunDB')->resultset('Testrun')->add(\%args);
         }
