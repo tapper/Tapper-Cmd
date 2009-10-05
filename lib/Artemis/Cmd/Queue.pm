@@ -68,8 +68,8 @@ Changes values of an existing queue.
         method update($id, $args) {
                 my %args = %{$args}; # copy
 
-                my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
-
+                my $queue = model('TestrunDB')->resultset('Queue')->find($id);
+                
                 return $queue->update_content(\%args);
         }
 
@@ -91,7 +91,7 @@ prevent confusion with the buildin delete function.
                 return 0;
         }
 
-
+}
 
 =head1 AUTHOR
 
