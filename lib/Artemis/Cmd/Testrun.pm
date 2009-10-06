@@ -76,7 +76,7 @@ or
                         $args{queue}   ||= 'AdHoc';
                         my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
                         return if not $queue_result;
-                        $args{queue_id}  = $queue_id->first->id;
+                        $args{queue_id}  = $queue_result->first->id;
                 }
                 return model('TestrunDB')->resultset('Testrun')->add(\%args);
         }
