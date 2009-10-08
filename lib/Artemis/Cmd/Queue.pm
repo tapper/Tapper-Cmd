@@ -49,6 +49,11 @@ Add a new queue.
 
                 my $q = model('TestrunDB')->resultset('Queue')->new(\%args);
                 $q->insert;
+                my $all_queues = model('TestrunDB')->resultset('Queue');
+                foreach my $queue ($all_queues->all) {
+                        $queue->runcount($queue->priority);
+                        $queue->update;
+                }
                 return $q->id;
         }
 
