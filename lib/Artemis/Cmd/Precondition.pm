@@ -89,7 +89,7 @@ prevent confusion with the buildin delete function.
         method del($id)
         {
                 my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
-                return qq(No precondition with id "$id" found);
+                return qq(No precondition with id "$id" found) if not $precondition;;
                 $precondition->delete();
                 return 0;
         }
