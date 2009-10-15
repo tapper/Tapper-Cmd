@@ -47,7 +47,7 @@ Add a requested host for a given testrun.
         method add_host($id, $hostname) {
 
                 my $hosts = model('TestrunDB')->resultset('Host')->search({name => $hostname});
-                return if not $hosts;
+                return if not $hosts->count;
                 my $host_id = $hosts->first->id;
                 my $request = model('TestrunDB')->resultset('TestrunRequestedHost')->new({testrun_id => $id, host_id => $host_id});
                 $request->insert();
