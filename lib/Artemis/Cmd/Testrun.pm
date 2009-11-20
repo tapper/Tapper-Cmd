@@ -59,19 +59,20 @@ or
 
 =cut
 
-        method add($args) {
+        method add($received_args) {
 
-                my %args = %{$args}; # copy
+                my %args = %{$received_args}; # copy
 
                 $args{notes}                 ||= '';
                 $args{shortname}             ||=  '';
 
-                $args{topic_name}              = $args->{topic}    || 'Misc';
+                $args{topic_name}              = $args{topic}    || 'Misc';
                 my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
                 
                 $args{earliest}              ||= DateTime->now;
                 $args{owner}                 ||= $ENV{USER};
-                $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
+                $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args{owner}    );
+
                 
                 
                 if (not $args{queue_id}) {
