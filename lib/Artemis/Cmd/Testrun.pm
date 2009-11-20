@@ -34,19 +34,20 @@ class Artemis::Cmd::Testrun
 
 =head2 add
 
-Add a new testrun. Hostname/hardwaredb_systems_id and owner/owner_user_id
+Add a new testrun. Owner/owner_user_id and requested_hosts/requested_host_ids
 allow to specify the associated value as id or string which will be converted
 to the associated id. If both values are given the id is used and the string
 is ignored. The function expects a hash reference with the following options:
--- required --
-* hardwaredb_systems_id - int
-or
-* hostname - string
 -- optional --
+* requested_host_ids - array of int
+or
+* requested_hosts    - array of string
+
 * notes - string
 * shortname - string
 * topic - string
 * date - DateTime
+
 * owner_user_id - int
 or
 * owner - string
@@ -71,7 +72,8 @@ or
                 $args{earliest}              ||= DateTime->now;
                 $args{owner}                 ||= $ENV{USER};
                 $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args->{owner}    );
-                $args{hardwaredb_systems_id} ||= Artemis::Model::get_systems_id_for_hostname( $args->{hostname} );
+                
+                
                 if (not $args{queue_id}) {
                         $args{queue}   ||= 'AdHoc';
                         my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
