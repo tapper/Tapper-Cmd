@@ -73,6 +73,12 @@ or
                 $args{owner}                 ||= $ENV{USER};
                 $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login(       $args{owner}    );
 
+                if ($args{requested_hosts} and not $args{requested_host_ids}) {
+                        foreach my $host (@{$args{requested_hosts}}) {
+                                my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
+                                push @{$args{requested_host_ids}}, $host_result->id if $host_result;
+                        }
+                }
                 
                 
                 if (not $args{queue_id}) {
