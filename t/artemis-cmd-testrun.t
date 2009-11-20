@@ -39,8 +39,7 @@ is($user_id, 12, 'get user id for login');
 #
 #######################################################
 
-my $testrun_args = {hostname  => 'bascha',
-                    notes     => 'foo',
+my $testrun_args = {notes     => 'foo',
                     shortname => 'foo',
                     topic     => 'foo',
                     earliest  => DateTime->new( year   => 1964,
@@ -54,14 +53,12 @@ my $testrun_args = {hostname  => 'bascha',
 my $testrun_id = $cmd->add($testrun_args);
 ok(defined($testrun_id), 'Adding testrun');
 my $testrun = model('TestrunDB')->resultset('Testrun')->search({id => $testrun_id})->first;
-my $retval = {hostname    => $testrun->hardwaredb_systems_id,
-              owner       => $testrun->owner_user_id,
+my $retval = {owner       => $testrun->owner_user_id,
               notes       => $testrun->notes,
               shortname   => $testrun->shortname,
               topic       => $testrun->topic_name,
               earliest    => $testrun->starttime_earliest,
              };
-$testrun_args->{hostname} =  15;
 $testrun_args->{owner}    =  12;
 is_deeply($retval, $testrun_args, 'Values of added test run');
 
