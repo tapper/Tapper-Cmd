@@ -48,7 +48,8 @@ my $testrun_args = {notes     => 'foo',
                                                 hour   => 16,
                                                 minute => 12,
                                                 second => 47),
-                    owner      => 'sschwigo'};
+                    requested_hosts => ['iring','bullock'],
+                    owner           => 'sschwigo'};
 
 my $testrun_id = $cmd->add($testrun_args);
 ok(defined($testrun_id), 'Adding testrun');
@@ -58,6 +59,7 @@ my $retval = {owner       => $testrun->owner_user_id,
               shortname   => $testrun->shortname,
               topic       => $testrun->topic_name,
               earliest    => $testrun->starttime_earliest,
+              requested_hosts => [ map {$_->host->name} $testrun->testrun_scheduling->requested_hosts->all ],
              };
 $testrun_args->{owner}    =  12;
 is_deeply($retval, $testrun_args, 'Values of added test run');
@@ -80,6 +82,7 @@ $retval = {hostname    => $testrun->hardwaredb_systems_id,
            shortname   => $testrun->shortname,
            topic       => $testrun->topic_name,
            earliest    => $testrun->starttime_earliest,
+           requested_hosts => [ map {$_->host->name} $testrun->testrun_scheduling->requested_hosts->all ],
           };
 is_deeply($retval, $testrun_args, 'Values of updated test run');
 
