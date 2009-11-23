@@ -23,8 +23,8 @@ testruns or preconditions in the database. This module handles the precondition 
 
 class Artemis::Cmd::Precondition extends Artemis::Cmd {
         use Artemis::Model 'model';
-        # use Artemis::Exception::Param;
-        # use YAML::Syck;
+        use Artemis::Exception::Param;
+        use YAML::Syck;
 
 
 =head2 add
@@ -35,7 +35,9 @@ precondition (i.e. those with a precondition_type) will be added. This is
 useful for macro preconditions.
 
 
-@param string - preconditions in YAML format.
+@param string    - preconditions in YAML format OR
+@param array ref - preconditions as list of hashes
+
 
 @return success - list of precondition ids
 @return error   - undef
@@ -45,9 +47,17 @@ useful for macro preconditions.
 =cut
 
 
-        method add($yaml)
+        method add($input)
         {
-                return model('TestrunDB')->resultset('Precondition')->add($yaml);
+                if (ref $input eq 'ARRAY') {
+                        return model('TestrunDB')->resultset('Precondition')->add($input);
+                } else {
+                        $input .= "\n" unless $input =~ /\n$/;
+                        my $yaml_error = Artemis::Schema::TestrunDB::_yaml_ok($input);
+                        die Artemis::Exception::Param->new($yaml_error) if $yaml_error;
+                        my @yaml = Load($input);
+                        return model('TestrunDB')->resultset('Precondition')->add(\@yaml);
+                }
         }
 
 =head2 update
