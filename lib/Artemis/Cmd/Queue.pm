@@ -74,8 +74,15 @@ Changes values of an existing queue.
                 my %args = %{$args}; # copy
 
                 my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-                
-                return $queue->update_content(\%args);
+                my $retval = $queue->update_content(\%args);
+
+                my $all_queues = model('TestrunDB')->resultset('Queue');
+                foreach my $queue ($all_queues->all) {
+                        $queue->runcount($queue->priority);
+                        $queue->update;
+                }
+
+                return $retval;
         }
 
 =head2 del
