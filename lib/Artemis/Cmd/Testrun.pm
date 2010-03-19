@@ -54,8 +54,10 @@ or
 
 @param hash ref - options for new testrun
 
-@return success - testrun id
-@return error   - undef
+@return success - testrun id)
+@return error   - exception
+
+@throws exception without class
 
 =cut
 
@@ -84,7 +86,7 @@ or
                 if (not $args{queue_id}) {
                         $args{queue}   ||= 'AdHoc';
                         my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
-                        return if not $queue_result->count;
+                        die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
                         $args{queue_id}  = $queue_result->first->id;
                 }
                 return model('TestrunDB')->resultset('Testrun')->add(\%args);
@@ -156,7 +158,9 @@ the existing testrun given as first argument.
 @param hash ref - different values for new testrun
 
 @return success - testrun id
-@return error   - error string
+@return error   - exception
+
+@throws exception without class
 
 =cut
 
