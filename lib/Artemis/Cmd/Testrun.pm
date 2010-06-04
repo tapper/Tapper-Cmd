@@ -145,6 +145,17 @@ prevent confusion with the buildin delete function.
 
         method del($id) {
                 my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+                if ($testrun->testrun_scheduling->requested_hosts->count) {
+                        foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
+                                $host->delete();
+                        }
+                }
+                if ($testrun->testrun_scheduling->requested_features->count) {
+                        foreach my $feat($testrun->testrun_scheduling->requested_features->all) {
+                                $feat->delete();
+                        }
+                }
+
                 $testrun->delete();
                 return 0;
         }
