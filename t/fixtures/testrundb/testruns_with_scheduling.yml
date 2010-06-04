@@ -74,6 +74,7 @@
     wait_after_tests: ~
 
 
+
 # -------------------- preconditions
 
 
@@ -421,3 +422,37 @@
     testrun_id: 3002
     precondition_id: 5
     succession: 2
+
+# ------------ test deleting with contraints --------------
+
+- schema: Testrun
+  name: Req_feat
+  data:
+    id: 101
+    owner_user_id: 12
+    shortname: req_feat
+    notes: Test whether deleting works with requested features
+    topic_name: Software
+
+- schema: TestrunScheduling
+  name: del_scheduling
+  data:
+    id: 1101
+    testrun_id: 101            
+    queue_id: 3                
+    status: finished
+
+
+- schema: TestrunRequestedFeature
+  name: req_feat1
+  data:
+    id: 1
+    testrun_id: 101
+    feature: None
+
+- schema: TestrunRequestedHost
+  name: req_host1
+  data:
+    id: 1
+    testrun_id: 101
+    host_id: 9

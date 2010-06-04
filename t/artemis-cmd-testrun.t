@@ -122,7 +122,7 @@ is_deeply(\@precond_array, \@precond_array_old, 'Rerun testrun with same precond
 #
 #######################################################
 
-$retval = $cmd->del($testrun_id);
+$retval = $cmd->del(101);
 is($retval, 0, 'Delete testrun');
-$testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+$testrun = model('TestrunDB')->resultset('Testrun')->find(101);
 is($testrun, undef, 'Delete correct testrun');
