@@ -1,4 +1,11 @@
-use MooseX::Declare;
+package Artemis::Cmd::Scenario;
+use Moose;
+
+use Artemis::Model 'model';
+use Artemis::Exception;
+
+use parent 'Artemis::Cmd';
+
 
 =head1 NAME
 
@@ -24,11 +31,6 @@ Add a new scenario to database.
 
 =cut
 
-class Artemis::Cmd::Scenario
-    extends Artemis::Cmd
-{
-        use Artemis::Model 'model';
-        use Artemis::Exception;
 
 =head2 add
 
@@ -41,13 +43,13 @@ Add a new scenario to database
 
 =cut
 
-        method add($args) {
-
-                my %args = %{$args}; # copy
-                my $scenario = model('TestrunDB')->resultset('Scenario')->new(\%args);
-                $scenario->insert;
-                return $scenario->id;
-        }
+sub add {
+        my ($self, $args) = @_;
+        my %args = %{$args};    # copy
+        my $scenario = model('TestrunDB')->resultset('Scenario')->new(\%args);
+        $scenario->insert;
+        return $scenario->id;
+}
         
 
 
@@ -63,12 +65,13 @@ prevent confusion with the buildin delete function.
 
 =cut
 
-        method del($id) {
-                my $scenario = model('TestrunDB')->resultset('Scenario')->find($id);
-                $scenario->delete();
-                return 0;
-        }
+sub del {
+        my ($self, $id) = @_;
+        my $scenario = model('TestrunDB')->resultset('Scenario')->find($id);
+        $scenario->delete();
+        return 0;
 }
+
 
 
 

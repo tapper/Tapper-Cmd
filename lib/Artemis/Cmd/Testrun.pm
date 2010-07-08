@@ -1,4 +1,11 @@
-use MooseX::Declare;
+package Artemis::Cmd::Testrun;
+use Moose;
+use Artemis::Model 'model';
+use DateTime;
+use Artemis::Exception;
+
+
+use parent 'Artemis::Cmd';
 
 =head1 NAME
 
@@ -24,13 +31,6 @@ Add a new testrun to database.
 
 =cut
 
-class Artemis::Cmd::Testrun
-    extends Artemis::Cmd
-{
-        use Artemis::Model 'model';
-        use DateTime;
-        use Data::Dumper;
-        use Artemis::Exception;
 
 =head2 add
 
@@ -61,36 +61,36 @@ or
 
 =cut
 
-        method add($received_args) {
+sub add {
+        my ($self, $received_args) = @_;
+        my %args = %{$received_args}; # copy
 
-                my %args = %{$received_args}; # copy
+        $args{notes}                 ||= '';
+        $args{shortname}             ||=  '';
 
-                $args{notes}                 ||= '';
-                $args{shortname}             ||=  '';
-
-                $args{topic_name}              = $args{topic}    || 'Misc';
-                my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
+        $args{topic_name}              = $args{topic}    || 'Misc';
+        my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
                 
-                $args{earliest}              ||= DateTime->now;
-                $args{owner}                 ||= $ENV{USER};
-                $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login( $args{owner} );
+        $args{earliest}              ||= DateTime->now;
+        $args{owner}                 ||= $ENV{USER};
+        $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login( $args{owner} );
 
-                if ($args{requested_hosts} and not $args{requested_host_ids}) {
-                        foreach my $host (@{$args{requested_hosts}}) {
-                                my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
-                                push @{$args{requested_host_ids}}, $host_result->id if $host_result;
-                        }
+        if ($args{requested_hosts} and not $args{requested_host_ids}) {
+                foreach my $host (@{$args{requested_hosts}}) {
+                        my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
+                        push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
-                
-                
-                if (not $args{queue_id}) {
-                        $args{queue}   ||= 'AdHoc';
-                        my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
-                        die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
-                        $args{queue_id}  = $queue_result->first->id;
-                }
-                return model('TestrunDB')->resultset('Testrun')->add(\%args);
         }
+                
+                
+        if (not $args{queue_id}) {
+                $args{queue}   ||= 'AdHoc';
+                my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
+                die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
+                $args{queue_id}  = $queue_result->first->id;
+        }
+        return model('TestrunDB')->resultset('Testrun')->add(\%args);
+}
 
 
 =head2 update
@@ -120,16 +120,17 @@ or
 
 =cut
 
-        method update($id, $args) {
-                my %args = %{$args}; # copy
+sub update {
+        my ($self, $id, $args) = @_;
+        my %args = %{$args};    # copy
 
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-                $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) if $args{hostname};
-                $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
+        $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) if $args{hostname};
+        $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
 
-                return $testrun->update_content(\%args);
-        }
+        return $testrun->update_content(\%args);
+}
 
 =head2 del
 
@@ -143,22 +144,23 @@ prevent confusion with the buildin delete function.
 
 =cut
 
-        method del($id) {
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
-                if ($testrun->testrun_scheduling->requested_hosts->count) {
-                        foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
-                                $host->delete();
-                        }
+sub del {
+        my ($self, $id) = @_;
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        if ($testrun->testrun_scheduling->requested_hosts->count) {
+                foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
+                        $host->delete();
                 }
-                if ($testrun->testrun_scheduling->requested_features->count) {
-                        foreach my $feat($testrun->testrun_scheduling->requested_features->all) {
-                                $feat->delete();
-                        }
-                }
-
-                $testrun->delete();
-                return 0;
         }
+        if ($testrun->testrun_scheduling->requested_features->count) {
+                foreach my $feat ($testrun->testrun_scheduling->requested_features->all) {
+                        $feat->delete();
+                }
+        }
+
+        $testrun->delete();
+        return 0;
+}
 
 =head2 rerun
 
@@ -175,12 +177,11 @@ the existing testrun given as first argument.
 
 =cut
 
-        method rerun($id, $args?) {
-                my %args = %{$args || {}}; # copy
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-                return $testrun->rerun(\%args);
-        }
-
+sub rerun {
+        my ($self, $id, $args) = @_;
+        my %args = %{$args || {}}; # copy
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
+        return $testrun->rerun(\%args);
 }
 
 

@@ -1,4 +1,11 @@
+package Artemis::Cmd::Queue;
 use MooseX::Declare;
+
+use Artemis::Model 'model';
+use DateTime;
+
+use parent 'Artemis::Cmd';
+
 
 =head1 NAME
 
@@ -23,11 +30,6 @@ Add a new queue to database.
 
 =cut
 
-class Artemis::Cmd::Queue
-    extends Artemis::Cmd
-{
-        use Artemis::Model 'model';
-        use DateTime;
 
 =head2 add
 
@@ -43,19 +45,19 @@ Add a new queue.
 
 =cut
 
-        method add($args) {
+sub add {
+        my ($self, $args) = @_;
+        my %args = %{$args};    # copy
 
-                my %args = %{$args}; # copy
-
-                my $q = model('TestrunDB')->resultset('Queue')->new(\%args);
-                $q->insert;
-                my $all_queues = model('TestrunDB')->resultset('Queue');
-                foreach my $queue ($all_queues->all) {
-                        $queue->runcount($queue->priority);
-                        $queue->update;
-                }
-                return $q->id;
+        my $q = model('TestrunDB')->resultset('Queue')->new(\%args);
+        $q->insert;
+        my $all_queues = model('TestrunDB')->resultset('Queue');
+        foreach my $queue ($all_queues->all) {
+                $queue->runcount($queue->priority);
+                $queue->update;
         }
+        return $q->id;
+}
 
 
 =head2 update
@@ -70,20 +72,21 @@ Changes values of an existing queue.
 
 =cut
 
-        method update($id, $args) {
-                my %args = %{$args}; # copy
+sub update {
+        my ($self, $id, $args) = @_;
+        my %args = %{$args};    # copy
 
-                my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-                my $retval = $queue->update_content(\%args);
+        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
+        my $retval = $queue->update_content(\%args);
 
-                my $all_queues = model('TestrunDB')->resultset('Queue');
-                foreach my $queue ($all_queues->all) {
-                        $queue->runcount($queue->priority);
-                        $queue->update;
-                }
-
-                return $retval;
+        my $all_queues = model('TestrunDB')->resultset('Queue');
+        foreach my $queue ($all_queues->all) {
+                $queue->runcount($queue->priority);
+                $queue->update;
         }
+
+        return $retval;
+}
 
 =head2 del
 
@@ -97,13 +100,14 @@ prevent confusion with the buildin delete function.
 
 =cut
 
-        method del($id) {
-                my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
-                $testrun->delete();
-                return 0;
-        }
-
+sub del {
+        my ($self, $id) = @_;
+        my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
+        $testrun->delete();
+        return 0;
 }
+
+
 
 =head1 AUTHOR
 

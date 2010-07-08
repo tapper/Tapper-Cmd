@@ -1,4 +1,9 @@
-use MooseX::Declare;
+package Artemis::Cmd::Requested;
+use Moose;
+
+use Artemis::Model 'model';
+use parent 'Artemis::Cmd';
+
 
 =head1 NAME
 
@@ -26,11 +31,6 @@ Add a requested host entry to database.
 
 =cut
 
-class Artemis::Cmd::Requested
-  extends Artemis::Cmd
-{
-        use Artemis::Model 'model';
-  
 
 =head2 add_host
 
@@ -44,15 +44,15 @@ Add a requested host for a given testrun.
 
 =cut
 
-        method add_host($id, $hostname) {
-
-                my $hosts = model('TestrunDB')->resultset('Host')->search({name => $hostname});
-                return if not $hosts->count;
-                my $host_id = $hosts->first->id;
-                my $request = model('TestrunDB')->resultset('TestrunRequestedHost')->new({testrun_id => $id, host_id => $host_id});
-                $request->insert();
-                return $request->id;
-        }
+sub add_host {
+        my ($self, $id, $hostname) = @_;
+        my $hosts = model('TestrunDB')->resultset('Host')->search({name => $hostname});
+        return if not $hosts->count;
+        my $host_id = $hosts->first->id;
+        my $request = model('TestrunDB')->resultset('TestrunRequestedHost')->new({testrun_id => $id, host_id => $host_id});
+        $request->insert();
+        return $request->id;
+}
 
 =head2 add_feature
 
@@ -66,13 +66,14 @@ Add a requested feature for a given testrun.
 
 =cut
 
-        method add_feature($id, $feature) {
+sub add_feature {
+        my ($self, $id, $feature) = @_;
 
-                my $request = model('TestrunDB')->resultset('TestrunRequestedFeature')->new({testrun_id => $id, feature => $feature});
-                $request->insert();
-                return $request->id;
-        }
+        my $request = model('TestrunDB')->resultset('TestrunRequestedFeature')->new({testrun_id => $id, feature => $feature});
+        $request->insert();
+        return $request->id;
 }
+
 
 
 =head1 AUTHOR

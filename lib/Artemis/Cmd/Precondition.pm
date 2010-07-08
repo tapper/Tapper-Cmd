@@ -1,6 +1,11 @@
 package Artemis::Cmd::Precondition;
+use Moose;
 
-use MooseX::Declare;
+use Artemis::Model 'model';
+use Artemis::Exception::Param;
+use YAML::Syck;
+
+use parent 'Artemis::Cmd';
 
 =head1 NAME
 
@@ -21,10 +26,6 @@ testruns or preconditions in the database. This module handles the precondition 
 
 =cut
 
-class Artemis::Cmd::Precondition extends Artemis::Cmd {
-        use Artemis::Model 'model';
-        use Artemis::Exception::Param;
-        use YAML::Syck;
 
 
 =head2 add
@@ -47,18 +48,18 @@ useful for macro preconditions.
 =cut
 
 
-        method add($input)
-        {
-                if (ref $input eq 'ARRAY') {
-                        return model('TestrunDB')->resultset('Precondition')->add($input);
-                } else {
-                        $input .= "\n" unless $input =~ /\n$/;
-                        my $yaml_error = Artemis::Schema::TestrunDB::_yaml_ok($input);
-                        die Artemis::Exception::Param->new($yaml_error) if $yaml_error;
-                        my @yaml = Load($input);
-                        return model('TestrunDB')->resultset('Precondition')->add(\@yaml);
-                }
+sub add {
+        my ($self, $input) = @_;
+        if (ref $input eq 'ARRAY') {
+                return model('TestrunDB')->resultset('Precondition')->add($input);
+        } else {
+                $input .= "\n" unless $input =~ /\n$/;
+                my $yaml_error = Artemis::Schema::TestrunDB::_yaml_ok($input);
+                die Artemis::Exception::Param->new($yaml_error) if $yaml_error;
+                my @yaml = Load($input);
+                return model('TestrunDB')->resultset('Precondition')->add(\@yaml);
         }
+}
 
 =head2 update
 
@@ -75,13 +76,13 @@ Update a given precondition.
 
 =cut
 
-        method update($id, $condition)
-        {
-                my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
-                die Artemis::Exception::Param->new("Precondition with id $id not found") if not $precondition;
+sub update {
+        my ($self, $id, $condition) = @_;
+        my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+        die Artemis::Exception::Param->new("Precondition with id $id not found") if not $precondition;
 
-                return $precondition->update_content($condition);
-        }
+        return $precondition->update_content($condition);
+}
 
 
 =head2 del
@@ -96,15 +97,12 @@ prevent confusion with the buildin delete function.
 
 =cut
 
-        method del($id)
-        {
-                my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
-                return qq(No precondition with id "$id" found) if not $precondition;;
-                $precondition->delete();
-                return 0;
-        }
-
-
+sub del {
+        my ($self, $id) = @_;
+        my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+        return qq(No precondition with id "$id" found) if not $precondition;;
+        $precondition->delete();
+        return 0;
 }
 
 
