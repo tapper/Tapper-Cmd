@@ -2,7 +2,6 @@ package Artemis::Cmd::Scenario;
 use Moose;
 
 use Artemis::Model 'model';
-use Artemis::Exception;
 
 use parent 'Artemis::Cmd';
 

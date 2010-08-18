@@ -2,7 +2,6 @@ package Artemis::Cmd::Precondition;
 use Moose;
 
 use Artemis::Model 'model';
-use Artemis::Exception::Param;
 use YAML::Syck;
 use Kwalify;
 
@@ -116,7 +115,7 @@ Update a given precondition.
 @return success - precondition id
 @return error   - error string
 
-@throws Artemis::Exception::Param
+@throws die
 
 
 =cut
@@ -124,7 +123,7 @@ Update a given precondition.
 sub update {
         my ($self, $id, $condition) = @_;
         my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
-        die Artemis::Exception::Param->new("Precondition with id $id not found") if not $precondition;
+        die "Precondition with id $id not found\n" if not $precondition;
 
         return $precondition->update_content($condition);
 }
