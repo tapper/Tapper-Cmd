@@ -2,7 +2,6 @@ package Artemis::Cmd::Testrun;
 use Moose;
 use Artemis::Model 'model';
 use DateTime;
-use Artemis::Exception;
 
 
 use parent 'Artemis::Cmd';
