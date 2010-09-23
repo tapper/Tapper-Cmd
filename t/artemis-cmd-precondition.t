@@ -8,7 +8,8 @@ use Test::Fixture::DBIC::Schema;
 use 5.010;
 
 use TryCatch;
-use Test::More tests => 5;
+use Test::More;
+use Test::Exception;
 
 use Artemis::Cmd::Precondition;
 use Artemis::Model 'model';
@@ -66,3 +67,18 @@ my $retval = $precondition->del($precond_ids[0]);
 is($retval, 0, 'Delete precondition');
 my $precond_search = model('TestrunDB')->resultset('Precondition')->find($precond_ids[0]);
 is($precond_search, undef, 'Delete correct precondition');
+
+$yaml = q(# artemis-mandatory-fields: kernel_version
+---
+name: invalid
+filename: linux-2.6.18
+---
+precondition_type: exec
+filename: /bin/gen_initrd.sh
+options:
+  - 2.6.18
+---
+);
+
+throws_ok { $precondition->add($yaml) } qr/Expected required key 'precondition_type'/, 'Invalid precondition detected';
+done_testing;
