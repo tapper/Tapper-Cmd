@@ -13,16 +13,6 @@ requires 'Kwalify'               => 0;
 
 build_requires 'Test::More';
 
-postamble("
-
-live:
-\t./script/dist_upload_wotan.sh dist || exit 1
-\tssh artemis\@bancroft sudo /opt/artemis/bin/cpan Artemis::Cmd || exit 1
-
-devel: install
-
-");
-
 
 WriteAll;
 
