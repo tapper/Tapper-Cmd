@@ -4,10 +4,6 @@ use MooseX::Declare;
 
 Artemis::Cmd - Backend functions for manipluation of testruns and preconditions in the database
 
-=head1 VERSION
-
-Version 0.01
-
 =cut
 
 {
