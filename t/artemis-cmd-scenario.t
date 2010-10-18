@@ -7,7 +7,6 @@ use Artemis::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
-use TryCatch;
 use Test::More;
 
 use Artemis::Cmd::Scenario;
