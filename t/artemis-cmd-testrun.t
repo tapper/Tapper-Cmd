@@ -7,7 +7,7 @@ use 5.010;
 use warnings;
 use strict;
 
-use Test::More tests => 12;
+use Test::More;
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -121,3 +121,5 @@ $retval = $cmd->del(101);
 is($retval, 0, 'Delete testrun');
 $testrun = model('TestrunDB')->resultset('Testrun')->find(101);
 is($testrun, undef, 'Delete correct testrun');
+
+done_testing;
