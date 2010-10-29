@@ -94,14 +94,9 @@ sub add {
 
 =head2 update
 
-Changes values of an existing testrun. Hostname/hardwaredb_systems_id and
-owner/owner_user_id allow to specify the associated value as id or string
-which will be converted to the associated id. If both values are given the id
-is used and the string is ignored. The function expects a hash reference with
+Changes values of an existing testrun. The function expects a hash reference with
 the following options (at least one should be given):
 
-* hardwaredb_systems_id - int
-or
 * hostname  - string
 * notes     - string
 * shortname - string
@@ -125,7 +120,6 @@ sub update {
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-        $args{hardwaredb_systems_id} = $args{hardwaredb_systems_id} || Artemis::Model::get_systems_id_for_hostname( $args{hostname} ) if $args{hostname};
         $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
 
         return $testrun->update_content(\%args);
