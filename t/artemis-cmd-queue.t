@@ -16,10 +16,6 @@ use Artemis::Model 'model';
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
 # -----------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------
-construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
-# -----------------------------------------------------------------------------------------------------------------
-
 
 my $queue = Artemis::Cmd::Queue->new();
 isa_ok($queue, 'Artemis::Cmd::Queue', '$queue');

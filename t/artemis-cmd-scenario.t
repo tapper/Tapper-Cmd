@@ -16,10 +16,6 @@ use Artemis::Model 'model';
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
 # -----------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------
-construct_fixture( schema  => hardwaredb_schema, fixture => 't/fixtures/hardwaredb/systems.yml' );
-# -----------------------------------------------------------------------------------------------------------------
-
 
 my $scen = Artemis::Cmd::Scenario->new();
 isa_ok($scen, 'Artemis::Cmd::Scenario', '$scenario');
