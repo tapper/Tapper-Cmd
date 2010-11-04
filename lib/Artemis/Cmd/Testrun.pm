@@ -72,7 +72,8 @@ sub add {
                 
         $args{earliest}              ||= DateTime->now;
         $args{owner}                 ||= $ENV{USER};
-        $args{owner_user_id}         ||= Artemis::Model::get_user_id_for_login( $args{owner} );
+        $self->
+        $args{owner_user_id}         ||= Artemis::Model::get_or_create_user( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{$args{requested_hosts}}) {
@@ -120,7 +121,7 @@ sub update {
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-        $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_user_id_for_login( $args{owner} )          if $args{owner};
+        $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_or_create_user( $args{owner} )          if $args{owner};
 
         return $testrun->update_content(\%args);
 }

@@ -25,7 +25,7 @@ isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
 #
 #######################################################
 
-my $user_id = Artemis::Model::get_user_id_for_login('sschwigo');
+my $user_id = Artemis::Model::get_or_create_user('sschwigo');
 is($user_id, 12, 'get user id for login');
 
 
