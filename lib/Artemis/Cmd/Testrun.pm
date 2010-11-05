@@ -72,7 +72,6 @@ sub add {
                 
         $args{earliest}              ||= DateTime->now;
         $args{owner}                 ||= $ENV{USER};
-        $self->
         $args{owner_user_id}         ||= Artemis::Model::get_or_create_user( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
