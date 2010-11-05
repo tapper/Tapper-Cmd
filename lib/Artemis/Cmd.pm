@@ -9,7 +9,7 @@ Artemis::Cmd - Backend functions for manipluation of testruns and preconditions 
 {
         # just for CPAN
         package Artemis::Cmd;
-        our $VERSION = '2.010033';
+        our $VERSION = '2.010035';
 }
 
 
