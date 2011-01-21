@@ -9,7 +9,7 @@ author   'OSRC SysInt Team <osrc-sysint@elbe.amd.com>';
 license  'freebsd';
 
 requires 'perl'                  => '5.010';
-requires 'Artemis::Model'        => '2.010016';
+requires 'Artemis::Model'        => '2.010020';
 requires 'Kwalify'               => 0;
 requires 'MooseX::Declare'       => 0;
 
