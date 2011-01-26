@@ -1,16 +1,15 @@
-use MooseX::Declare;
+package Artemis::Cmd;
 
 =head1 NAME
 
 Artemis::Cmd - Backend functions for manipluation of testruns and preconditions in the database
 
 =cut
+use Moose;
 
-{
-        # just for CPAN
-        package Artemis::Cmd;
-        our $VERSION = '2.010035';
-}
+use Artemis::Model 'model';
+
+our $VERSION = '2.010035';
 
 
 =head1 SYNOPSIS
@@ -34,11 +33,9 @@ exist yet.
 
 =cut 
 
-class Artemis::Cmd { 
-        use Artemis::Model 'model';
 
 
-=head2
+=head2 assign_preconditions
 
 Assign a list of preconditions to a testrun. Both have to be given as valid
 ids.
@@ -51,13 +48,14 @@ ids.
 
 =cut
 
-        method assign_preconditions($testrun_id, @preconditions)
-        {
-                my $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
-                return $testrun->assign_preconditions(@preconditions);
+sub assign_preconditions
+{
+        my ($self, $testrun_id, @preconditions) = @_;
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find($testrun_id);
+        return $testrun->assign_preconditions(@preconditions);
 
-        }
 }
+
 
 =head1 AUTHOR
 

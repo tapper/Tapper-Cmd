@@ -1,10 +1,11 @@
 package Artemis::Cmd::Queue;
-use MooseX::Declare;
+use Moose;
 
-use Artemis::Model 'model';
 use DateTime;
 
-use parent 'Artemis::Cmd';
+use Artemis::Model 'model';
+
+extends 'Artemis::Cmd';
 
 
 =head1 NAME
