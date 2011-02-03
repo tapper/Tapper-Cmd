@@ -3,26 +3,26 @@
 use strict;
 use warnings;
 
-use Artemis::Schema::TestTools;
+use Tapper::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
 use Test::More;
 use Test::Exception;
 
-use Artemis::Cmd::Precondition;
-use Artemis::Model 'model';
+use Tapper::Cmd::Precondition;
+use Tapper::Model 'model';
 
 
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
 # -----------------------------------------------------------------------------------------------------------------
 
-my $precondition = Artemis::Cmd::Precondition->new();
-isa_ok($precondition, 'Artemis::Cmd::Precondition', '$precondition');
+my $precondition = Tapper::Cmd::Precondition->new();
+isa_ok($precondition, 'Tapper::Cmd::Precondition', '$precondition');
 
 
-my $yaml = q(# artemis-mandatory-fields: kernel_version
+my $yaml = q(# tapper-mandatory-fields: kernel_version
 ---
 precondition_type: package
 filename: linux-2.6.18
@@ -63,7 +63,7 @@ is($retval, 0, 'Delete precondition');
 my $precond_search = model('TestrunDB')->resultset('Precondition')->find($precond_ids[0]);
 is($precond_search, undef, 'Delete correct precondition');
 
-$yaml = q(# artemis-mandatory-fields: kernel_version
+$yaml = q(# tapper-mandatory-fields: kernel_version
 ---
 name: invalid
 filename: linux-2.6.18

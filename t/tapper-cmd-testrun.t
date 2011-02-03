@@ -1,6 +1,6 @@
 #!perl
 
-use Artemis::Schema::TestTools;
+use Tapper::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
@@ -8,16 +8,16 @@ use warnings;
 use strict;
 
 use Test::More;
-use Artemis::Cmd::Testrun;
-use Artemis::Model 'model';
+use Tapper::Cmd::Testrun;
+use Tapper::Model 'model';
 
 
 # -----------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testruns_with_scheduling.yml' );
 # -----------------------------------------------------------------------------------
 
-my $cmd = Artemis::Cmd::Testrun->new();
-isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
+my $cmd = Tapper::Cmd::Testrun->new();
+isa_ok($cmd, 'Tapper::Cmd::Testrun', '$testrun');
 
 #######################################################
 #
@@ -25,7 +25,7 @@ isa_ok($cmd, 'Artemis::Cmd::Testrun', '$testrun');
 #
 #######################################################
 
-my $user_id = Artemis::Model::get_or_create_user('sschwigo');
+my $user_id = Tapper::Model::get_or_create_user('sschwigo');
 is($user_id, 12, 'get user id for login');
 
 

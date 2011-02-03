@@ -1,24 +1,24 @@
-package Artemis::Cmd::Precondition;
+package Tapper::Cmd::Precondition;
 use Moose;
 
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 use YAML::Syck;
 use Kwalify;
 
-use parent 'Artemis::Cmd';
+use parent 'Tapper::Cmd';
 
 =head1 NAME
 
-Artemis::Cmd::Precondition - Backend functions for manipluation of preconditions in the database
+Tapper::Cmd::Precondition - Backend functions for manipluation of preconditions in the database
 
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects that manipulate
 testruns or preconditions in the database. This module handles the precondition part.
 
-    use Artemis::Cmd::Testrun;
+    use Tapper::Cmd::Testrun;
 
-    my $bar = Artemis::Cmd::Precondition->new();
+    my $bar = Tapper::Cmd::Precondition->new();
     $bar->add($precondition);
     ...
 
@@ -64,7 +64,7 @@ sub die_on_invalid_precondition
         $preconditions = [ $preconditions] unless ref($preconditions) eq 'ARRAY';
  precondition:
         foreach my $precondition (@$preconditions) {
-                # undefined preconditions are caused by artemis headers or a "---\n" line at the end
+                # undefined preconditions are caused by tapper headers or a "---\n" line at the end
                 next precondition unless defined($precondition); 
                 Kwalify::validate($schema, $precondition);
         }
@@ -172,4 +172,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testrun
+1; # End of Tapper::Cmd::Testrun

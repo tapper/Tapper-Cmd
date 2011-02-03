@@ -1,25 +1,25 @@
-package Artemis::Cmd::Queue;
+package Tapper::Cmd::Queue;
 use Moose;
 
 use DateTime;
 
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 
-extends 'Artemis::Cmd';
+extends 'Tapper::Cmd';
 
 
 =head1 NAME
 
-Artemis::Cmd::Queue - Backend functions for manipluation of queues in the database
+Tapper::Cmd::Queue - Backend functions for manipluation of queues in the database
 
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects that manipulate
 queues in the database. This module handles the testrun part.
 
-    use Artemis::Cmd::Queue;
+    use Tapper::Cmd::Queue;
 
-    my $bar = Artemis::Cmd::Queue->new();
+    my $bar = Tapper::Cmd::Queue->new();
     $bar->add($testrun);
     ...
 
@@ -131,4 +131,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testrun
+1; # End of Tapper::Cmd::Testrun

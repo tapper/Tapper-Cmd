@@ -1,23 +1,23 @@
-package Artemis::Cmd::Scenario;
+package Tapper::Cmd::Scenario;
 use Moose;
 
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 
-use parent 'Artemis::Cmd';
+use parent 'Tapper::Cmd';
 
 
 =head1 NAME
 
-Artemis::Cmd::Scenario - Backend functions for manipulation of scenario in the database
+Tapper::Cmd::Scenario - Backend functions for manipulation of scenario in the database
 
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects for manipulation the
-database on a higher level than that offered by Artemis::Schema.
+database on a higher level than that offered by Tapper::Schema.
 
-    use Artemis::Cmd::Scenario;
+    use Tapper::Cmd::Scenario;
 
-    my $bar = Artemis::Cmd::Scenario->new();
+    my $bar = Tapper::Cmd::Scenario->new();
     $bar->add($scenario);
     ...
 
@@ -95,4 +95,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testrun
+1; # End of Tapper::Cmd::Testrun

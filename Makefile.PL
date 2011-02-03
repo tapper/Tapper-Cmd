@@ -3,13 +3,13 @@ use warnings;
 
 use inc::Module::Install;
 
-name     'Artemis-Cmd';
-all_from 'lib/Artemis/Cmd.pm';
+name     'Tapper-Cmd';
+all_from 'lib/Tapper/Cmd.pm';
 author   'OSRC SysInt Team <osrc-sysint@elbe.amd.com>';
 license  'freebsd';
 
 requires 'perl'                  => '5.010';
-requires 'Artemis::Model'        => '2.010020';
+requires 'Tapper::Model'        => '2.010020';
 requires 'Kwalify'               => 0;
 requires 'MooseX::Declare'       => 0;
 

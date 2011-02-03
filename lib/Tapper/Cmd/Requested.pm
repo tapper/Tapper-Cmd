@@ -1,13 +1,13 @@
-package Artemis::Cmd::Requested;
+package Tapper::Cmd::Requested;
 use Moose;
 
-use Artemis::Model 'model';
-use parent 'Artemis::Cmd';
+use Tapper::Model 'model';
+use parent 'Tapper::Cmd';
 
 
 =head1 NAME
 
-Artemis::Cmd::Request - Backend functions for manipluation of requested hosts or features in the database
+Tapper::Cmd::Request - Backend functions for manipluation of requested hosts or features in the database
 
 =head1 SYNOPSIS
 
@@ -16,9 +16,9 @@ wrappers handle things like setting default values or id<->name
 translation. This module handles requested hosts and features for a
 testrequest.
 
-    use Artemis::Cmd::Testrun;
+    use Tapper::Cmd::Testrun;
 
-    my $bar = Artemis::Cmd::Testrun->new();
+    my $bar = Tapper::Cmd::Testrun->new();
     $bar->add($testrun);
     ...
 
@@ -97,4 +97,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testrun
+1; # End of Tapper::Cmd::Testrun

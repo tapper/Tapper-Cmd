@@ -1,13 +1,13 @@
-package Artemis::Cmd;
+package Tapper::Cmd;
 
 =head1 NAME
 
-Artemis::Cmd - Backend functions for manipluation of testruns and preconditions in the database
+Tapper::Cmd - Backend functions for manipluation of testruns and preconditions in the database
 
 =cut
 use Moose;
 
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 
 our $VERSION = '2.010035';
 
@@ -19,13 +19,13 @@ testruns or preconditions in the database. This module is the base module that
 contains common functions of all modules in the project. No such functions
 exist yet.
 
-    use Artemis::Cmd::Testrun;
-    use Artemis::Cmd::Precondition;
+    use Tapper::Cmd::Testrun;
+    use Tapper::Cmd::Precondition;
 
-    my $foo = Artemis::Cmd::Precondition->new();
+    my $foo = Tapper::Cmd::Precondition->new();
     $foo->add($precondition);
 
-    my $bar = Artemis::Cmd::Testrun->new();
+    my $bar = Tapper::Cmd::Testrun->new();
     $bar->add($testrun);
     ...
 
@@ -78,4 +78,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd
+1; # End of Tapper::Cmd

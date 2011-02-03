@@ -1,23 +1,23 @@
-package Artemis::Cmd::Testrun;
+package Tapper::Cmd::Testrun;
 use Moose;
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 use DateTime;
 
 
-use parent 'Artemis::Cmd';
+use parent 'Tapper::Cmd';
 
 =head1 NAME
 
-Artemis::Cmd::Testrun - Backend functions for manipluation of testruns in the database
+Tapper::Cmd::Testrun - Backend functions for manipluation of testruns in the database
 
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects that manipulate
 testruns or preconditions in the database. This module handles the testrun part.
 
-    use Artemis::Cmd::Testrun;
+    use Tapper::Cmd::Testrun;
 
-    my $bar = Artemis::Cmd::Testrun->new();
+    my $bar = Tapper::Cmd::Testrun->new();
     $bar->add($testrun);
     ...
 
@@ -72,7 +72,7 @@ sub add {
                 
         $args{earliest}              ||= DateTime->now;
         $args{owner}                 ||= $ENV{USER};
-        $args{owner_user_id}         ||= Artemis::Model::get_or_create_user( $args{owner} );
+        $args{owner_user_id}         ||= Tapper::Model::get_or_create_user( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{$args{requested_hosts}}) {
@@ -120,7 +120,7 @@ sub update {
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-        $args{owner_user_id}         = $args{owner_user_id}         || Artemis::Model::get_or_create_user( $args{owner} )          if $args{owner};
+        $args{owner_user_id}         = $args{owner_user_id}         || Tapper::Model::get_or_create_user( $args{owner} )          if $args{owner};
 
         return $testrun->update_content(\%args);
 }
@@ -200,4 +200,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testrun
+1; # End of Tapper::Cmd::Testrun

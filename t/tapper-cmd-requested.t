@@ -3,22 +3,22 @@
 use strict;
 use warnings;
 
-use Artemis::Schema::TestTools;
+use Tapper::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
 
 use Test::More;
-use Artemis::Cmd::Requested;
-use Artemis::Model 'model';
+use Tapper::Cmd::Requested;
+use Tapper::Model 'model';
 
 
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testruns_with_scheduling.yml' );
 # -----------------------------------------------------------------------------------------------------------------
 
-my $requested = Artemis::Cmd::Requested->new();
-isa_ok($requested, 'Artemis::Cmd::Requested', 'Object');
+my $requested = Tapper::Cmd::Requested->new();
+isa_ok($requested, 'Tapper::Cmd::Requested', 'Object');
 
 
 my $id = $requested->add_host(3001, 'iring');
