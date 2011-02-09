@@ -59,7 +59,7 @@ sub add_host {
 Add a requested feature for a given testrun.
 
 @param int    - testrun id
-@param string - hostname
+@param string - feature
 
 @return success - local id (primary key)
 @return error   - undef
