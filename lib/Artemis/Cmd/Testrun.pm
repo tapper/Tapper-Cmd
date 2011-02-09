@@ -24,7 +24,10 @@ testruns or preconditions in the database. This module handles the testrun part.
 
 =head1 FUNCTIONS
 
+=head2 find_matching_hosts
+
 =cut
+
 
 sub find_matching_hosts
 {
