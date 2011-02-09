@@ -5,6 +5,7 @@ use DateTime;
 
 
 use parent 'Artemis::Cmd';
+use Artemis::Cmd::Requested;
 
 =head1 NAME
 
@@ -55,21 +56,21 @@ sub create
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_host => $host, testplan_id => $instance});
+                                            requested_hosts => $host, testplan_id => $instance});
         }
         if ($plan->{requested_hosts_any}) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_hosts => $plan->{requested_host_any},
+                                            requested_hosts => $plan->{requested_hosts_any},
                                             testplan_id => $instance});
         }
         foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_host => $host,
+                                            requested_hosts => $host,
                                             testplan_id => $instance});
         }
         if ($plan->{requested_features_any}) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_feature => $plan->{requested_features_any},
+                                            requested_features => $plan->{requested_features_any},
                                             testplan_id => $instance});
         }
         return @testruns;
@@ -122,12 +123,11 @@ sub add {
         $args{owner_user_id}         ||= Artemis::Model::get_or_create_user( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
-                foreach my $host (@{$args{requested_hosts}}) {
+                foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
                         my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
-
 
         if (not $args{queue_id}) {
                 $args{queue}   ||= 'AdHoc';
@@ -135,7 +135,16 @@ sub add {
                 die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
                 $args{queue_id}  = $queue_result->first->id;
         }
-        return model('TestrunDB')->resultset('Testrun')->add(\%args);
+        my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
+
+        if ($args{requested_features}) {
+                foreach my $feature (@{ref $args{requested_features} eq 'ARRAY' ?
+                                         $args{requested_features} : [ $args{requested_features} ]}) {
+                        my $request = model('TestrunDB')->resultset('TestrunRequestedFeature')->new({testrun_id => $testrun_id, feature => $feature});
+                        $request->insert();
+                }
+        }
+        return $testrun_id;
 }
 
 
