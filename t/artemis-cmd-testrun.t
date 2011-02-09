@@ -8,6 +8,8 @@ use warnings;
 use strict;
 
 use Test::More;
+use YAML::Syck;
+
 use Artemis::Cmd::Testrun;
 use Artemis::Model 'model';
 
@@ -121,5 +123,14 @@ $retval = $cmd->del(101);
 is($retval, 0, 'Delete testrun');
 $testrun = model('TestrunDB')->resultset('Testrun')->find(101);
 is($testrun, undef, 'Delete correct testrun');
+
+my $tr_spec = YAML::Syck::LoadFile('t/misc_files/testrun.mpc');
+my @testruns = $cmd->create($tr_spec->{description});
+is(int @testruns, 4, 'Testruns created from requested_hosts_all, requested_hosts_any, requested_hosts_any');
+
+TODO: {
+        local $TODO = 'searching all hosts with a given feature set is not yet implemented';
+        is(int @testruns, 6, 'Testruns created from all requests');
+}
 
 done_testing;
