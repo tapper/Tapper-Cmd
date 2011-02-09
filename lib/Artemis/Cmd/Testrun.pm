@@ -55,22 +55,22 @@ sub create
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_host => $host, instance => $instance});
+                                            requested_host => $host, testplan_id => $instance});
         }
         if ($plan->{requested_hosts_any}) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
                                             requested_hosts => $plan->{requested_host_any},
-                                            instance => $instance});
+                                            testplan_id => $instance});
         }
         foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
                                             requested_host => $host,
-                                            instance => $instance});
+                                            testplan_id => $instance});
         }
         if ($plan->{requested_features_any}) {
                 push @testruns, $self->add({precondition => $plan->{preconditions},
                                             requested_feature => $plan->{requested_features_any},
-                                            instance => $instance});
+                                            testplan_id => $instance});
         }
         return @testruns;
 }
