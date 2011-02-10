@@ -6,6 +6,8 @@ use DateTime;
 
 use parent 'Artemis::Cmd';
 use Artemis::Cmd::Requested;
+use Artemis::Cmd::Precondition;
+
 
 =head1 NAME
 
@@ -56,25 +58,37 @@ i.e. without creating a link between the new testruns and a test plan
 sub create
 {
         my ($self, $plan, $instance) = @_;
+        my $cmd = Artemis::Cmd::Precondition->new();
+        my @preconditions = $cmd->add($plan->{preconditions});
+
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
-                push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_hosts => $host, testplan_id => $instance});
+                my $testrun_id = $self->add({precondition => $plan->{preconditions},
+                                             requested_hosts => $host,
+                                             testplan_id => $instance});
+                $self->assign_preconditions($testrun_id, @preconditions);
+                push @testruns, $testrun_id;
         }
         if ($plan->{requested_hosts_any}) {
-                push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_hosts => $plan->{requested_hosts_any},
-                                            testplan_id => $instance});
+                my $testrun_id = $self->add({precondition => $plan->{preconditions},
+                                             requested_hosts => $plan->{requested_hosts_any},
+                                             testplan_id => $instance});
+                $self->assign_preconditions($testrun_id, @preconditions);
+                push @testruns, $testrun_id;
         }
         foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
-                push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_hosts => $host,
-                                            testplan_id => $instance});
+                my $testrun_id = $self->add({precondition => $plan->{preconditions},
+                                             requested_hosts => $host,
+                                             testplan_id => $instance});
+                $self->assign_preconditions($testrun_id, @preconditions);
+                push @testruns, $testrun_id;
         }
         if ($plan->{requested_features_any}) {
-                push @testruns, $self->add({precondition => $plan->{preconditions},
-                                            requested_features => $plan->{requested_features_any},
-                                            testplan_id => $instance});
+                my $testrun_id = $self->add({precondition => $plan->{preconditions},
+                                             requested_features => $plan->{requested_features_any},
+                                             testplan_id => $instance});
+                $self->assign_preconditions($testrun_id, @preconditions);
+                push @testruns, $testrun_id;
         }
         return @testruns;
 }
