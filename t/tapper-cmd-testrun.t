@@ -136,13 +136,16 @@ TODO: {
 for (my $i=1; $i<=2; $i++) {
         $testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
         is($testrun->testrun_scheduling->requested_hosts->count, 1, "$i. requested_host_all testrun with one requested host");
+        is($testrun->preconditions, 6, "$i. requested_host_all testrun has preconditions assigned");
 }
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
 is($testrun->testrun_scheduling->requested_hosts->count, 2, "requested_host_any testrun with two requested hosts");
+is($testrun->preconditions, 6, "requested_host_any testrun has preconditions assigned");
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
 is($testrun->testrun_scheduling->requested_features->count, 2, "requested_features_any testrun with two requested features");
+is($testrun->preconditions, 6, "requested_feature_any testrun has preconditions assigned");
 
 
 done_testing;
