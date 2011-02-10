@@ -12,6 +12,7 @@ requires 'perl'                  => '5.010';
 requires 'Tapper::Model'        => '2.010020';
 requires 'Kwalify'               => 0;
 requires 'MooseX::Declare'       => 0;
+requires 'YAML::Syck'            => 0;
 
 build_requires 'Test::More';
 

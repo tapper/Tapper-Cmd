@@ -8,6 +8,8 @@ use warnings;
 use strict;
 
 use Test::More;
+use YAML::Syck;
+
 use Tapper::Cmd::Testrun;
 use Tapper::Model 'model';
 
@@ -121,5 +123,26 @@ $retval = $cmd->del(101);
 is($retval, 0, 'Delete testrun');
 $testrun = model('TestrunDB')->resultset('Testrun')->find(101);
 is($testrun, undef, 'Delete correct testrun');
+
+my $tr_spec = YAML::Syck::LoadFile('t/misc_files/testrun.mpc');
+my @testruns = $cmd->create($tr_spec->{description});
+is(int @testruns, 4, 'Testruns created from requested_hosts_all, requested_hosts_any, requested_hosts_any');
+
+TODO: {
+        local $TODO = 'searching all hosts with a given feature set is not yet implemented';
+        is(int @testruns, 6, 'Testruns created from all requests');
+}
+
+for (my $i=1; $i<=2; $i++) {
+        $testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
+        is($testrun->testrun_scheduling->requested_hosts->count, 1, "$i. requested_host_all testrun with one requested host");
+}
+
+$testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
+is($testrun->testrun_scheduling->requested_hosts->count, 2, "requested_host_any testrun with two requested hosts");
+
+$testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
+is($testrun->testrun_scheduling->requested_features->count, 2, "requested_features_any testrun with two requested features");
+
 
 done_testing;

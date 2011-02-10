@@ -5,6 +5,7 @@ use DateTime;
 
 
 use parent 'Tapper::Cmd';
+use Artemis::Cmd::Requested;
 
 =head1 NAME
 
@@ -23,12 +24,61 @@ testruns or preconditions in the database. This module handles the testrun part.
 
 =head1 FUNCTIONS
 
-
-=head2 add
-
-Add a new testrun to database.
+=head2 find_matching_hosts
 
 =cut
+
+
+sub find_matching_hosts
+{
+        return;
+}
+
+
+=head2 create
+
+Create new testruns from one element of a test plan (actually a test
+plan instance) that contains all information including requested hosts
+and features. If the new testruns belong to a test plan instance the
+function expects the id of this instance as second parameter. If the
+instance id is empty the function can also be used to create testruns
+from a testplan like layout without actually using test plan features,
+i.e. without creating a link between the new testruns and a test plan
+(instance).
+
+@param hash ref - test plan element
+@param instance - test plan instance id
+
+@return array   - testrun ids
+
+=cut
+
+sub create
+{
+        my ($self, $plan, $instance) = @_;
+        my @testruns;
+        foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
+                push @testruns, $self->add({precondition => $plan->{preconditions},
+                                            requested_hosts => $host, testplan_id => $instance});
+        }
+        if ($plan->{requested_hosts_any}) {
+                push @testruns, $self->add({precondition => $plan->{preconditions},
+                                            requested_hosts => $plan->{requested_hosts_any},
+                                            testplan_id => $instance});
+        }
+        foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
+                push @testruns, $self->add({precondition => $plan->{preconditions},
+                                            requested_hosts => $host,
+                                            testplan_id => $instance});
+        }
+        if ($plan->{requested_features_any}) {
+                push @testruns, $self->add({precondition => $plan->{preconditions},
+                                            requested_features => $plan->{requested_features_any},
+                                            testplan_id => $instance});
+        }
+        return @testruns;
+}
+
 
 
 =head2 add
@@ -46,6 +96,7 @@ or
 * shortname - string
 * topic - string
 * date - DateTime
+* instance - int
 
 * owner_user_id - int
 or
@@ -65,7 +116,7 @@ sub add {
         my %args = %{$received_args}; # copy
 
         $args{notes}                 ||= '';
-        $args{shortname}             ||=  '';
+        $args{shortname}             ||= '';
 
         $args{topic_name}              = $args{topic}    || 'Misc';
         my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
@@ -75,20 +126,28 @@ sub add {
         $args{owner_user_id}         ||= Tapper::Model::get_or_create_user( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
-                foreach my $host (@{$args{requested_hosts}}) {
+                foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
                         my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
                 
-                
         if (not $args{queue_id}) {
                 $args{queue}   ||= 'AdHoc';
-                my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}}); 
+                my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}});
                 die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
                 $args{queue_id}  = $queue_result->first->id;
         }
-        return model('TestrunDB')->resultset('Testrun')->add(\%args);
+        my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
+
+        if ($args{requested_features}) {
+                foreach my $feature (@{ref $args{requested_features} eq 'ARRAY' ?
+                                         $args{requested_features} : [ $args{requested_features} ]}) {
+                        my $request = model('TestrunDB')->resultset('TestrunRequestedFeature')->new({testrun_id => $testrun_id, feature => $feature});
+                        $request->insert();
+                }
+        }
+        return $testrun_id;
 }
 
 
