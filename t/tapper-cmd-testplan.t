@@ -1,6 +1,6 @@
 #!perl
 
-use Artemis::Schema::TestTools;
+use Tapper::Schema::TestTools;
 use Test::Fixture::DBIC::Schema;
 use 5.010;
 
@@ -9,16 +9,16 @@ use strict;
 
 use Test::More;
 
-use Artemis::Cmd::Testplan;
-use Artemis::Model 'model';
+use Tapper::Cmd::Testplan;
+use Tapper::Model 'model';
 
 
 # -----------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/testrundb/testruns_with_scheduling.yml' );
 # -----------------------------------------------------------------------------------
 
-my $cmd = Artemis::Cmd::Testplan->new();
-isa_ok($cmd, 'Artemis::Cmd::Testplan', '$testrun');
+my $cmd = Tapper::Cmd::Testplan->new();
+isa_ok($cmd, 'Tapper::Cmd::Testplan', '$testrun');
 
 
 #######################################################

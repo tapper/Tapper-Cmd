@@ -5,7 +5,7 @@ use DateTime;
 
 
 use parent 'Tapper::Cmd';
-use Artemis::Cmd::Requested;
+use Tapper::Cmd::Requested;
 use Tapper::Cmd::Precondition;
 
 

@@ -1,23 +1,23 @@
-package Artemis::Cmd::Testplan;
+package Tapper::Cmd::Testplan;
 
 use Moose;
-use Artemis::Model 'model';
+use Tapper::Model 'model';
 use YAML::Syck;
 
-use parent 'Artemis::Cmd';
+use parent 'Tapper::Cmd';
 
 =head1 NAME
 
-Artemis::Cmd::Testplan - Backend functions for manipluation of testplan instances in the database
+Tapper::Cmd::Testplan - Backend functions for manipluation of testplan instances in the database
 
 =head1 SYNOPSIS
 
 This project offers functions to add, delete or update testplan
 instances in the database.
 
-    use Artemis::Cmd::Testplan;
+    use Tapper::Cmd::Testplan;
 
-    my $cmd = Artemis::Cmd::Testplan->new();
+    my $cmd = Tapper::Cmd::Testplan->new();
     my $plan_id = $cmd->add($plan);
     $cmd->update($plan_id, $new_plan);
     $cmd->del($plan_id);
@@ -53,8 +53,8 @@ sub add {
         foreach my $plan (@plans) {
                 my $type = $plan->{type};
                 $type = ucfirst($type);
-                eval "use Artemis::Cmd::$type";
-                my $handler = "Artemis::Cmd::$type"->new();
+                eval "use Tapper::Cmd::$type";
+                my $handler = "Tapper::Cmd::$type"->new();
                 my @new_ids = $handler->create($plan->{description}, $instance->id);
                 push @testrun_ids, @new_ids;
         }
@@ -105,4 +105,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Artemis::Cmd::Testplan
+1; # End of Tapper::Cmd::Testplan
