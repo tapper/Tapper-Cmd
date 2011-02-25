@@ -16,5 +16,7 @@ requires 'YAML::Syck'            => 0;
 
 build_requires 'Test::More';
 
+author_requires 'Module::Install::WriteAll';
+
 WriteAll;
 
