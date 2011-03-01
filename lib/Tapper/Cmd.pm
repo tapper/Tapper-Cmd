@@ -2,7 +2,7 @@ package Tapper::Cmd;
 
 =head1 NAME
 
-Tapper::Cmd - Backend functions for manipluation of testruns and preconditions in the database
+Tapper::Cmd - Tapper - Backend functions for CLI and Web
 
 =cut
 use Moose;
