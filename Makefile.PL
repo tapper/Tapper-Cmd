@@ -5,7 +5,7 @@ use inc::Module::Install;
 
 name     'Tapper-Cmd';
 all_from 'lib/Tapper/Cmd.pm';
-author   'AMD OSRC Tapper Team <tapper@amd64.com>';
+author   'AMD OSRC Tapper Team <tapper@amd64.org>';
 license  'freebsd';
 
 requires 'perl'                  => '5.010';
