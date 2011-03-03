@@ -2,15 +2,14 @@ package Tapper::Cmd;
 
 =head1 NAME
 
-Tapper::Cmd - Backend functions for manipluation of testruns and preconditions in the database
+Tapper::Cmd - Tapper - Backend functions for CLI and Web
 
 =cut
 use Moose;
 
 use Tapper::Model 'model';
 
-our $VERSION = '2.010035';
-
+our $VERSION = '3.000001';
 
 =head1 SYNOPSIS
 
@@ -59,7 +58,7 @@ sub assign_preconditions
 
 =head1 AUTHOR
 
-OSRC SysInt Team, C<< <osrc-sysint at elbe.amd.com> >>
+AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
 
 =head1 BUGS
 
@@ -70,11 +69,9 @@ automatically be notified of progress on your bug as I make changes.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 OSRC SysInt Team, all rights reserved.
+Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
+This program is released under the following license: freebsd
 
 =cut
 
