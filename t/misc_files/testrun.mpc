@@ -1,6 +1,7 @@
 ---
 type: testrun
 description:
+  topic: Topic
   requested_hosts_all:
   - bullock
   - dickstone
