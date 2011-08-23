@@ -139,7 +139,7 @@ sub add {
 
         $args{topic_name}              = $args{topic}    || 'Misc';
         my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
-                
+
         $args{earliest}              ||= DateTime->now;
         $args{owner}                 ||= $ENV{USER};
         $args{owner_user_id}         ||= Tapper::Model::get_or_create_user( $args{owner} );
@@ -150,7 +150,7 @@ sub add {
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
-                
+
         if (not $args{queue_id}) {
                 $args{queue}   ||= 'AdHoc';
                 my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}});
@@ -218,7 +218,7 @@ prevent confusion with the buildin delete function.
 sub del {
         my ($self, $id) = @_;
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
-        return "Running testruns can not be deleted. Try freehost or wait till the testrun is finished." 
+        return "Running testruns can not be deleted. Try freehost or wait till the testrun is finished."
           if $testrun->testrun_scheduling->status eq 'running';
         if ($testrun->testrun_scheduling->requested_hosts->count) {
                 foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
