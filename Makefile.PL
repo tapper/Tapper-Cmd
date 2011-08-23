@@ -13,6 +13,8 @@ requires 'Tapper::Model' => "3.000010";
 requires 'Kwalify'               => 0;
 requires 'MooseX::Declare'       => 0;
 requires 'YAML::Syck'            => "1.17";
+requires 'Perl6::Junctions';
+requires 'Hash::Merge::Simple';
 
 build_requires 'Test::More';
 
