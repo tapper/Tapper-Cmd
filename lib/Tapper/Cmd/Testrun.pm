@@ -2,7 +2,8 @@ package Tapper::Cmd::Testrun;
 use Moose;
 use Tapper::Model 'model';
 use DateTime;
-
+use Perl6::Junction qw/any/;
+use Hash::Merge::Simple qw/merge/;
 
 use parent 'Tapper::Cmd';
 use Tapper::Cmd::Requested;
@@ -60,38 +61,39 @@ sub create
         my ($self, $plan, $instance) = @_;
         my $cmd           = Tapper::Cmd::Precondition->new();
         my @preconditions = $cmd->add($plan->{preconditions});
-        my $topic         = $plan->{topic};
+        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) eq any('topic', 'queue')} keys %$plan;
 
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
-                my $testrun_id = $self->add({precondition    => $plan->{preconditions},
-                                             requested_hosts => $host,
-                                             topic           => $topic,
-                                             testplan_id     => $instance});
+                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                                                      requested_hosts => $host,
+                                                      testplan_id     => $instance,
+                                                     };
+                my $testrun_id = $self->add($merged_arguments);
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
         if ($plan->{requested_hosts_any}) {
-                my $testrun_id = $self->add({precondition    => $plan->{preconditions},
-                                             requested_hosts => $plan->{requested_hosts_any},
-                                             topic           => $topic,
-                                             testplan_id     => $instance});
+                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                                                      requested_hosts => $plan->{requested_hosts_any},
+                                                      testplan_id     => $instance};
+                my $testrun_id = $self->add($merged_arguments );
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
         foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
-                my $testrun_id = $self->add({precondition    => $plan->{preconditions},
-                                             requested_hosts => $host,
-                                             topic           => $topic,
-                                             testplan_id     => $instance});
+                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                                                      requested_hosts => $host,
+                                                      testplan_id     => $instance};
+                my $testrun_id = $self->add($merged_arguments );
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
         if ($plan->{requested_features_any}) {
-                my $testrun_id = $self->add({precondition       => $plan->{preconditions},
-                                             requested_features => $plan->{requested_features_any},
-                                             topic              => $topic,
-                                             testplan_id        => $instance});
+                my $merged_arguments = merge \%args, {precondition       => $plan->{preconditions},
+                                                      requested_features => $plan->{requested_features_any},
+                                                      testplan_id        => $instance};
+                my $testrun_id = $self->add($merged_arguments );
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
