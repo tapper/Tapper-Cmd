@@ -103,8 +103,8 @@ prevent confusion with the buildin delete function.
 
 sub del {
         my ($self, $id) = @_;
-        my $testrun = model('TestrunDB')->resultset('Queue')->find($id);
-        $testrun->delete();
+        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
+        $queue->delete();
         return 0;
 }
 
