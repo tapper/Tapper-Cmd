@@ -104,7 +104,9 @@ prevent confusion with the buildin delete function.
 sub del {
         my ($self, $id) = @_;
         my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-        $queue->delete();
+        $queue->is_deleted(1);
+        $queue->is_active(0);
+        $queue->update;
         return 0;
 }
 
