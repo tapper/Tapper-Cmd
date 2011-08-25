@@ -105,7 +105,7 @@ sub del {
         my ($self, $id) = @_;
         my $queue = model('TestrunDB')->resultset('Queue')->find($id);
         $queue->is_deleted(1);
-        $queue->is_active(0);
+        $queue->active(0);
         $queue->update;
         return 0;
 }
