@@ -68,6 +68,11 @@ plan content and a path.
 sub add {
         my ($self, $plan_content, $path, $name) = @_;
 
+        my @plans = YAML::Syck::Load($plan_content);
+        # use Data::Dumper;
+        # print STDERR "plans: ".Dumper($plan_content);
+        # print STDERR "plans: ".Dumper(\@plans);
+
         my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({evaluated_testplan => $plan_content, 
                                                                                path => $path, 
                                                                                name => $name,
@@ -75,8 +80,6 @@ sub add {
         $instance->insert;
 
         my @testrun_ids;
-
-        my @plans = YAML::Syck::Load($plan_content);
         foreach my $plan (@plans) {
                 my $module = $self->get_module_for_type($plan->{type});
                 eval "use $module";
