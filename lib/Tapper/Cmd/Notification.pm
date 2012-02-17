@@ -102,7 +102,7 @@ subscriptions.
 sub list
 {
         my ($self, $search) = @_;
-        return model('ReportsDB')->resultset('Notification')->search($search);
+        return model('ReportsDB')->resultset('Notification')->search($search, { result_class => 'DBIx::Class::ResultClass::HashRefInflator' });
 }
 
 
