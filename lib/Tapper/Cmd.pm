@@ -9,7 +9,7 @@ use Moose;
 
 use Tapper::Model 'model';
 
-our $VERSION = '3.000010';
+our $VERSION = '3.000012';
 
 =head1 SYNOPSIS
 
