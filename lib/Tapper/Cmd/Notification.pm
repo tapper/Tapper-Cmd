@@ -19,16 +19,14 @@ notification subscriptions.
 
     my $subscription = Tapper::Cmd::Notification->new();
 
-    my $details = {event => "testrun_finished",
-                   check => "event.type == testrun_finish and testrun.id == 23",
-                   call  => 'jabber',
-                   comment => "Get back to work, testrun 23 is finished",
-                   persist => 0,
-                   owner   => 'anton',
-
+    my $details = {event      => "testrun_finished",
+                   condition  => "testrun('id') == 23",
+                   comment    => "Get back to work, testrun 23 is finished",
+                   persist    => 0,
+                   user_login => 'anton',
                   };
     my $id = $subscription->add($details);
-    $details->{check} = "event.type == testrun_finish and testrun.id == 24";
+    $details->{condition} = "testrun('id') == 24";
     my $error = $subscription->update($id, $details);
     $error = $subscription->delete($id);
 
