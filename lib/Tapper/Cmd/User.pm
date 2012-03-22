@@ -104,7 +104,7 @@ sub list
         my @users;
         my $user_rs = model('ReportsDB')->resultset('User')->search($search);
         while (my $user_result = $user_rs->next) {
-                my $user = { name => $user_result->name, login => $user_result->login };
+                my $user = { id => $user_result->id, name => $user_result->name, login => $user_result->login };
                 $user->{contacts} = [ map { { address => $_->address, protocol => $_->protocol } } $user_result->contacts->all ];
                 push @users, $user;
         }
