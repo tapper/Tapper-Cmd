@@ -64,6 +64,16 @@ sub add
         my $contacts = $data->{contacts};
         delete $data->{contacts};
 
+        $data->{login} ||= $ENV{USER};
+
+        if (not $data->{name}) {
+                # Try to guess the real name. Since UNIX has no idea of a real name, this is extremly error prone.
+                my @userdata = getpwnam($data->{login});
+                $data->{name} = $userdata[6];
+                $data->{name} =~ s/,//g;
+        }
+
+
         my $user = model('ReportsDB')->resultset('User')->new($data);
         $user->insert;
 
