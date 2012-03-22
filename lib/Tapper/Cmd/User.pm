@@ -116,10 +116,12 @@ sub list
 
 =head2 del
 
-Delete a user subscription with given id. Its named del instead of delete to
-prevent confusion with the buildin delete function.
+Delete a user subscription with given id. Its named del instead of
+delete to prevent confusion with the buildin delete function. The first
+parameter can be either the users database id (not the UNIX id!) or the
+login name.
 
-@param int - user id
+@param int|string - user id|user login name
 
 @return success - 0
 
@@ -130,8 +132,13 @@ prevent confusion with the buildin delete function.
 sub del
 {
         my ($self, $id) = @_;
-        my $user = model('ReportsDB')->resultset('User')->find($id);
-        die qq(No user with id "$id" found) if not $user;;
+        my $user;
+        if ($id =~ /^\d+$/) {
+                $user = model('ReportsDB')->resultset('User')->find($id);
+        } else {
+                $user = model('ReportsDB')->resultset('User')->find({login => $id});
+        }
+        die qq(User "$id" not found) if not $user;;
         $user->delete();
         return 0;
 }
