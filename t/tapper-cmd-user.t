@@ -41,12 +41,14 @@ ok(defined($user_id), 'Adding user');
 my @users = $cmd->list();
 my $expected_users = [
                       {
+                       id=> 1,
                        contacts => [{ address => "anton\@mail.net", protocol => "mail" }],
                        login => "anton",
                        name => "Anton Gorodezki",
                       },
-                      { contacts => [], login => "alissa", name => "Alissa Donnikowa" },
+                      { id => 2, contacts => [], login => "alissa", name => "Alissa Donnikowa" },
                       {
+                       id => 3,
                        contacts => [{ address => "anton\@nightwatch.ru", protocol => "Mail" }],
                        login => "anton",
                        name => "Anton Gorodetzky",
@@ -58,11 +60,12 @@ $cmd->del($user_id);
 @users = $cmd->list();
 $expected_users = [
                       {
+                       id => 1,
                        contacts => [{ address => "anton\@mail.net", protocol => "mail" }],
                        login => "anton",
                        name => "Anton Gorodezki",
                       },
-                      { contacts => [], login => "alissa", name => "Alissa Donnikowa" },
+                      { id => 2, contacts => [], login => "alissa", name => "Alissa Donnikowa" },
                      ];
 is_deeply(\@users, $expected_users, 'Expected users after deleting');
 
