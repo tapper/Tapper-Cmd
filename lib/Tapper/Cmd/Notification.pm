@@ -20,13 +20,13 @@ notification subscriptions.
     my $subscription = Tapper::Cmd::Notification->new();
 
     my $details = {event      => "testrun_finished",
-                   condition  => "testrun('id') == 23",
+                   filter  => "testrun('id') == 23",
                    comment    => "Get back to work, testrun 23 is finished",
                    persist    => 0,
                    user_login => 'anton',
                   };
     my $id = $subscription->add($details);
-    $details->{condition} = "testrun('id') == 24";
+    $details->{filter} = "testrun('id') == 24";
     my $error = $subscription->update($id, $details);
     $error = $subscription->delete($id);
 
