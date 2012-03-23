@@ -3,6 +3,7 @@ use Moose;
 
 use Tapper::Model 'model';
 use YAML::Syck;
+use 5.010;
 
 use parent 'Tapper::Cmd';
 
@@ -141,6 +142,40 @@ sub del
         die qq(User "$id" not found) if not $user;;
         $user->delete();
         return 0;
+}
+
+=head2 contact_add
+
+Add a contact to an existing user in reportsdb. Expects all details as a hash
+reference.
+
+@param int|string - user as id or login
+@param hash ref   - contact data
+
+@return success - user id
+@return error   - undef
+
+@throws Perl die
+
+=cut
+
+sub contact_add
+{
+        my ($self, $user, $data) = @_;
+
+        $user //= $ENV{USER};
+
+        if ( $user !~ m/^\d+$/ ) {
+                my $user_result = model('ReportsDB')->resultset('User')->find({login => $user});
+                $user = $user_result->id;
+        }
+        $data->{user_id} ||= $user;
+
+        my $contact = model('ReportsDB')->resultset('Contact')->new($data);
+        $contact->insert;
+
+
+        return $contact->id;
 }
 
 
