@@ -27,7 +27,7 @@ isa_ok($cmd, 'Tapper::Cmd::User');
 #
 #######################################################
 
-my $content = {login => "anton",
+my $content = {login => "anton2",
                name  => 'Anton Gorodetzky',
                contacts => [{
                              protocol => 'Mail',
