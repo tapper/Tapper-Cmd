@@ -167,6 +167,7 @@ sub contact_add
 
         if ( $user !~ m/^\d+$/ ) {
                 my $user_result = model('ReportsDB')->resultset('User')->find({login => $user});
+                die "User $user does not exist in database\n" if not $user_result;
                 $user = $user_result->id;
         }
         $data->{user_id} ||= $user;
