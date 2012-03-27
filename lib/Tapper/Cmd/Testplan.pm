@@ -4,6 +4,7 @@ use Moose;
 use Tapper::Model 'model';
 use YAML::Syck;
 use 5.010;
+use Try::Tiny;
 
 use parent 'Tapper::Cmd';
 
@@ -63,6 +64,8 @@ plan content and a path.
 
 @return int - testplan instance id
 
+@throws die()
+
 =cut
 
 sub add {
@@ -81,8 +84,15 @@ sub add {
 
         my @testrun_ids;
         foreach my $plan (@plans) {
+                die "Missing plan type for the following testplan: $plan";
                 my $module = $self->get_module_for_type($plan->{type});
-                eval "use $module";
+
+                try {
+                        eval "use $module";
+                } catch {
+                        die "Can not load '$module' to handle testplan of type $plan->{type}: $!";
+                };
+
                 my $handler = "$module"->new();
                 my @new_ids = $handler->create($plan->{description}, $instance->id);
                 push @testrun_ids, @new_ids;
