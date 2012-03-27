@@ -84,7 +84,7 @@ sub add {
 
         my @testrun_ids;
         foreach my $plan (@plans) {
-                die "Missing plan type for the following testplan: $plan";
+                die "Missing plan type for the following testplan: \n".Dump($plan) unless $plan->{type};
                 my $module = $self->get_module_for_type($plan->{type});
 
                 try {
