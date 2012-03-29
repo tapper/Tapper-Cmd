@@ -220,16 +220,18 @@ prevent confusion with the buildin delete function.
 sub del {
         my ($self, $id) = @_;
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
-        return "Running testruns can not be deleted. Try freehost or wait till the testrun is finished."
-          if $testrun->testrun_scheduling and $testrun->testrun_scheduling->status eq 'running';
-        if ($testrun->testrun_scheduling->requested_hosts->count) {
-                foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
-                        $host->delete();
+        if ($testrun->testrun_scheduling) {
+                return "Running testruns can not be deleted. Try freehost or wait till the testrun is finished."
+                  if $testrun->testrun_scheduling->status eq 'running';
+                if ($testrun->testrun_scheduling->requested_hosts->count) {
+                        foreach my $host ($testrun->testrun_scheduling->requested_hosts->all) {
+                                $host->delete();
+                        }
                 }
-        }
-        if ($testrun->testrun_scheduling->requested_features->count) {
-                foreach my $feat ($testrun->testrun_scheduling->requested_features->all) {
-                        $feat->delete();
+                if ($testrun->testrun_scheduling->requested_features->count) {
+                        foreach my $feat ($testrun->testrun_scheduling->requested_features->all) {
+                                $feat->delete();
+                        }
                 }
         }
 
