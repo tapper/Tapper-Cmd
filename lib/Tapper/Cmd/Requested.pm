@@ -80,16 +80,9 @@ sub add_feature {
 
 AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
 
-=head1 BUGS
-
-Please report any bugs or feature requests to C<osrc-sysin at elbe.amd.com>, or through
-the web interface at L<https://osrc/bugs>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
+Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
 
 This program is released under the following license: freebsd
 
