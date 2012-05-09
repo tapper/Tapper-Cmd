@@ -9,5 +9,3 @@ BEGIN {
 	use_ok( 'Tapper::Cmd::Precondition' );
 	use_ok( 'Tapper::Cmd::Queue' );
 }
-
-diag( "Testing Tapper::Cmd $Tapper::Cmd::VERSION, Perl $], $^X" );

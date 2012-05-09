@@ -1,15 +1,9 @@
 package Tapper::Cmd;
+# ABSTRACT: Tapper - Backend functions for CLI and Web
 
-=head1 NAME
-
-Tapper::Cmd - Tapper - Backend functions for CLI and Web
-
-=cut
 use Moose;
 
 use Tapper::Model 'model';
-
-our $VERSION = '3.000012';
 
 =head1 SYNOPSIS
 
@@ -28,11 +22,9 @@ exist yet.
     $bar->add($testrun);
     ...
 
+=cut
+
 =head1 FUNCTIONS
-
-=cut 
-
-
 
 =head2 assign_preconditions
 
@@ -54,18 +46,5 @@ sub assign_preconditions
         return $testrun->assign_preconditions(@preconditions);
 
 }
-
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::Cmd
