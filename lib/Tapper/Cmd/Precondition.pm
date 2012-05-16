@@ -44,16 +44,16 @@ sub die_on_invalid_precondition
 {
         my ($self, $preconditions, $schema) = @_;
         if (not ($schema and ref($schema) eq 'HASH') ) {
-                $schema = 
+                $schema =
                 {
                  type               => 'map',
-                 mapping            => 
+                 mapping            =>
                  {
-                  precondition_type => 
+                  precondition_type =>
                   { type            => 'str',
                     required        => 1,
                   },
-                  '='               => 
+                  '='               =>
                   {
                    type             => 'any',
                    required         => 1,
@@ -65,7 +65,7 @@ sub die_on_invalid_precondition
  precondition:
         foreach my $precondition (@$preconditions) {
                 # undefined preconditions are caused by tapper headers or a "---\n" line at the end
-                next precondition unless defined($precondition); 
+                next precondition unless defined($precondition);
                 Kwalify::validate($schema, $precondition);
         }
         return 0;
@@ -148,19 +148,5 @@ sub del {
         $precondition->delete();
         return 0;
 }
-
-
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::Cmd::Testrun

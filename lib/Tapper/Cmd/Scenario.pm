@@ -49,7 +49,7 @@ sub add {
         $scenario->insert;
         return $scenario->id;
 }
-        
+
 
 
 =head2 del
@@ -70,20 +70,5 @@ sub del {
         $scenario->delete();
         return 0;
 }
-
-
-
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::Cmd::Testrun

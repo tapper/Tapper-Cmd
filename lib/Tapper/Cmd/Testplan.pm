@@ -76,8 +76,8 @@ sub add {
         # print STDERR "plans: ".Dumper($plan_content);
         # print STDERR "plans: ".Dumper(\@plans);
 
-        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({evaluated_testplan => $plan_content, 
-                                                                               path => $path, 
+        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({evaluated_testplan => $plan_content,
+                                                                               path => $path,
                                                                                name => $name,
                                                                               });
         $instance->insert;
@@ -121,18 +121,5 @@ sub del {
         $testplan->delete();
         return 0;
 }
-
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::Cmd::Testplan

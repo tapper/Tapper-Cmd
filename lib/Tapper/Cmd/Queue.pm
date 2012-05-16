@@ -63,7 +63,7 @@ sub add {
 
 =head2 update
 
-Changes values of an existing queue. 
+Changes values of an existing queue.
 
 @param int      - queue id
 @param hash ref - overwrite these options
@@ -109,19 +109,5 @@ sub del {
         $queue->update;
         return 0;
 }
-
-
-
-=head1 AUTHOR
-
-AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2012 AMD OSRC Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
 
 1; # End of Tapper::Cmd::Testrun
