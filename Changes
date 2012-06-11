@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.0.1     2012-06-11
         - cmd for user management
         - add listing of notifications
         - delete queue by just setting deleted flag
