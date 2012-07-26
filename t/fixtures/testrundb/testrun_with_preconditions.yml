@@ -29,6 +29,15 @@
     notes: perfmon
     topic_name: Software
 
+- schema: TestrunScheduling
+  name: perfmon
+  data:
+    testrun_id: 23
+    queue_id: 1
+    status: finished
+    auto_rerun: 1
+
+
 - schema: Testrun
   name: lmbench
   data:
