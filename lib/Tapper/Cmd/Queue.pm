@@ -50,7 +50,9 @@ sub add {
         my ($self, $args) = @_;
         my %args = %{$args};    # copy
 
-        my $q = model('TestrunDB')->resultset('Queue')->new(\%args);
+        $args{is_deleted} = 0;
+        
+        my $q = model('TestrunDB')->resultset('Queue')->update_or_create(\%args);
         $q->insert;
         my $all_queues = model('TestrunDB')->resultset('Queue');
         foreach my $queue ($all_queues->all) {
