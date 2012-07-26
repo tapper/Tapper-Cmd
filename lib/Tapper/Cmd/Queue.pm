@@ -91,10 +91,13 @@ sub update {
 
 =head2 del
 
-Delete a queue with given id. Its named del instead of delete to
-prevent confusion with the buildin delete function.
+Delete a queue with given id. Its named del instead of delete to prevent
+confusion with the buildin delete function. If the queue is not empty
+and force is not given, we keep the queue and only set it to deleted to
+not break showing old testruns and their results.
 
-@param int - queue id
+@param int  - queue id
+@param bool - force deleted
 
 @return success - 0
 @return error   - error string
@@ -102,11 +105,15 @@ prevent confusion with the buildin delete function.
 =cut
 
 sub del {
-        my ($self, $id) = @_;
+        my ($self, $id, $force) = @_;
         my $queue = model('TestrunDB')->resultset('Queue')->find($id);
         $queue->is_deleted(1);
         $queue->active(0);
         $queue->update;
+
+        # empty queues can be deleted, because it does not break anything
+        $queue->delete if $queue->testrunschedulings->count == 0;
+
         return 0;
 }
 
