@@ -112,6 +112,11 @@ sub del {
         $queue->is_deleted(1);
         $queue->active(0);
         $queue->update;
+        my $attached_jobs = $queue->testrunschedulings->search({status => 'schedule'});
+        while (my $job = $attached_jobs->next) {
+                $job->status('finished');
+                $job->update;
+        } 
 
         # empty queues can be deleted, because it does not break anything
         $queue->delete if $queue->testrunschedulings->count == 0;
