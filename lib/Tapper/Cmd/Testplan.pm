@@ -104,6 +104,16 @@ sub add {
 
 =head2 del
 
+Delete testrun with given id from database. Please not that this does
+not remove the associated testruns.
+
+
+@param int - testplan instance id
+
+@return success - 0
+@return error - exception
+
+@throws die()
 
 =cut
 
