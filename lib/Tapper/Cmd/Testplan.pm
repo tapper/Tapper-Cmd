@@ -101,14 +101,6 @@ sub add {
 }
 
 
-=head2 update
-
-
-=cut
-
-sub update {
-        my ($self, $id, $args) = @_;
-}
 
 =head2 del
 
