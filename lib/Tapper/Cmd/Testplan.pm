@@ -124,4 +124,27 @@ sub del {
         return 0;
 }
 
+=head2 rerun
+
+Reapply the evaluated testplan of the given testplan instance.
+
+@param int - testplan instance id
+
+@return success - new testplan id
+@return error   - exception
+
+@throws die()
+
+=cut
+
+sub rerun
+{
+        my ($self, $id) = @_;
+
+        my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+        die "No testplan with ID $id\n" unless $testplan;
+
+        return $self->add($testplan->evaluated_testplan, $testplan->path, $testplan->name);
+}
+
 1; # End of Tapper::Cmd::Testplan
