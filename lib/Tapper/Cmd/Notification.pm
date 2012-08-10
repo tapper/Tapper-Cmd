@@ -49,14 +49,14 @@ Make sure the user is given as user id.
 sub get_user
 {
         my ($self, $data) = @_;
-        if (not $data->{user_id}) {
+        if (not $data->{owner_id}) {
                 my $login = $data->{user_login} || $ENV{USER};
-                my $user = model('ReportsDB')->resultset('User')->search({login => $login})->first;
-                if (not $user) {
+                my $owner = model('ReportsDB')->resultset('Owner')->search({login => $login})->first;
+                if (not $owner) {
                         die "User '$login' does not exist in the database. Please create this user first.\n";
                 }
 
-                $data->{user_id} = $user->id;
+                $data->{owner_id} = $owner->id;
                 delete $data->{user_login};
         }
         return $data;

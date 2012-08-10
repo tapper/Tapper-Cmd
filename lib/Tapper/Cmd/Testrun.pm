@@ -104,7 +104,7 @@ sub create
 
 =head2 add
 
-Add a new testrun. Owner/owner_user_id and requested_hosts/requested_host_ids
+Add a new testrun. Owner/owner_id and requested_hosts/requested_host_ids
 allow to specify the associated value as id or string which will be converted
 to the associated id. If both values are given the id is used and the string
 is ignored. The function expects a hash reference with the following options:
@@ -119,7 +119,7 @@ or
 * date - DateTime
 * instance - int
 
-* owner_user_id - int
+* owner_id - int
 or
 * owner - string
 
@@ -144,7 +144,7 @@ sub add {
 
         $args{earliest}              ||= DateTime->now;
         $args{owner}                 ||= $ENV{USER};
-        $args{owner_user_id}         ||= Tapper::Model::get_or_create_user( $args{owner} );
+        $args{owner_id}              ||= Tapper::Model::get_or_create_owner( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
@@ -182,7 +182,7 @@ the following options (at least one should be given):
 * shortname - string
 * topic     - string
 * date      - DateTime
-* owner_user_id - int
+* owner_id - int
 or
 * owner     - string
 
@@ -200,7 +200,7 @@ sub update {
 
         my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
 
-        $args{owner_user_id}         = $args{owner_user_id}         || Tapper::Model::get_or_create_user( $args{owner} )          if $args{owner};
+        $args{owner_id} = $args{owner_id} || Tapper::Model::get_or_create_owner( $args{owner} ) if $args{owner};
 
         return $testrun->update_content(\%args);
 }

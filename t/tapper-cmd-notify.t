@@ -47,7 +47,7 @@ cmp_deeply($notification_hash, superhashof({
                                             'persist' => 1,
                                             'comment' => 'Night watch is watching you',
                                             'updated_at' => undef,
-                                            'user_id' => 2,
+                                            'owner_id' => 2,
                                             'id' => 4,
                                             'filter' => 'updated condition'
                                            }), 'Notification updated');
