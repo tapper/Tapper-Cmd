@@ -120,6 +120,19 @@ not remove the associated testruns.
 sub del {
         my ($self, $id) = @_;
         my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+        foreach my $testrun ($testplan->testruns->all) {
+                if ($testrun->testrun_scheduling->status eq 'running') {
+                        my $message = model('TestrunDB')->resultset('Message')->new({testrun_id => $testrun->id,
+                                                                                     type       => 'state',
+                                                                                     message    => {
+                                                                                                    state => 'quit',
+                                                                                                    error => 'Testplan cancelled'
+                                                                                                   }});
+                        $message->insert();
+                }
+                $testrun->testrun_scheduling->status('finished');
+                $testrun->testrun_scheduling->update;
+        }
         $testplan->delete();
         return 0;
 }
