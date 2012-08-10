@@ -101,17 +101,19 @@ sub add {
 }
 
 
-=head2 update
-
-
-=cut
-
-sub update {
-        my ($self, $id, $args) = @_;
-}
 
 =head2 del
 
+Delete testrun with given id from database. Please not that this does
+not remove the associated testruns.
+
+
+@param int - testplan instance id
+
+@return success - 0
+@return error - exception
+
+@throws die()
 
 =cut
 
@@ -120,6 +122,29 @@ sub del {
         my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
         $testplan->delete();
         return 0;
+}
+
+=head2 rerun
+
+Reapply the evaluated testplan of the given testplan instance.
+
+@param int - testplan instance id
+
+@return success - new testplan id
+@return error   - exception
+
+@throws die()
+
+=cut
+
+sub rerun
+{
+        my ($self, $id) = @_;
+
+        my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+        die "No testplan with ID $id\n" unless $testplan;
+
+        return $self->add($testplan->evaluated_testplan, $testplan->path, $testplan->name);
 }
 
 1; # End of Tapper::Cmd::Testplan
