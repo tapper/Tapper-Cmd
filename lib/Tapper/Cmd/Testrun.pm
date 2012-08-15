@@ -143,7 +143,7 @@ sub add {
         my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
 
         $args{earliest}              ||= DateTime->now;
-        $args{owner}                 ||= $ENV{USER};
+        $args{owner}                 ||= $ENV{USER} || 'nobody';
         $args{owner_id}              ||= Tapper::Model::get_or_create_owner( $args{owner} );
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
