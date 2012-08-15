@@ -130,6 +130,8 @@ sub del {
                                                                                                    }});
                         $message->insert();
                 }
+                $testrun->testrun_scheduling->testrun->testplan_id(undef);
+                $testrun->testrun_scheduling->testrun->update;
                 $testrun->testrun_scheduling->status('finished');
                 $testrun->testrun_scheduling->update;
         }
