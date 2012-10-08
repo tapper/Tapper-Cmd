@@ -148,7 +148,7 @@ sub add {
 
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
-                        my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host})->first;
+                        my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host}, {rows => 1})->first;
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
@@ -157,7 +157,7 @@ sub add {
                 $args{queue}   ||= 'AdHoc';
                 my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}});
                 die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
-                $args{queue_id}  = $queue_result->first->id;
+                $args{queue_id}  = $queue_result->search({}, {rows => 1})->first->id;
         }
         my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
 
