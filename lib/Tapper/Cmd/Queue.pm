@@ -51,7 +51,7 @@ sub add {
         my %args = %{$args};    # copy
 
         $args{is_deleted} = 0;
-        
+
         my $q = model('TestrunDB')->resultset('Queue')->update_or_create(\%args);
         $q->insert;
         my $all_queues = model('TestrunDB')->resultset('Queue');
@@ -116,7 +116,7 @@ sub del {
         while (my $job = $attached_jobs->next) {
                 $job->status('finished');
                 $job->update;
-        } 
+        }
 
         # empty queues can be deleted, because it does not break anything
         $queue->delete if $queue->testrunschedulings->count == 0;
