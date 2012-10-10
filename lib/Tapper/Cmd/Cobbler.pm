@@ -55,7 +55,7 @@ sub get_mac_address
 
 sub cobbler_execute
 {
-        my ($self, $command) = @_;
+        my ($self, @command) = @_;
 
         my $cfg     = Tapper::Config->subconfig;
         my $cobbler_host = $cfg->{cobbler}->{host};
@@ -65,9 +65,9 @@ sub cobbler_execute
                 my $user = $cfg->{cobbler}->{user};
                 my $ssh = Net::OpenSSH->new("$user\@$cobbler_host");
                 $ssh->error and die "ssh  $user\@$cobbler_host failed: ".$ssh->error;
-                $output = $ssh->capture($command);
+                $output = $ssh->capture({ quote_args => 1 }, @command);
         } else {
-                $output = qx( $command );
+                $output = qx( @command );
         }
         return $output;
 }
@@ -98,9 +98,9 @@ sub host_new
         my $mac = $options->{mac} || $self->get_mac_address($host);
         return "Missing mac address for host '$name'" if not $mac;
 
-        my $command = "cobbler system copy --name $default --newname $name --mac-address $mac";
+        my @command = split(" ","cobbler system copy --name $default --newname $name --mac-address $mac");
 
-        return $self->cobbler_execute($command);
+        return $self->cobbler_execute(@command);
 }
 
 
@@ -119,8 +119,8 @@ sub host_del
 {
         my ($self, $name) = @_;
 
-        my $command = "cobbler system remove --name $name";
-        return $self->cobbler_execute($command);
+        my @command = split(" ", "cobbler system remove --name $name");
+        return $self->cobbler_execute(@command);
 }
 
 
