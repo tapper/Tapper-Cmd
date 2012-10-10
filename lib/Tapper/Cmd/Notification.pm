@@ -51,7 +51,7 @@ sub get_user
         my ($self, $data) = @_;
         if (not $data->{owner_id}) {
                 my $login = $data->{user_login} || $ENV{USER};
-                my $owner = model('ReportsDB')->resultset('Owner')->search({login => $login})->first;
+                my $owner = model('ReportsDB')->resultset('Owner')->search({login => $login}, {rows => 1})->first;
                 if (not $owner) {
                         die "User '$login' does not exist in the database. Please create this user first.\n";
                 }
