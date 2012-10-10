@@ -123,6 +123,34 @@ sub host_del
         return $self->cobbler_execute(@command);
 }
 
+=head2 host_list
+
+List systems that Cobbler already knows, either all or all matching a
+given criteria.
+
+@optparam hashref - list of criteria to match, possible criteria are
+* name
+* status (one of development,testing,acceptance,production)
+
+@return success - list of system names
+
+=cut
+
+sub host_list
+{
+        my ($self, $search) = @_;
+
+        my @command  = qw/cobbler system find/;
+        if ($search and ref($search) eq 'HASH') {
+        KEY:
+                foreach my $key (keys %$search) {
+                        push @command, "--$key", $search->{$key};
+                }
+        }
+        return $self->cobbler_execute(@command);
+}
+
+
 
 
 
