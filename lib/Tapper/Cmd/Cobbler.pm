@@ -151,6 +151,30 @@ sub host_list
 }
 
 
+=head2 host_update
+
+Change a number of ascpects of a given host.
+
+@param string - hostname
+@param hashref - list of aspects to change with new values
+
+@return success - 0
+@return error   - error string
+
+=cut
+
+sub host_update
+{
+        my ($self, $name, $options) = @_;
+
+        my @command  = qw/cobbler system edit --name/;
+        push @command, $name;
+        foreach my $key (keys %$options) {
+                push @command, "--$key", $options->{$key};
+        }
+        return $self->cobbler_execute(@command);
+}
+
 
 
 
