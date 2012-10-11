@@ -45,13 +45,16 @@ sub get_mac_address
         return $retval;
 }
 
-# cobbler_execute
-#
-# Execute a Cobbler command.
-#
-# @param string - command
-#
-# @return string - output of cobbler
+
+=head2 cobbler_execute
+
+Execute a Cobbler command.
+
+@param string - command
+
+@return string - output of cobbler
+
+=cut
 
 sub cobbler_execute
 {
