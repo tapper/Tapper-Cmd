@@ -23,7 +23,7 @@ notification subscriptions.
                    filter  => "testrun('id') == 23",
                    comment    => "Get back to work, testrun 23 is finished",
                    persist    => 0,
-                   user_login => 'anton',
+                   owner_login => 'anton',
                   };
     my $id = $subscription->add($details);
     $details->{filter} = "testrun('id') == 24";
@@ -50,14 +50,14 @@ sub get_user
 {
         my ($self, $data) = @_;
         if (not $data->{owner_id}) {
-                my $login = $data->{user_login} || $ENV{USER};
+                my $login = $data->{owner_login} || $ENV{USER};
                 my $owner = model('ReportsDB')->resultset('Owner')->search({login => $login}, {rows => 1})->first;
                 if (not $owner) {
                         die "User '$login' does not exist in the database. Please create this user first.\n";
                 }
 
                 $data->{owner_id} = $owner->id;
-                delete $data->{user_login};
+                delete $data->{owner_login};
         }
         return $data;
 }

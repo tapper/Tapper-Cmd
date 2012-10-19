@@ -30,13 +30,15 @@ module offers access to Cobbler database manipulation.
 
 =cut
 
-# get_mac_address
-#
-# Retrieve the mac address of a host from features available in DB.
-#
-# @param Tapper::Schema::TestrunDB::Result::Host - host object
-#
-# @return string - mac address
+=head2 get_mac_address
+
+Retrieve the mac address of a host from features available in DB.
+
+@param Tapper::Schema::TestrunDB::Result::Host - host object
+
+@return string - mac address
+
+=cut
 
 sub get_mac_address
 {
@@ -45,13 +47,15 @@ sub get_mac_address
         return $retval;
 }
 
-# cobbler_execute
-#
-# Execute a Cobbler command.
-#
-# @param string - command
-#
-# @return string - output of cobbler
+=head2 cobbler_execute
+
+Execute a Cobbler command.
+
+@param string - command
+
+@return string - output of cobbler
+
+=cut
 
 sub cobbler_execute
 {
