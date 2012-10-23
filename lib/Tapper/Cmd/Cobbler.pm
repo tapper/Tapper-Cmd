@@ -69,6 +69,7 @@ sub cobbler_execute
                 my $ssh = Net::OpenSSH->new("$user\@$cobbler_host");
                 $ssh->error and die "ssh  $user\@$cobbler_host failed: ".$ssh->error;
                 $output = $ssh->capture({ quote_args => 1 }, @command);
+                $ssh->error and die "Calling ".(join (" ",@command))." on $cobbler_host failed: ".$ssh->error;
         } else {
                 $output = qx( @command );
         }
