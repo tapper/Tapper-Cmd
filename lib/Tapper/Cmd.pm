@@ -3,6 +3,8 @@ package Tapper::Cmd;
 
 use Moose;
 
+extends 'Tapper::Base';
+
 use Tapper::Model 'model';
 
 =head1 SYNOPSIS
