@@ -69,12 +69,18 @@ sub cobbler_execute
                 my $user = $cfg->{cobbler}->{user};
                 my $ssh = Net::OpenSSH->new("$user\@$cobbler_host");
                 $ssh->error and die "ssh  $user\@$cobbler_host failed: ".$ssh->error;
-                $output = $ssh->capture({ quote_args => 1 }, @command);
-                $ssh->error and die "Calling ".(join (" ",@command))." on $cobbler_host failed: ".$ssh->error;
+                if (wantarray) {
+                        my @output = $ssh->capture({ quote_args => 1 }, @command);
+                        $ssh->error and die "Calling ".(join (" ",@command))." on $cobbler_host failed: ".$ssh->error;
+                        return @output;
+                } else {
+                        my $output = $ssh->capture({ quote_args => 1 }, @command);
+                        $ssh->error and die "Calling ".(join (" ",@command))." on $cobbler_host failed: ".$ssh->error;
+                        return $output;
+                }
         } else {
-                $output = qx( @command );
+                return qx( @command );
         }
-        return $output;
 }
 
 =head2 host_new
