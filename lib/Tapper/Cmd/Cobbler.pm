@@ -102,6 +102,13 @@ sub host_new
         my ($self, $name, $options) = @_;
         my $default = $options->{default} || 'default';
 
+        return (join "",("Need a string as first argument in ",
+                          __FILE__,
+                          ", line ",
+                          __LINE__,
+                          ". You provided a ",
+                          ref $name))
+          if ref $name;
 
         my $host    = model('TestrunDB')->resultset('Host')->find({name => $name});
         return "Host '$name' does not exist in the database" if not $host;
