@@ -185,6 +185,14 @@ sub host_update
 {
         my ($self, $name, $options) = @_;
 
+        return (join "",("Need a string as first argument in ",
+                          __FILE__,
+                          ", line ",
+                          __LINE__,
+                          ". You provided a ",
+                          ref $name))
+          if ref $name;
+
         my @command  = qw/cobbler system edit --name/;
         push @command, $name;
         foreach my $key (keys %$options) {
