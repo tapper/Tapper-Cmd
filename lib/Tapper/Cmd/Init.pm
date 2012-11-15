@@ -9,7 +9,8 @@ use Moose;
 use Tapper::Cmd::DbDeploy;
 use Tapper::Config;
 use Tapper::Model 'model';
-use File::ShareDir 'module_file';
+use File::ShareDir 'module_file', 'module_dir';
+use File::Copy::Recursive 'dircopy';
 use File::Slurp 'slurp';
 use DBI;
 
@@ -42,7 +43,7 @@ sub mint_file {
 
         my $file = "$init_dir/$basename";
         if (-e $file) {
-                say "$file already exists - skipped";
+                say "SKIP    $file - already exists";
         } else {
                 my $content = slurp module_file('Tapper::Cmd::Init', $basename);
                 $content =~ s/__HOME__/$HOME/g;
@@ -50,7 +51,25 @@ sub mint_file {
                 open my $INITCFG, ">", $file or die "Can not create file $file.\n";
                 print $INITCFG $content;
                 close $INITCFG;
-                say "Created $file";
+                say "CREATED $file";
+        }
+}
+
+=head2 copy_subdir ($init_dir, $dirname)
+
+Create subdir taken from sharedir into user's ~/.tapper/.
+
+=cut
+
+sub copy_subdir {
+        my ($init_dir, $dirname) = @_;
+
+        my $dir = "$init_dir/$dirname";
+        if (-d $dir) {
+                say "SKIP    $dir - already exists";
+        } else {
+                dircopy(module_dir('Tapper::Cmd::Init')."/$dirname", $dir);
+                say "CREATED $dir";
         }
 }
 
@@ -62,9 +81,37 @@ Create a subdirectory with some log output.
 
 sub make_subdir {
         my ($dir) = @_;
-        if (! -d $dir) {
+        if (-d $dir) {
+                say "SKIP    $dir - already exists";
+        } else {
                 mkdir $dir or die "Can not create $dir\n";
-                say "Created $dir/";
+                say "CREATED $dir/";
+        }
+}
+
+=head2 dbdeploy
+
+Initialize databases in $HOME/.tapper/
+
+=cut
+
+sub dbdeploy
+{
+        Tapper::Config::_switch_context; # reload config
+
+        foreach my $db (qw(TestrunDB ReportsDB)) {
+                my $dsn = Tapper::Config->subconfig->{database}{$db}{dsn};
+                my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
+                 or die "Can't parse DBI DSN '$dsn'";
+                if ($driver eq "SQLite") {
+                        my ($dbname) = $driver_dsn =~ /dbname=(.*)/;
+                        if (! -e $dbname) {
+                                my $cmd = Tapper::Cmd::DbDeploy->new;
+                                $cmd->dbdeploy($db);
+                        } else {
+                                say "SKIP    $dbname - already exists";
+                        }
+                }
         }
 }
 
@@ -84,26 +131,11 @@ sub init
 
         make_subdir my $init_dir = "$HOME/.tapper";
         make_subdir my $logs_dir = "$HOME/.tapper/logs";
-
+        copy_subdir ($init_dir, "hello-world");
         mint_file ($init_dir, "tapper.cfg");
         mint_file ($init_dir, "log4perl.cfg");
 
-        Tapper::Config::_switch_context; # reload config
-
-        foreach my $db (qw(TestrunDB ReportsDB)) {
-                my $dsn = Tapper::Config->subconfig->{database}{$db}{dsn};
-                my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
-                 or die "Can't parse DBI DSN '$dsn'";
-                if ($driver eq "SQLite") {
-                        my ($dbname) = $driver_dsn =~ /dbname=(.*)/;
-                        if (! -e $dbname) {
-                                my $cmd = Tapper::Cmd::DbDeploy->new;
-                                $cmd->dbdeploy($db);
-                        } else {
-                                say "$dbname already exists - skipped";
-                        }
-                }
-        }
+        dbdeploy;
 }
 
 1;
