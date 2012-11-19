@@ -11,25 +11,25 @@ FORMAT="%U"
 # ==================== UTILS ====================
 
 if [ -r $SYS_PATH/cpufreq/boost ] ; then
-	SYS_CPB=$SYS_PATH/cpufreq/boost
-	ok 0 "using acpi-cpufreq boost disable interface"
+        SYS_CPB=$SYS_PATH/cpufreq/boost
+        ok 0 "using acpi-cpufreq boost disable interface"
 elif [ -r $SYS_PATH/cpu0/cpufreq/cpb ] ; then
-	SYS_CPB=$SYS_PATH/cpu0/cpufreq/cpb
-	ok 0 "using legacy cpb boost disable interface"
+        SYS_CPB=$SYS_PATH/cpu0/cpufreq/cpb
+        ok 0 "using legacy cpb boost disable interface"
 else
-	autoreport_skip_all "no sysfs boost disable interface"
+        autoreport_skip_all "no sysfs boost disable interface"
 fi
 
 enable_cpb() {
         OLDCPB=$(cat $SYS_CPB)
         echo 1 > $SYS_CPB
-	#echo '# enable cpb to' $(cat $SYS_CPB) 1>&2
+        #echo '# enable cpb to' $(cat $SYS_CPB) 1>&2
 }
 
 disable_cpb() {
         OLDCPB=$(cat $SYS_CPB)
         echo 0 > $SYS_CPB
-	#echo '# disable cpb to' $(cat $SYS_CPB) 1>&2
+        #echo '# disable cpb to' $(cat $SYS_CPB) 1>&2
 }
 
 restore_cpb() {
@@ -43,8 +43,8 @@ restore_cpb() {
 # maybe we should replace md5sum with this algorithm
 
 do_md5sum_zeroes() {
-	/usr/bin/time -o $TIMEFILE --format "$FORMAT" sh -c "dd if=/dev/zero bs=1M count=$1 status=noxfer 2> /dev/null | md5sum - > /dev/null 2>&1"
-	cat $TIMEFILE | sed -e "s/^0\.//" | tr -d .
+        /usr/bin/time -o $TIMEFILE --format "$FORMAT" sh -c "dd if=/dev/zero bs=1M count=$1 status=noxfer 2> /dev/null | md5sum - > /dev/null 2>&1"
+        cat $TIMEFILE | sed -e "s/^0\.//" | tr -d .
 }
 
 # ==================== REQUIREMENTS ====================
@@ -52,9 +52,9 @@ do_md5sum_zeroes() {
 require_root
 require_crit_level 3 # toggle CPB
 if ! has_cpufeature cpb &&  ! has_cpufeature ida ; then
-	autoreport_skip_all "CPU does not support boosting"
+        autoreport_skip_all "CPU does not support boosting"
 else
-	ok 0 "CPU does support boosting"
+        ok 0 "CPU does support boosting"
 fi
 
 # ==================== PREPARE ====================
