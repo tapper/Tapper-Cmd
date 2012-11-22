@@ -211,6 +211,12 @@ sub get_shortname{
         return;
 }
 
+=head2 testplannew
+
+Create a testplan instance from a file.
+
+=cut
+
 sub testplannew {
         my ($self, $opt) = @_;
 
