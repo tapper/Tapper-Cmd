@@ -66,7 +66,7 @@ sub copy_subdir {
 
         my $dir = "$init_dir/$dirname";
         if (-d $dir) {
-                say "SKIP    $dir - already exists";
+                say "SKIP    $dir/ - already exists";
         } else {
                 dircopy(module_dir('Tapper::Cmd::Init')."/$dirname", $dir);
                 say "CREATED $dir";
