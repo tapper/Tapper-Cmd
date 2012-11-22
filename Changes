@@ -1,6 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - 'tapper init' with more ~/.tapper/ boilerplate,
+          for Tapper::MCP::MessageReceiver and first testplans
+        - new command: 'tapper testplan-new'
+          (migrated from former 'tapper-testrun newtestplan')
 
 4.1.1     2012-11-19
         - new command: 'tapper init' to initialize a ~/.tapper
