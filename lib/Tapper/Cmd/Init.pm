@@ -139,6 +139,8 @@ sub init
         make_subdir my $prg_dir      = "$HOME/.tapper/testprogram";
         make_subdir my $testplan_dir = "$HOME/.tapper/testplans";
         copy_subdir ($init_dir, "hello-world");
+        copy_subdir ($init_dir, "testplans/topic");
+        copy_subdir ($init_dir, "testplans/include");
         mint_file ($init_dir, "tapper.cfg");
         mint_file ($init_dir, "log4perl.cfg");
         mint_file ($init_dir, "tapper-mcp-messagereceiver.conf");
