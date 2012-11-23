@@ -3,7 +3,7 @@
 [% USE Autoformat %]
 [%- IF machine     != '' %][% THROW LEGACY "Use '-Dmachines=...' (plural).\n" %][% END -%]
 [%- IF queue       == '' %][% queue          = 'AdHoc' %][% END -%]
-[%- IF tests_host  == '' %][% tests_host     = '/PATH/TO/SCRIPT/SLEEPTEST.sh' %][% END -%]
+[%- IF tests_host  == '' %][% tests_host     = '/home/ss5/.tapper/hello-world/03-controlfiles/run-hello-world-tests.sh' %][% END -%]
 [%- IF machines    == '' %][% machines       = 'einstein' %][% END -%]
 [%- shorttitle_test_host = BLOCK %][% IF tests_host.match(',') %]MULTI[% ELSE %][% tests_host.replace('.*/([^/]+)$', '$1').replace('^(xen|kvm)-','').replace('\.sh$','').replace('\.t$','').replace('[-_]','') %][% END %][% END -%]
 [%- IF title       == ''    %][% title          = BLOCK %]Any[%- IF shorttitle_test_host != '' %]-[% shorttitle_test_host %][% ELSE %][% END %][%- IF shorttitle_test_guest != '' %]-[% shorttitle_test_guest %][% END %][% END %][% END -%]
@@ -71,6 +71,6 @@ description:
           capture: tap
 [% END -%][%# FOREACH AllTestsHost testprograms %]
         - precondition_type: hint
-          local: 1
           skip_install: 1
+          local: 1
 [%- END %][%# FOREACH AllMachines %]
