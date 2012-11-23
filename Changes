@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.1.3     2012-11-23
         - tapper init: more example programs in ~/.tapper/
           for new 'local' testruns
 
