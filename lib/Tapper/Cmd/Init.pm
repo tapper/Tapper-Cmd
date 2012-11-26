@@ -69,7 +69,7 @@ sub copy_subdir {
                 say "SKIP    $dir/ - already exists";
         } else {
                 dircopy(module_dir('Tapper::Cmd::Init')."/$dirname", $dir);
-                say "CREATED $dir";
+                say "CREATED $dir/";
         }
 }
 
@@ -82,7 +82,7 @@ Create a subdirectory with some log output.
 sub make_subdir {
         my ($dir) = @_;
         if (-d $dir) {
-                say "SKIP    $dir - already exists";
+                say "SKIP    $dir/ - already exists";
         } else {
                 mkdir $dir or die "Can not create $dir\n";
                 say "CREATED $dir/";
