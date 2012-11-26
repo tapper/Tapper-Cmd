@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.1.4     2012-11-26
         - polished backend testplan "topic.any.generic.local"
         - example frontend testplans "topic.helloworld.example*"
         - testplans now provide a default [% HOME %] substitution
