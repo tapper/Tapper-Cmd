@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - polished backend testplan "topic.any.generic.local"
+        - example frontend testplans "topic.helloworld.example*"
+        - testplans now provide a default [% HOME %] substitution
 
 4.1.3     2012-11-23
         - tapper init: more example programs in ~/.tapper/
