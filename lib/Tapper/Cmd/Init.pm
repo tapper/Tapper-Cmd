@@ -137,11 +137,9 @@ sub init
         make_subdir my $img_dir      = "$HOME/.tapper/repository/images";
         make_subdir my $pkg_dir      = "$HOME/.tapper/repository/packages";
         make_subdir my $prg_dir      = "$HOME/.tapper/testprogram";
-        make_subdir my $testplan_dir = "$HOME/.tapper/testplans";
         make_subdir my $localdata_dir = "$HOME/.tapper/localdata";
         copy_subdir ($init_dir, "hello-world");
-        copy_subdir ($init_dir, "testplans/topic");
-        copy_subdir ($init_dir, "testplans/include");
+        copy_subdir ($init_dir, "testplans");
         mint_file ($init_dir, "tapper.cfg");
         mint_file ($init_dir, "log4perl.cfg");
         mint_file ($init_dir, "tapper-mcp-messagereceiver.conf");
