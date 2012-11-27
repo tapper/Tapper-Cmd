@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.1.7     2012-11-27
         - helloworld: add example macroprecondition
         - helloworld: rename subdir 03-controlfiles -> controlfiles
 
