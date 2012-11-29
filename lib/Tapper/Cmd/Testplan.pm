@@ -225,7 +225,12 @@ sub testplannew {
         my $file = $opt->{file};
 
         my $plan = slurp($file);
-        $plan = $self->apply_macro($plan, $opt->{D}, $opt->{include});
+        $plan = $self->apply_macro($plan,
+                                   {
+                                    HOME => $ENV{HOME},
+                                    %{$opt->{D} || {}},
+                                   },
+                                   $opt->{include});
 
         if ($opt->{guide}) {
                 my $guide = $plan;
