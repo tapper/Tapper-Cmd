@@ -68,7 +68,6 @@ sub get_user
 Add a new notification subscription. Expects all details as a hash reference.
 
 
-@param string    - preconditions in YAML format OR
 @param hash ref  - notification subscrition data
 
 @return success - subscrition id
