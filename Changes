@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+4.1.8     2013-03-14
         - helloworld: example_kernel_install.sh: example installer
         - helloworld: example_producer_builder.sh: example for builder
         - helloworld: testplans/*/example03-builder: frontend to testplans/*/local
