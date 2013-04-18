@@ -26,13 +26,6 @@ database on a higher level than that offered by Tapper::Schema.
 
 =head2 add
 
-Add a new scenario to database.
-
-=cut
-
-
-=head2 add
-
 Add a new scenario to database
 
 @param hash ref - options for new scenario
