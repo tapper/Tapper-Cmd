@@ -50,6 +50,7 @@ sub get_module_for_type
         my ($self, $type) = @_;
          given (lc($type)){
                 when('multitest') { return "Tapper::Cmd::Testrun"; }
+                when('scenario')  { return "Tapper::Cmd::Scenario" }
                 default           { $type = ucfirst($type); return "Tapper::Cmd::$type"; }
         }
 }
@@ -97,7 +98,8 @@ sub add {
                 };
 
                 my $handler = "$module"->new();
-                my @new_ids = $handler->create($plan->{description}, $instance->id);
+                my $description = $plan->{testplan_description} || $plan->{description};
+                my @new_ids = $handler->create($description, $instance->id);
                 push @testrun_ids, @new_ids;
         }
         return $instance->id;

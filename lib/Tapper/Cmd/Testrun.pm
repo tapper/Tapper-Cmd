@@ -63,7 +63,7 @@ sub create
         my ($self, $plan, $instance) = @_;
         my $cmd           = Tapper::Cmd::Precondition->new();
         my @preconditions = $cmd->add($plan->{preconditions});
-        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) eq any('topic', 'queue')} keys %$plan;
+        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and lc($_) !~ /^requested/} keys %$plan;
 
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
