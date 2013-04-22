@@ -137,13 +137,42 @@ sub init
         make_subdir my $img_dir      = "$HOME/.tapper/repository/images";
         make_subdir my $pkg_dir      = "$HOME/.tapper/repository/packages";
         make_subdir my $prg_dir      = "$HOME/.tapper/testprogram";
+        make_subdir my $producer_dir = "$HOME/.tapper/producers";
         make_subdir my $localdata_dir = "$HOME/.tapper/localdata";
+
         copy_subdir ($init_dir, "hello-world");
-        copy_subdir ($init_dir, "testplans");
+
         mint_file ($init_dir, "tapper.cfg");
         mint_file ($init_dir, "log4perl.cfg");
         mint_file ($init_dir, "tapper-mcp-messagereceiver.conf");
 
+        # Allow more fine-grained updates for testplans,
+        # as we expect the user to have his own stuff in there.
+        make_subdir my $tplan_dir = "$HOME/.tapper/testplans";
+
+        make_subdir "$tplan_dir/$_" foreach qw(topic
+                                               topic/xen
+                                               topic/xen/generic
+                                               topic/any
+                                               topic/any/generic
+                                               topic/kernel
+                                               topic/kernel/generic
+                                               topic/helloworld
+                                               include
+                                             );
+        mint_file ($init_dir, $_) foreach qw(testplans/topic/xen/generic/upload-xen-dmesg.sh
+                                             testplans/topic/xen/generic/test
+                                             testplans/topic/xen/generic/guest-template.svm
+                                             testplans/topic/xen/generic/guest-start-template.sh
+                                             testplans/topic/any/generic/local
+                                             testplans/topic/kernel/generic/test
+                                             testplans/topic/helloworld/example01
+                                             testplans/topic/helloworld/example02
+                                             testplans/topic/helloworld/example03-builder
+                                             testplans/include/distrodetails
+                                             testplans/include/defaults
+                                             testplans/include/defaultbenchmarks
+                                           );
         dbdeploy;
 }
 
