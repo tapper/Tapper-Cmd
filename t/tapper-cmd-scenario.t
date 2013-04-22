@@ -11,7 +11,7 @@ use Test::More;
 
 use Tapper::Cmd::Scenario;
 use Tapper::Model 'model';
-
+use YAML::XS;
 
 # -----------------------------------------------------------------------------------------------------------------
 construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb/testrun_with_preconditions.yml' );
@@ -20,11 +20,16 @@ construct_fixture( schema  => testrundb_schema, fixture => 't/fixtures/testrundb
 my $scen = Tapper::Cmd::Scenario->new();
 isa_ok($scen, 'Tapper::Cmd::Scenario', '$scenario');
 
-my $retval  = $scen->add({type => 'interdep'});
-my $scen_rs = model('TestrunDB')->resultset('Scenario')->find($retval);
+my $scenario = do {local $/;
+                   open (my $fh, '<', 't/misc_files/scenario.sc') or die "Can open file:$!\n";
+                   <$fh>
+           };
+
+my @retval  = $scen->add(YAML::XS::Load($scenario));
+my $scen_rs = model('TestrunDB')->resultset('Scenario')->find($retval[0]);
 isa_ok($scen_rs, 'Tapper::Schema::TestrunDB::Result::Scenario', 'Insert scenario / scenario id returned');
 
-$retval  = $scen->del($scen_rs->id);
+my $retval  = $scen->del($scen_rs->id);
 is($retval, 0, 'Delete scenario');
 $scen_rs = model('TestrunDB')->resultset('Scenario')->find($scen_rs->id);
 
