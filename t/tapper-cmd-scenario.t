@@ -33,5 +33,14 @@ my $retval  = $scen->del($scen_rs->id);
 is($retval, 0, 'Delete scenario');
 $scen_rs = model('TestrunDB')->resultset('Scenario')->find($scen_rs->id);
 
+$scenario = do {local $/;
+                   open (my $fh, '<', 't/misc_files/single.sc') or die "Can open file 'single.sc':$!\n";
+                   <$fh>
+           };
+
+@retval  = $scen->add(YAML::XS::Load($scenario));
+my $testrun_res = model('TestrunDB')->resultset('Scenario')->find($retval[0]);
+isa_ok($testrun_res, 'Tapper::Schema::TestrunDB::Result::Scenario', 'Insert single scenario / testrun id returned');
+
 done_testing();
 
