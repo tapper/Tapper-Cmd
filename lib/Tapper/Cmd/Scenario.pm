@@ -66,7 +66,6 @@ sub parse_interdep
         my ($self, $conf) = @_;
 
         # TODO
-        # 1.) make atomic
         # 2.) check whether more than 2 testruns are local and prevent sync in this case
 
         my $scenario = model('TestrunDB')->resultset('Scenario')->new({type => 'interdep',
