@@ -99,6 +99,14 @@ sub create
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
+        if ( not grep { lc($_) =~ /^requested/} keys %$plan) {
+                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                                                      testplan_id     => $instance,
+                                                     };
+                my $testrun_id = $self->add($merged_arguments);
+                $self->assign_preconditions($testrun_id, @preconditions);
+                push @testruns, $testrun_id;
+        }
         return @testruns;
 }
 
