@@ -109,15 +109,25 @@ Add a new scenario to database. Add with testplan instance id if given.
 =cut
 
 sub add {
-        my ($self, $scenario) = @_;
+        my ($self, $conf) = @_;
 
 
-        given ($scenario->{scenario_type}) {
+        given ($conf->{scenario_type}) {
                 when ('interdep') {
-                        return $self->parse_interdep($scenario);
+                        return $self->parse_interdep($conf);
+                }
+                when ('multitest') {
+                        my $sc = model('TestrunDB')->resultset('Scenario')->new({type => 'single',
+                                                                                 options => $conf->{scenario_options} || $conf->{options},
+                                                                                 name => $conf->{scenario_name} || $conf->{name},
+                                                                                })->insert;
+                        $conf->{scenario_id} = $sc->id;
+                        my $tr = Tapper::Cmd::Testrun->new();
+                        $tr->create($conf->{scenario_description} || $conf->{description});
+                        return $sc->id;
                 }
                 default {
-                        die "Unknown scenario type ", $scenario->{scenario_type};
+                        die "Unknown scenario type ", $conf->{scenario_type};
                 }
         }
 }
