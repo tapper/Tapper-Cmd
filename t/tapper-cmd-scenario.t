@@ -25,7 +25,7 @@ my $scenario = do {local $/;
                    <$fh>
            };
 
-my @retval  = $scen->add(YAML::XS::Load($scenario));
+my @retval  = $scen->add([YAML::XS::Load($scenario)]);
 my $scen_rs = model('TestrunDB')->resultset('Scenario')->find($retval[0]);
 isa_ok($scen_rs, 'Tapper::Schema::TestrunDB::Result::Scenario', 'Insert scenario / scenario id returned');
 
@@ -38,9 +38,13 @@ $scenario = do {local $/;
                    <$fh>
            };
 
-@retval  = $scen->add(YAML::XS::Load($scenario));
-my $testrun_res = model('TestrunDB')->resultset('Scenario')->find($retval[0]);
-isa_ok($testrun_res, 'Tapper::Schema::TestrunDB::Result::Scenario', 'Insert single scenario / testrun id returned');
+@retval  = $scen->add([YAML::XS::Load($scenario)]);
+foreach my $id (@retval) {
+        my $scenario_res = model('TestrunDB')->resultset('Scenario')->find($id);
+        isa_ok($scenario_res, 'Tapper::Schema::TestrunDB::Result::Scenario', 'Insert single scenario / testrun id returned');
+        my @testrun_ids = map {$_->testrun->id} $scenario_res->scenario_elements->all;
+        isnt(int @testrun_ids, 0, 'Testruns associated to scenario');
+}
 
 done_testing();
 

@@ -38,14 +38,15 @@ function expects the id of this instance as second parameter.
 @param hash ref - test plan element
 @param instance - test plan instance id
 
-@return array   - scenario ids
+@return success - array - scenario ids
+@return error   - die
 
 =cut
 
 sub create {
         my ($self, $scenario, $instance) = @_;
         $scenario->{instance_id} ||= $instance;
-        return $self->add($scenario);
+        return $self->add([$scenario]);
 }
 
 =head2 parse_interdep
@@ -56,7 +57,7 @@ database.
 @param hash ref - config containing all relevant information
 @param hash ref - options
 
-@return success - 0
+@return success - int - scenario_id
 @return error   - die with error text
 
 =cut
@@ -103,33 +104,38 @@ Add a new scenario to database. Add with testplan instance id if given.
 @param hash ref - options for new scenario
 @param instance - test plan instance id
 
-@return success - scenario id
-@return error   - undef
+@return success - array - scenario id
+@return error   - die
 
 =cut
 
 sub add {
-        my ($self, $conf) = @_;
+        my ($self, $list_of_confs) = @_;
 
-
-        given ($conf->{scenario_type}) {
-                when ('interdep') {
-                        return $self->parse_interdep($conf);
-                }
-                when ('multitest') {
-                        my $sc = model('TestrunDB')->resultset('Scenario')->new({type => 'single',
-                                                                                 options => $conf->{scenario_options} || $conf->{options},
-                                                                                 name => $conf->{scenario_name} || $conf->{name},
-                                                                                })->insert;
-                        $conf->{scenario_id} = $sc->id;
-                        my $tr = Tapper::Cmd::Testrun->new();
-                        $tr->create($conf->{scenario_description} || $conf->{description});
-                        return $sc->id;
-                }
-                default {
-                        die "Unknown scenario type ", $conf->{scenario_type};
+        my @ids;
+        foreach my $conf (@{$list_of_confs || [] }) {
+                given ($conf->{scenario_type}) {
+                        when ('interdep') {
+                                push @ids, $self->parse_interdep($conf);
+                        }
+                        when ('multitest') {
+                                my $sc = model('TestrunDB')->resultset('Scenario')->new({type => 'multitest',
+                                                                                         options => $conf->{scenario_options} || $conf->{options},
+                                                                                         name => $conf->{scenario_name} || $conf->{name},
+                                                                                        })->insert;
+                                my $description = $conf->{scenario_description} || $conf->{description};
+                                $description->{scenario_id} = $sc->id;
+                                my $tr = Tapper::Cmd::Testrun->new();
+                                $tr->create($description);
+                                push @ids, $sc->id;
+                        }
+                        default {
+                                no warnings 'uninitialized';
+                                die "Unknown scenario type '$conf->{scenario_type}'";
+                        }
                 }
         }
+        return @ids;
 }
 
 
