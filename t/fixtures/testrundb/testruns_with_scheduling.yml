@@ -381,6 +381,21 @@
     name: bascha
     free: 1
 
+
+- schema: Host
+  name: einstein
+  data:
+    id: 10
+    name: einstein
+    free: 1
+
+- schema: Host
+  name: bohr
+  data:
+    id: 11
+    name: bohr
+    free: 1
+
 # -------------------- "preconditions for scheduled tests 1"
 
 - schema: TestrunPrecondition
