@@ -159,6 +159,7 @@ sub add {
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
                         my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host}, {rows => 1})->first;
+                        die "Can not request host '$host'. This host is not known to tapper" if not $host_result;
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
