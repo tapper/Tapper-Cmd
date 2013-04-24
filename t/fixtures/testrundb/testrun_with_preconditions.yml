@@ -167,3 +167,19 @@
     id: 4
     name: AdHoc
     priority: 1000
+
+# ------- Hosts ----------------
+
+- schema: Host
+  name: einstein
+  data:
+    id: 7
+    name: einstein
+    free: 1
+
+- schema: Host
+  name: bohr
+  data:
+    id: 8
+    name: bohr
+    free: 1
