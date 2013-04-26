@@ -80,6 +80,13 @@ sub parse_interdep
                 my $tr = Tapper::Cmd::Testrun->new();
                 $plan->{scenario_id} ||= $sc_id;
                 $plan->{status} = 'prepare';
+
+                # backwards compatibility for old interdep descriptions
+                if ($plan->{requested_hosts}) {
+                        $plan->{requested_hosts_any} = $plan->{requested_hosts};
+                        delete $plan->{requested_hosts};
+                }
+
                 my @ids = $tr->create($plan, $conf->{instance_id});
                 push @all_ids, @ids;
         }
