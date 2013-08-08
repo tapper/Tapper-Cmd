@@ -125,7 +125,7 @@ not remove the associated testruns.
 sub del {
         my ($self, $id) = @_;
         my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
-        foreach my $testrun ($testplan->testruns->all) {
+        while(my $testrun = $testplan->testruns->next) {
                 if ($testrun->testrun_scheduling->status eq 'running') {
                         my $message = model('TestrunDB')->resultset('Message')->new({testrun_id => $testrun->id,
                                                                                      type       => 'state',
