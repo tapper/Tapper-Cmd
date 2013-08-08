@@ -8,6 +8,7 @@ use Try::Tiny;
 use YAML::Syck;
 use Tapper::Model 'model';
 use Tapper::Reports::DPath::TT;
+use File::Slurp 'slurp';
 
 extends 'Tapper::Cmd';
 
@@ -191,19 +192,16 @@ sub parse_path
 
 =head2 get_shortname
 
-Get the shortname for this testplan. The shortname is either given as
-command line option or inside the plan text.
+Get the shortname for this testplan.
 
 @param string - plan text
-@param string - value of $opt->{name}
 
 @return string - shortname
 
 =cut
 
 sub get_shortname{
-        my ($self, $plan, $name) = @_;
-        return $name if $name;
+        my ($self, $plan) = @_;
 
         foreach my $line (split "\n", $plan) {
                 if ($line =~/^###\s*(?:short)?name\s*:\s*(.+)$/i) {
@@ -213,65 +211,69 @@ sub get_shortname{
         return;
 }
 
+
+=head2 guide
+
+Get self documentation of a testplan file.
+
+@param string - file name of testplan file
+
+@return success - documentation text
+
+@throws - die()
+
+=cut
+
+sub guide
+{
+        my ($self, $file, $substitutes, $include) = @_;
+        my $text;
+        my $guide = $self->apply_macro($file,
+                                       $substitutes,
+                                       $include);
+
+        my @guide = grep { m/^###/ } split (qr/\n/, $guide);
+        $text = "Self-documentation:\n";
+        $text = join "\n", map { my $l = $_; $l =~ s/^###/ /; "$l" } @guide;
+        return $text;
+}
+
 =head2 testplannew
 
 Create a testplan instance from a file.
+
+@param hash ref - options containing
+
+required:
+* file: string, path of the testplan file
+* substitutes: hash ref, substitute variables for Template Toolkit
+
+optional:
+* include: array ref of strings containing include paths
+* path: string, alternative path instead of real path
+* name: string, overwrite shortname in plan
+
+@return success - testplan id
+
+@throws die
 
 =cut
 
 sub testplannew {
         my ($self, $opt) = @_;
 
-        use File::Slurp 'slurp';
-
-        my $file = $opt->{file};
-
-        my $plan = slurp($file);
-        $plan = $self->apply_macro($plan,
-                                   {
-                                    HOME => $ENV{HOME},
-                                    %{$opt->{D} || {}},
-                                   },
-                                   $opt->{include});
-
-        if ($opt->{guide}) {
-                my $guide = $plan;
-                my @guide = grep { m/^###/ } split (qr/\n/, $plan);
-                say "Self-documentation:";
-                say map { my $l = $_; $l =~ s/^###/ /; "$l\n" } @guide;
-                return 0;
-        }
-
-        my $cmd = Tapper::Cmd::Testplan->new;
-        my $path = $opt->{path} || $self->parse_path($opt->{file});
-        my $shortname = $self->get_shortname($plan, $opt->{name});
-
-        if ($opt->{dryrun}) {
-                say $plan;
-                return 0;
-        }
-
-        my $plan_id = $cmd->add($plan, $path, $shortname);
-        die "Plan not created" unless defined $plan_id;
-
-        if ($opt->{verbose}) {
-                my $url = Tapper::Config->subconfig->{base_url} || 'http://tapper/tapper';
-                say "Plan created";
-                say "  id:   $plan_id";
-                say "  url:  $url/testplan/id/$plan_id";
-                say "  path: $path";
-                say "  file: ".$opt->{file};
-        } else {
-                say $plan_id;
-        }
-        return 0;
+        my $plan = $self->apply_macro($opt->{file}, $opt->{substitutes}, $opt->{include});
+        my $path   = $opt->{path} || $self->parse_path($opt->{file});
+        my $shortname = $opt->{name} || $self->get_shortname($plan);
+        return $self->add($plan, $path, $shortname);
 }
 
 =head2 apply_macro
 
-Process macros and substitute using Template::Toolkit.
+Process macros and substitute using Template::Toolkit. This function
+allows to access reportdata and use dpath in testplans.
 
-@param string  - contains macros
+@param string  - file name
 @param hashref - containing substitutions
 @optparam string - path to more include files
 
@@ -280,9 +282,16 @@ Process macros and substitute using Template::Toolkit.
 
 =cut
 
+# This apply_macro function allows access to reportdata and dpath. Thats
+# why it uses Tapper::Reports::DPath::TT instead of Template
+# directly. Thats because that way we can make testplans dependent on
+# former reports without doing it right.
 sub apply_macro
 {
-        my ($self, $macro, $substitutes, $includes) = @_;
+        my ($self, $file, $substitutes, $includes) = @_;
+
+        $substitutes ||= {};
+        my $plan = File::Slurp::slurp($file);
 
         my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
         push @include_paths, @{$includes || [] };
@@ -291,7 +300,7 @@ sub apply_macro
         my $tt = Tapper::Reports::DPath::TT->new(include_path => $include_path_list,
                                                  substitutes  => $substitutes,
                                                 );
-        return $tt->render_template($macro);
+        return $tt->render_template($plan);
 }
 
 

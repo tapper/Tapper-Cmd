@@ -83,4 +83,21 @@ is($testplan->testruns->count, 3, 'Testruns for testplan created');
 my @scenario_ids = map {$_->scenario_element->scenario->id} grep { defined $_->scenario_element } $testplan->testruns->all;
 is_deeply(\@scenario_ids, [1, 1], 'Scenario in testplan');
 
+#######################################################
+#
+#   check testplannew
+#
+#######################################################
+
+
+$testplan_id = $cmd->testplannew({file => 't/misc_files/testplan_with_substitutes.tp',
+                                  name => 'Zomtec',
+                                  path => 'la.le.lu',
+                                  include => ['t/includes/'],
+                                  substitutes => {hosts_all => ['bullock', 'dickstone'],
+                                                  hosts_any => ['iring', 'bascha'], },
+                            });
+$testplan = model('TestrunDB')->resultset('TestplanInstance')->find($testplan_id);
+is($testplan->testruns->count, 4, 'Testruns for testplan created');
+
 done_testing;
