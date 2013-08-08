@@ -9,6 +9,7 @@ use YAML::Syck;
 use Tapper::Model 'model';
 use Tapper::Reports::DPath::TT;
 use File::Slurp 'slurp';
+use Perl6::Junction 'any';
 
 extends 'Tapper::Cmd';
 
@@ -303,6 +304,60 @@ sub apply_macro
         return $tt->render_template($plan);
 }
 
+
+=head2 query
+
+Get information of one testplan.
+
+@param int - testplan id
+
+@return - hash ref -
+* status - one of 'schedule', 'running', 'pass', 'fail'
+* complete_percentage - percentage of finished testruns
+* started_percentage  - percentage of running and finished testruns
+* success_percentage  - average of success rates of finished testruns
+
+@throws - die
+
+=cut
+
+sub query
+{
+        my ($self, $id) = @_;
+        my $results;
+        my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+        die "No testplan with id '$id'\n" if not $testplan;
+
+        my ($started, $complete, $success_sum) = (0,0,0);
+        for my $testrun ($testplan->testruns->all) {
+                $started++  if $testrun->testrun_scheduling->status eq any('running', 'finished');
+                if ($testrun->testrun_scheduling->status eq 'finished') {
+                        $complete++ ;
+                        my $success_obj = model('ReportsDB')->resultset('ReportgroupTestrunStats')->find({testrun_id => $testrun->id});
+                        $success_sum+= int($success_obj->success_ratio);
+                }
+        }
+        my $result = {
+                      complete_percentage => ($complete * 100) / $testplan->testruns->count,
+                      started_percentage  => ($started * 100) / $testplan->testruns->count,
+                      success_percentage  => $complete ? $success_sum / $complete : undef,
+                     };
+        if ($started == 0) {
+                $result->{status} = 'schedule';
+        }
+        elsif ($started > 0 and $complete < $testplan->testruns->count) {
+                $result->{status} = 'running';
+        }
+        else {
+                if ($result->{success_percentage} < 100) {
+                        $result->{status} = 'fail';
+                } else {
+                        $result->{status} = 'pass';
+                }
+        }
+
+        return $result;
+}
 
 
 1; # End of Tapper::Cmd::Testplan
