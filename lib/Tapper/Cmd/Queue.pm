@@ -98,7 +98,7 @@ confusion with the buildin delete function. If the queue is not empty
 and force is not given, we keep the queue and only set it to deleted to
 not break showing old testruns and their results.
 
-@param int  - queue id
+@param      - queue result || queue id
 @param bool - force deleted
 
 @return success - 0
@@ -107,21 +107,30 @@ not break showing old testruns and their results.
 =cut
 
 sub del {
-        my ($self, $id, $force) = @_;
-        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-        $queue->is_deleted(1);
-        $queue->active(0);
+
+    my ( $self, $queue, $force ) = @_;
+
+    # queue is not a result object
+    if (! ref $queue ) {
+        $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
+    }
+
+    # empty queues can be deleted, because it does not break anything
+    if ( $force || $queue->testrunschedulings->count == 0 ) {
+        $queue->delete;
+    }
+    else {
+        $queue->is_deleted( 1 );
+        $queue->active( 0 );
         $queue->update;
-        my $attached_jobs = $queue->testrunschedulings->search({status => 'schedule'});
-        while (my $job = $attached_jobs->next) {
-                $job->status('finished');
-                $job->update;
+
+        if ( my $or_attached_jobs = $queue->testrunschedulings->search({ status => 'schedule' }) ) {
+            $or_attached_jobs->update({ status => 'finished' });
         }
+    }
 
-        # empty queues can be deleted, because it does not break anything
-        $queue->delete if $queue->testrunschedulings->count == 0;
+    return 0;
 
-        return 0;
 }
 
 1; # End of Tapper::Cmd::Testrun
