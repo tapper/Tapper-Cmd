@@ -36,8 +36,8 @@ Add a requested host entry to database.
 
 Add a requested host for a given testrun.
 
-@param int    - testrun id
-@param string - hostname
+@param int              - testrun id
+@param string/integer   - hostname or host id
 
 @return success - local id (primary key)
 @return error   - undef
@@ -45,13 +45,33 @@ Add a requested host for a given testrun.
 =cut
 
 sub add_host {
-        my ($self, $id, $hostname) = @_;
-        my $hosts = model('TestrunDB')->resultset('Host')->search({name => $hostname});
-        return if not $hosts->count;
-        my $host_id = $hosts->search({}, {rows => 1})->first->id;
-        my $request = model('TestrunDB')->resultset('TestrunRequestedHost')->new({testrun_id => $id, host_id => $host_id});
-        $request->insert();
-        return $request->id;
+
+    my ( $self, $testrun_id, $i_host_id ) = @_;
+
+    if ( $i_host_id !~ /^\d+$/ ) {
+        if (
+            !(
+                $i_host_id =
+                    model('TestrunDB')
+                        ->resultset('Host')
+                        ->search({ name => $i_host_id },{ rows => 1 })
+                        ->first
+                        ->id
+            )
+        ) {
+            return;
+        }
+    }
+
+    my $or_request =
+        model('TestrunDB')
+            ->resultset('TestrunRequestedHost')
+            ->new({ testrun_id => $testrun_id, host_id => $i_host_id })
+    ;
+    $or_request->insert();
+
+    return $or_request->id;
+
 }
 
 =head2 add_feature
