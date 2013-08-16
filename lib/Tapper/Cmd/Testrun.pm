@@ -170,6 +170,7 @@ sub add {
                 die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
                 $args{queue_id}  = $queue_result->search({}, {rows => 1})->first->id;
         }
+
         my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
 
         if ($args{requested_features}) {
@@ -193,9 +194,8 @@ sub add {
                                       event    => "testrun_finished",
                                      });
                 } catch {
-                        my $message = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n";
-                        $message   .= "$_\n";
-                        die $message;
+                        say {*STDERR} "Successfully created your testrun with id $testrun_id but failed to add a notification request\n";
+                        say {*STDERR} "$_";
                 }
         }
         return $testrun_id;
