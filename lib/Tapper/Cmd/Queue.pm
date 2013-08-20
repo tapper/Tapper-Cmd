@@ -67,25 +67,29 @@ sub add {
 
 Changes values of an existing queue.
 
-@param int      - queue id
-@param hash ref - overwrite these options
+@param int or object ref    - queue id or queue object
+@param hash ref             - overwrite these options
 
-@return success - queue id
-@return error   - undef
+@return success             - queue id
+@return error               - undef
 
 =cut
 
 sub update {
-        my ($self, $id, $args) = @_;
-        my %args = %{$args};    # copy
+        my ($self, $queue, $args) = @_;
 
-        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-        my $retval = $queue->update_content(\%args);
+        if (! $queue->isa('Tapper::Schema::TestrunDB::Result::Queue') ) {
+                $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
+        }
 
-        my $all_queues = model('TestrunDB')->resultset('Queue');
-        foreach my $queue ($all_queues->all) {
-                $queue->runcount($queue->priority);
-                $queue->update;
+        my $retval = $queue->update_content( $args );
+
+        require DateTime;
+        foreach my $queue ( model('TestrunDB')->resultset('Queue')->all ) {
+                if ( $queue->runcount ne $queue->priority ) {
+                        $queue->updated_at( DateTime->now->strftime('%F %T') );
+                        $queue->update;
+                }
         }
 
         return $retval;
@@ -120,8 +124,11 @@ sub del {
         $queue->delete;
     }
     else {
+
+        require DateTime;
         $queue->is_deleted( 1 );
         $queue->active( 0 );
+        $queue->updated_at( DateTime->now->strftime('%F %T') );
         $queue->update;
 
         if ( my $or_attached_jobs = $queue->testrunschedulings->search({ status => 'schedule' }) ) {
