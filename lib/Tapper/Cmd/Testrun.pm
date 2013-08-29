@@ -180,6 +180,7 @@ sub add {
                         $request->insert();
                 }
         }
+        my $s_error;
         if ( exists $args{notify} ) {
                 my $s_notify = $args{notify} // q##;
                 my $notify   = Tapper::Cmd::Notification->new();
@@ -195,11 +196,15 @@ sub add {
                                       event    => "testrun_finished",
                                      });
                 } catch {
-                        say {*STDERR} "Successfully created your testrun with id $testrun_id but failed to add a notification request\n";
-                        say {*STDERR} "$_";
+                        $s_error = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n$_";
                 }
         }
-        return $testrun_id;
+        if ( wantarray ) {
+            return ( $testrun_id, $s_error );
+        }
+        else {
+            return $testrun_id;
+        }
 }
 
 
