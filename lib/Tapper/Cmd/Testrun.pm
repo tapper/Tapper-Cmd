@@ -180,9 +180,10 @@ sub add {
                         $request->insert();
                 }
         }
-        if ($args{notify}) {
-                my $notify = Tapper::Cmd::Notification->new();
-                my $filter = "testrun('id') == $testrun_id";
+        if ( exists $args{notify} ) {
+                my $s_notify = $args{notify} // q##;
+                my $notify   = Tapper::Cmd::Notification->new();
+                my $filter   = "testrun('id') == $testrun_id";
                 if (lc $args{notify} eq any('pass', 'ok','success')) {
                         $filter .= " and testrun('success_word') eq 'pass'";
                 } elsif (lc $args{notify} eq any('fail', 'not_ok','error')) {

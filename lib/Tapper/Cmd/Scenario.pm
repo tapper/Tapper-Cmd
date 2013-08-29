@@ -91,7 +91,7 @@ sub parse_interdep
                 push @all_ids, @ids;
         }
 
-        # when there is only on scenario element in the DB and the scheduler
+        # when there is only one scenario element in the DB and the scheduler
         # picks it it will think all scenario elements are fitted and start it
         # therefore, we can only set them to 'schedule' when all testruns are in the DB
         foreach my $id (@all_ids) {
