@@ -1,7 +1,7 @@
 # Enqueue a testrun into a queue (arm)
 # and it should run on the next available host of that queue.
 #
-# tapper-testrun new --macroprecond ~/.tapper/hello-world/macropreconditions/run-hello-world-tests.mpc \
+# tapper testrun-new --macroprecond ~/.tapper/hello-world/macropreconditions/run-hello-world-tests.mpc \
 #                    --shortname hello-world-wrapper \
 #                    --topic hello-world \
 #                    --queue arm

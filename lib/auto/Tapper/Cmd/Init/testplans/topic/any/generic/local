@@ -60,9 +60,9 @@
 ###
 ### Typical command lines (User tapper@tapper):
 ###
-###   $ tapper-testrun newtestplan --file [%HOME%]/.tapper/testplans/topic/any/generic/local
-###   $ tapper-testrun newtestplan --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=machine1,machine2
-###   $ tapper-testrun newtestplan --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=lemure -Dtests_host=/PATH/TO/STARTSCRIPT1.sh,/PATH/TO/STARTSCRIPT2.sh
+###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local
+###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=machine1,machine2
+###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=lemure -Dtests_host=/PATH/TO/STARTSCRIPT1.sh,/PATH/TO/STARTSCRIPT2.sh
 ###
 [%- FOREACH machine = AllMachines %]
 ---

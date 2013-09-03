@@ -44,20 +44,20 @@ start-tapper-daemon tapper-mcp
 start-tapper-daemon tapper-mcp-messagereceiver
 
 # Create queues
-tapper-testrun newqueue --name x86 --priority=100 --active
-tapper-testrun newqueue --name arm --priority=100 --active
+tapper queue-new --name x86 --priority=100 --active
+tapper queue-new --name arm --priority=100 --active
 
 # Create hosts
-tapper-testrun newhost --active --queue x86 --name einstein 2> /dev/null
-tapper-testrun newhost --active --queue x86 --name hawking  2> /dev/null
-tapper-testrun newhost --active --queue x86 --name newton   2> /dev/null
-tapper-testrun newhost --active --queue arm --name ali      2> /dev/null
-tapper-testrun newhost --active --queue arm --name hug      2> /dev/null
-tapper-testrun newhost --active --queue arm --name dekkers  2> /dev/null
-tapper-testrun listhost -v
+tapper host-new --active --queue x86 --name einstein 2> /dev/null
+tapper host-new --active --queue x86 --name hawking  2> /dev/null
+tapper host-new --active --queue x86 --name newton   2> /dev/null
+tapper host-new --active --queue arm --name ali      2> /dev/null
+tapper host-new --active --queue arm --name hug      2> /dev/null
+tapper host-new --active --queue arm --name dekkers  2> /dev/null
+tapper host-list -v
 
 # Enqueue tests
-tapper testplan-new tapper testplan-new --file ~/.tapper/testplans/topic/helloworld/example01
-tapper testplan-new tapper testplan-new --file ~/.tapper/testplans/topic/helloworld/example02
+tapper testplan-new --file ~/.tapper/testplans/topic/helloworld/example01
+tapper testplan-new --file ~/.tapper/testplans/topic/helloworld/example02
 
-tapper-testrun list --schedule --verbose
+tapper testrun-list --schedule --verbose
