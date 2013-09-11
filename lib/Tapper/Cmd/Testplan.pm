@@ -269,42 +269,6 @@ sub testplannew {
         return $self->add($plan, $path, $shortname);
 }
 
-=head2 apply_macro
-
-Process macros and substitute using Template::Toolkit. This function
-allows to access reportdata and use dpath in testplans.
-
-@param string  - file name
-@param hashref - containing substitutions
-@optparam string - path to more include files
-
-@return success - text with applied macros
-@return error   - die with error string
-
-=cut
-
-# This apply_macro function allows access to reportdata and dpath. Thats
-# why it uses Tapper::Reports::DPath::TT instead of Template
-# directly. Thats because that way we can make testplans dependent on
-# former reports without doing it right.
-sub apply_macro
-{
-        my ($self, $file, $substitutes, $includes) = @_;
-
-        $substitutes ||= {};
-        my $plan = File::Slurp::slurp($file);
-
-        my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
-        push @include_paths, @{$includes || [] };
-        my $include_path_list = join ":", @include_paths;
-
-        my $tt = Tapper::Reports::DPath::TT->new(include_path => $include_path_list,
-                                                 substitutes  => $substitutes,
-                                                );
-        return $tt->render_template($plan);
-}
-
-
 =head2 query
 
 Get information of one testplan.
