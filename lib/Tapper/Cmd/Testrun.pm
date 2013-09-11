@@ -294,7 +294,7 @@ sub rerun {
         my ($self, $id, $args) = @_;
         my %args = %{$args || {}}; # copy
         my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-        return $testrun->rerun(\%args);
+        return $testrun->rerun(\%args)->id;
 }
 
 
