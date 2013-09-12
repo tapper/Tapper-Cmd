@@ -78,7 +78,7 @@ Changes values of an existing queue.
 sub update {
         my ($self, $queue, $args) = @_;
 
-        if (! $queue->isa('Tapper::Schema::TestrunDB::Result::Queue') ) {
+        if (not ref($queue) ) {
                 $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
         }
 
