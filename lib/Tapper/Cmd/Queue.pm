@@ -55,6 +55,12 @@ sub add {
         my $q = model('TestrunDB')->resultset('Queue')->update_or_create(\%args);
         $q->insert;
         my $all_queues = model('TestrunDB')->resultset('Queue');
+
+
+        # the new queue now has a much lower runcount than all others
+        # If we keep this situation the new queue would be scheduled
+        # until it catches up with the other queues. To prevent this we
+        # reset the runcount of all queues.
         foreach my $queue ($all_queues->all) {
                 $queue->runcount($queue->priority);
                 $queue->update;
