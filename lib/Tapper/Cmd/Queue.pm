@@ -89,6 +89,18 @@ sub update {
         }
 
         my $retval = $queue->update_content( $args );
+        my $all_queues = model('TestrunDB')->resultset('Queue');
+
+        if (defined($args->{priority})) {
+                # The priority of the queue has changed. Without the following
+                # changes the queue would be scheduled/not scheduled until its
+                # runcount is in correct relation to all others. Therefore, we
+                # reset the runcount to have scheduling working correctly immediatelly.
+                foreach my $queue ($all_queues->all) {
+                        $queue->runcount($queue->priority);
+                        $queue->update;
+                }
+        }
 
         require DateTime;
         foreach my $queue ( model('TestrunDB')->resultset('Queue')->all ) {
