@@ -42,25 +42,31 @@ sub find_matching_hosts
 
 =head2 create
 
-Create new testruns from one element of a test plan (actually a test
-plan instance) that contains all information including requested hosts
-and features. If the new testruns belong to a test plan instance the
-function expects the id of this instance as second parameter. If the
-instance id is empty the function can also be used to create testruns
-from a testplan like layout without actually using test plan features,
-i.e. without creating a link between the new testruns and a test plan
-(instance).
+Create new testruns from a data structure that contains all information
+including requested hosts and features. If the new testruns belong to a
+test plan instance the function expects the id of this instance as
+second parameter.
 
-@param hash ref - test plan element
-@param instance - test plan instance id
+@param hash ref - testrun description OR
+       string   - YAML
+@optparam instance - test plan instance id
 
 @return array   - testrun ids
+
+@throws die()
 
 =cut
 
 sub create
 {
         my ($self, $plan, $instance) = @_;
+        if (not ref($plan)) {
+                require YAML::Syck;
+                $plan = YAML::Syck::Load($plan);
+        }
+        die "'$plan' is not YAML containing a testrun description\n" if not ref($plan) eq 'HASH';
+
+
         my $cmd           = Tapper::Cmd::Precondition->new();
         my @preconditions = $cmd->add($plan->{preconditions});
         my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and lc($_) !~ /^requested/} keys %$plan;
