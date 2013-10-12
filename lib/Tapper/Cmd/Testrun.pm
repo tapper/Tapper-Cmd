@@ -303,6 +303,49 @@ sub rerun {
         return $testrun->rerun(\%args)->id;
 }
 
+=head2 cancel
+
+Stop a running testrun by sending the appropriate message to MCP. As
+convenience to the user the function will also work on testruns that are
+not running. In that case the return value contains a warning that the
+caller should present to the user.
+
+@param int - testrun id
+@optparam string - comment
+
+@return success - success string
+@return error   - error string
+
+@throws die()
+
+=cut
+
+sub cancel
+{
+        my ($self, $testrun_id, $comment) = @_;
+        my $msg = { 'state' => 'quit', };
+        if ( $comment ) {
+                $msg->{error} = $comment;
+        }
+        my $testrun_result = model->resultset('Testrun')->find( $testrun_id ) or die "No such testrun '$testrun_id'\n";
+        if ($testrun_result->testrun_scheduling->status eq 'schedule' or
+            $testrun_result->testrun_scheduling->status eq 'prepare'
+           ) {
+                $testrun_result->testrun_scheduling->status('finished');
+                $testrun_result->testrun_scheduling->update;
+                return "Testrun not started yet, setting status 'finished'";
+        } elsif ($testrun_result->testrun_scheduling->status eq 'finished') {
+                return "Testrun already finished.";
+        } else {
+                model->resultset('Message')->new({
+                                                  testrun_id => $testrun_id,
+                                                  message    => $msg,
+                                                 }
+                                                )->insert;
+                return "Cancel message sent.";
+        }
+        return 0;
+}
 
 
 =head1 AUTHOR
