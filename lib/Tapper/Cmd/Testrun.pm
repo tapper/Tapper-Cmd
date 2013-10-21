@@ -342,7 +342,6 @@ sub cancel
                                                   message    => $msg,
                                                  }
                                                 )->insert;
-                return "Cancel message sent.";
         }
         return 0;
 }
