@@ -64,8 +64,15 @@ sub add
                 die "pool_count can not go together with pool_free" if $data->{pool_free};
                 $data->{pool_free} = $data->{pool_count};
         }
+        my $host_r = Tapper::Model::model()->resultset('Host')->search({name => $host}, {rows => 1})->first;
+        if ($host_r) {
+                $host_r->deleted(0);
+                $host_r->update;
+        } else {
+                $host_r = model('TestrunDB')->resultset('Host')->new($data)->insert;
+        }
+        return $host_r->id;
 
-        return model('TestrunDB')->resultset('Host')->new($data)->insert->id;
 }
 
 
