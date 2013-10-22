@@ -78,7 +78,7 @@ sub apply_macro
         my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
         push @include_paths, @{$includes || [] };
         my $include_path_list = join ":", @include_paths;
-
+        require Tapper::Reports::DPath::TT;
         my $tt = Tapper::Reports::DPath::TT->new(include_path => $include_path_list,
                                                  substitutes  => $substitutes,
                                                 );
