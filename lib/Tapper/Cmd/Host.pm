@@ -66,7 +66,7 @@ sub add
         }
         my $host_r = Tapper::Model::model()->resultset('Host')->search({name => $data->{name}}, {rows => 1})->first;
         if ($host_r) {
-                $host_r->deleted(0);
+                $host_r->is_deleted(0);
                 $host_r->update;
         } else {
                 $host_r = model('TestrunDB')->resultset('Host')->new($data)->insert;
