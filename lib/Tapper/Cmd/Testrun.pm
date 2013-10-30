@@ -333,10 +333,7 @@ sub cancel
            ) {
                 $testrun_result->testrun_scheduling->status('finished');
                 $testrun_result->testrun_scheduling->update;
-                return "Testrun not started yet, setting status 'finished'";
-        } elsif ($testrun_result->testrun_scheduling->status eq 'finished') {
-                return "Testrun already finished.";
-        } else {
+        } elsif ( $testrun_result->testrun_scheduling->status eq 'running') {
                 model->resultset('Message')->new({
                                                   testrun_id => $testrun_id,
                                                   message    => $msg,

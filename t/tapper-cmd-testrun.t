@@ -163,7 +163,6 @@ is($testrun->preconditions, 6, "requested_feature_any testrun has preconditions 
 
 $testrun = model('TestrunDB')->resultset('Testrun')->find(3001);
 $retval = $cmd->cancel(3001);
-is($retval, "Testrun not started yet, setting status 'finished'", 'Warning for user');
 is($testrun->testrun_scheduling->status, 'finished', 'Testrun was not running and is now finished');
 
 $testrun->testrun_scheduling->status('running'); # can't use mark_as_running because database is incomplete (undefined values)
