@@ -344,6 +344,45 @@ sub cancel
 }
 
 
+=head2 query
+
+Get information of one testrun.
+
+@param int - testrun id
+
+@return - hash ref -
+* status - one of 'prepare', 'schedule', 'running', 'pass', 'fail'
+* success_ratio - percentage of success
+
+
+@throws - die
+
+=cut
+
+sub query
+{
+        my ($self, $id) = @_;
+        my $result;
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        die "No testrun with id '$id'\n" if not $testrun;
+
+        $result->{status}       .= $testrun->testrun_scheduling->status; # the dot (.=) stringifies the enum object that the status actually contains
+        $result->{success_ratio} = undef;
+
+        if ($result->{status} eq 'finished') {
+                my $stats = model('TestrunDB')->resultset('Reportgrouptestrunstats')->search({testrun_id => $id})->first;
+                return $result if not defined($stats);
+
+                if ($stats->success_ratio < 100) {
+                        $result->{success_ratio} = 'fail';
+                } else {
+                        $result->{success_ratio} = 'pass';
+                }
+        }
+        return $result;
+}
+
+
 =head1 AUTHOR
 
 AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
