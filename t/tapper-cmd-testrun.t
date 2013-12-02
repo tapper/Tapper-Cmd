@@ -176,4 +176,6 @@ is_deeply($message->message,{
                             },
           'Cancel message in DB'
          );
+is_deeply($cmd->query(3004), { 'success_ratio' => undef, 'status' => 'schedule' }, 'Query scheduled testrun');
+
 done_testing;
