@@ -14,8 +14,7 @@ Tapper::Cmd::User - Backend functions for manipluation of user subscriptions in 
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects that manipulate
-users in the database. Even though it mostly handles users in the
-reportsdb, some functions can also manipulate users in the testrundb.
+users in the database.
 
     use Tapper::Cmd::User;
 
@@ -46,7 +45,7 @@ reportsdb, some functions can also manipulate users in the testrundb.
 
 =head2 add
 
-Add a new user to reportsdb. Expects all details as a hash reference.
+Add a new user to testrundb. Expects all details as a hash reference.
 
 
 @param hash ref  - user data
@@ -75,12 +74,12 @@ sub add
         }
 
 
-        my $owner = model('ReportsDB')->resultset('Owner')->new($data);
+        my $owner = model('TestrunDB')->resultset('Owner')->new($data);
         $owner->insert;
 
         foreach my $contact (@{$contacts || []}) {
                 $contact->{owner_id} = $owner->id;
-                my $contact_result = model('ReportsDB')->resultset('Contact')->new($contact);
+                my $contact_result = model('TestrunDB')->resultset('Contact')->new($contact);
                 $contact_result->insert;
         }
 
@@ -103,7 +102,7 @@ sub list
 {
         my ($self, $search) = @_;
         my @users;
-        my $owner_rs = model('ReportsDB')->resultset('Owner')->search($search);
+        my $owner_rs = model('TestrunDB')->resultset('Owner')->search($search);
         while (my $owner_result = $owner_rs->next) {
                 my $user = { id => $owner_result->id, name => $owner_result->name, login => $owner_result->login };
                 $user->{contacts} = [ map { { address => $_->address, protocol => $_->protocol } } $owner_result->contacts->all ];
@@ -134,9 +133,9 @@ sub del
         my ($self, $id) = @_;
         my $owner;
         if ($id =~ /^\d+$/) {
-                $owner = model('ReportsDB')->resultset('Owner')->find($id);
+                $owner = model('TestrunDB')->resultset('Owner')->find($id);
         } else {
-                $owner = model('ReportsDB')->resultset('Owner')->find({login => $id});
+                $owner = model('TestrunDB')->resultset('Owner')->find({login => $id});
         }
         die qq(User "$id" not found) if not $owner;;
         $owner->delete();
@@ -145,7 +144,7 @@ sub del
 
 =head2 contact_add
 
-Add a contact to an existing owner in reportsdb. Expects all details as a hash
+Add a contact to an existing owner in testrundb. Expects all details as a hash
 reference.
 
 @param int|string - owner as id or login
@@ -165,13 +164,13 @@ sub contact_add
         $user //= $ENV{USER};
 
         if ( $user !~ m/^\d+$/ ) {
-                my $owner_result = model('ReportsDB')->resultset('Owner')->find({login => $user});
+                my $owner_result = model('TestrunDB')->resultset('Owner')->find({login => $user});
                 die "User $user does not exist in database\n" if not $owner_result;
                 $user = $owner_result->id;
         }
         $data->{owner_id} ||= $user;
 
-        my $contact = model('ReportsDB')->resultset('Contact')->new($data);
+        my $contact = model('TestrunDB')->resultset('Contact')->new($data);
         $contact->insert;
 
         return $contact->id;

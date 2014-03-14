@@ -99,18 +99,16 @@ sub dbdeploy
 {
         Tapper::Config::_switch_context; # reload config
 
-        foreach my $db (qw(TestrunDB ReportsDB)) {
-                my $dsn = Tapper::Config->subconfig->{database}{$db}{dsn};
-                my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
-                 or die "Can't parse DBI DSN '$dsn'";
-                if ($driver eq "SQLite") {
-                        my ($dbname) = $driver_dsn =~ /dbname=(.*)/;
-                        if (! -e $dbname) {
-                                my $cmd = Tapper::Cmd::DbDeploy->new;
-                                $cmd->dbdeploy($db);
-                        } else {
-                                say "SKIP    $dbname - already exists";
-                        }
+        my $dsn = Tapper::Config->subconfig->{database}{TestrunDB}{dsn};
+        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
+         or die "Can't parse DBI DSN '$dsn'";
+        if ($driver eq "SQLite") {
+                my ($dbname) = $driver_dsn =~ /dbname=(.*)/;
+                if (! -e $dbname) {
+                        my $cmd = Tapper::Cmd::DbDeploy->new;
+                        $cmd->dbdeploy('TestrunDB');
+                } else {
+                        say "SKIP    $dbname - already exists";
                 }
         }
 }

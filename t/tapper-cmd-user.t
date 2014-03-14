@@ -14,7 +14,7 @@ use Tapper::Model 'model';
 
 
 # -----------------------------------------------------------------------------------
-construct_fixture( schema  => reportsdb_schema,  fixture => 't/fixtures/reportsdb/report.yml' );
+construct_fixture( schema  => testrundb_schema,  fixture => 't/fixtures/reportsdb/report.yml' );
 # -----------------------------------------------------------------------------------
 
 my $cmd = Tapper::Cmd::User->new();

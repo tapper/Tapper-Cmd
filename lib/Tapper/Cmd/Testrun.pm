@@ -344,7 +344,7 @@ sub cancel
 }
 
 
-=head2 query
+=head2 status
 
 Get information of one testrun.
 
@@ -359,7 +359,7 @@ Get information of one testrun.
 
 =cut
 
-sub query
+sub status
 {
         my ($self, $id) = @_;
         my $result;
@@ -370,13 +370,14 @@ sub query
         $result->{success_ratio} = undef;
 
         if ($result->{status} eq 'finished') {
-                my $stats = model('TestrunDB')->resultset('Reportgrouptestrunstats')->search({testrun_id => $id})->first;
+                my $stats = model('TestrunDB')->resultset('ReportgroupTestrunStats')->search({testrun_id => $id})->first;
                 return $result if not defined($stats);
 
+                $result->{success_ratio} = $stats->success_ratio;
                 if ($stats->success_ratio < 100) {
-                        $result->{success_ratio} = 'fail';
+                        $result->{status} = 'fail';
                 } else {
-                        $result->{success_ratio} = 'pass';
+                        $result->{status} = 'pass';
                 }
         }
         return $result;

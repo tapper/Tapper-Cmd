@@ -61,7 +61,7 @@ my $retval = {owner       => $testrun->owner_id,
               earliest    => $testrun->starttime_earliest,
               requested_hosts => [ map {$_->host->name} $testrun->testrun_scheduling->requested_hosts->all ],
              };
-my $notify = model('ReportsDB')->resultset('Notification')->search({},
+my $notify = model('TestrunDB')->resultset('Notification')->search({},
                                                                    {  result_class => 'DBIx::Class::ResultClass::HashRefInflator',}
                                                                   )->first;
 
@@ -176,6 +176,6 @@ is_deeply($message->message,{
                             },
           'Cancel message in DB'
          );
-is_deeply($cmd->query(3004), { 'success_ratio' => undef, 'status' => 'schedule' }, 'Query scheduled testrun');
+is_deeply($cmd->status(3004), { 'success_ratio' => undef, 'status' => 'schedule' }, 'Query scheduled testrun');
 
 done_testing;

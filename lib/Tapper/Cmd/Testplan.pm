@@ -103,6 +103,7 @@ sub add {
                 my $description = $plan->{testplan_description} || $plan->{description};
                 my @new_ids = $handler->create($description, $instance->id);
                 push @testrun_ids, @new_ids;
+
         }
         return $instance->id;
 }
@@ -269,7 +270,7 @@ sub testplannew {
         return $self->add($plan, $path, $shortname);
 }
 
-=head2 query
+=head2 status
 
 Get information of one testplan.
 
@@ -285,13 +286,15 @@ Get information of one testplan.
 
 =cut
 
-sub query
+sub status
 {
         my ($self, $id) = @_;
         my $results;
         my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
         die "No testplan with id '$id'\n" if not $testplan;
-
+        if (not $testplan->testruns->count) {
+                return {status => 'fail'};
+        }
         my ($started, $complete, $success_sum) = (0,0,0);
         for my $testrun ($testplan->testruns->all) {
                 $started++  if $testrun->testrun_scheduling->status eq any('running', 'finished');

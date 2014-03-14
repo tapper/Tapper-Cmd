@@ -84,7 +84,7 @@ Changes values of an existing queue.
 sub update {
         my ($self, $queue, $args) = @_;
 
-        if (not ref($queue) ) {
+        if (! (ref $queue && $queue->isa('Tapper::Schema::TestrunDB::Result::Queue')) ) {
                 $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
         }
 
@@ -105,6 +105,7 @@ sub update {
         require DateTime;
         foreach my $queue ( model('TestrunDB')->resultset('Queue')->all ) {
                 if ( $queue->runcount ne $queue->priority ) {
+                        $queue->runcount( $queue->priority );
                         $queue->updated_at( DateTime->now->strftime('%F %T') );
                         $queue->update;
                 }
