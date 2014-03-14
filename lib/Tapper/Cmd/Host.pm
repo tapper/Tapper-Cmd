@@ -162,16 +162,4 @@ sub list
         return $hosts;
 }
 
-=head1 AUTHOR
-
-EC2 Dresden Tapper Team, C<< <tapper-interest at amazon.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2013 EC2 Dresden Tapper Team, all rights reserved.
-
-This program is released under the following license: freebsd
-
-=cut
-
 1; # End of Tapper::Cmd::Testrun
