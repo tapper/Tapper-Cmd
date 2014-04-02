@@ -299,8 +299,8 @@ sub status
                                                         query_vals  => {testplan_id => $id},
                                                        });
         my $testruns_rs = model->resultset("Testrun")->search({testplan_id => $id});
-        my @testrun_ids = map {$_->id} $testruns_rs->all;
-        $results->{testruns} = \@testrun_ids;
+        my %testrun_ids = map { $_->id => $_->topic_name} $testruns_rs->all;
+        $results->{testruns} = \%testrun_ids;
         return $results;
 
 # TODO check how we can get old infos back in
