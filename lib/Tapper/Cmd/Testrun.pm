@@ -369,6 +369,15 @@ sub status
         $result->{status}       .= $testrun->testrun_scheduling->status; # the dot (.=) stringifies the enum object that the status actually contains
         $result->{success_ratio} = undef;
 
+        my $reportgroup = model()->resultset('ReportgroupTestrun')->search({testrun_id => $id});
+        if ($reportgroup->count > 0) {
+                $result->{reports} = [];
+                foreach my $report ($reportgroup->all) {
+                        push @{$result->{reports}}, $report->id;
+                        $result->{primaryreport} = $report->id if $report->primaryreport;
+                }
+        }
+
         if ($result->{status} eq 'finished') {
                 my $stats = model('TestrunDB')->resultset('ReportgroupTestrunStats')->search({testrun_id => $id})->first;
                 return $result if not defined($stats);
