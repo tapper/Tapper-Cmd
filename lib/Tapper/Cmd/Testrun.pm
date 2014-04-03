@@ -372,9 +372,9 @@ sub status
         my $reportgroup = model()->resultset('ReportgroupTestrun')->search({testrun_id => $id});
         if ($reportgroup->count > 0) {
                 $result->{reports} = [];
-                foreach my $report ($reportgroup->all) {
-                        push @{$result->{reports}}, $report->id;
-                        $result->{primaryreport} = $report->id if $report->primaryreport;
+                foreach my $group_element ($reportgroup->all) {
+                        push @{$result->{reports}}, $group_element->report_id;
+                        $result->{primaryreport} = $group_element->report_id if $group_element->primaryreport;
                 }
         }
 
