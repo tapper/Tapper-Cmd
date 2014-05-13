@@ -310,5 +310,30 @@ sub status
 # * success_percentage  - average of success rates of finished testruns
 }
 
+=head2 testplan_files
+
+Get all files that belong to a testplan.
+
+@param int    - testplan id
+@param string - filter
+
+@return array ref - list of report file ids
+
+@throws - die
+
+=cut
+
+sub testplan_files
+{
+        my ($self, $testplan_id, $filter) = @_;
+        my $results_rawsql = model('TestrunDB')->fetch_raw_sql({
+                                                                query_name  => 'testplans::reportfile',
+                                                                fetch_type  => '@@',
+                                                                query_vals  => {testplan_id => $testplan_id, filter => $filter},
+                                                               });
+        my @results = map { $_->[0] } @$results_rawsql;
+        return \@results;
+}
+
 
 1; # End of Tapper::Cmd::Testplan
