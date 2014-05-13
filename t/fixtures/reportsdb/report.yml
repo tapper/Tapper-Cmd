@@ -4,12 +4,14 @@
   name: dummy 1
   data:
     id: 21
+    successgrade: incomplete
 
 - schema: Report
   name: full_tap_report
   data:
     id: 101
     machine_name: dickstone
+    successgrade: incomplete
 
 - schema: Tap
   name: tap 1
@@ -27,6 +29,7 @@
   name: dummy 2
   data:
     id: 22
+    successgrade: incomplete
 
 - schema: Tap
   name: tap 2
@@ -43,6 +46,7 @@
   name: dummy 3
   data:
     id: 23
+    successgrade: incomplete
 
 - schema: Tap
   name: tap 3
