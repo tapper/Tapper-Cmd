@@ -51,7 +51,7 @@ sub get_user
         my ($self, $data) = @_;
         if (not $data->{owner_id}) {
                 my $login = $data->{owner_login} || $ENV{USER};
-                my $owner = model('ReportsDB')->resultset('Owner')->search({login => $login}, {rows => 1})->first;
+                my $owner = model('TestrunDB')->resultset('Owner')->search({login => $login}, {rows => 1})->first;
                 if (not $owner) {
                         die "User '$login' does not exist in the database. Please create this user first.\n";
                 }
@@ -83,7 +83,7 @@ sub add {
 
         $data = $self->get_user($data);
 
-        my $notification = model('ReportsDB')->resultset('Notification')->new($data);
+        my $notification = model('TestrunDB')->resultset('Notification')->new($data);
         $notification->insert;
 
         return $notification->id;
@@ -99,7 +99,7 @@ subscriptions.
 sub list
 {
         my ($self, $search) = @_;
-        return model('ReportsDB')->resultset('Notification')->search($search, { result_class => 'DBIx::Class::ResultClass::HashRefInflator' });
+        return model('TestrunDB')->resultset('Notification')->search($search, { result_class => 'DBIx::Class::ResultClass::HashRefInflator' });
 }
 
 
@@ -122,7 +122,7 @@ update.
 sub update {
         my ($self, $id, $data) = @_;
 
-        my $notification = model('ReportsDB')->resultset('Notification')->find($id);
+        my $notification = model('TestrunDB')->resultset('Notification')->find($id);
         die "Notification subscription with id $id not found\n" if not $notification;
         die "Did not get a hash with data for updating notification subscription with id '$id'" unless ref $data eq 'HASH';
 
@@ -152,7 +152,7 @@ prevent confusion with the buildin delete function.
 
 sub del {
         my ($self, $id) = @_;
-        my $notification = model('ReportsDB')->resultset('Notification')->find($id);
+        my $notification = model('TestrunDB')->resultset('Notification')->find($id);
         die qq(No notification subscription with id "$id" found) if not $notification;;
         $notification->delete();
         return 0;

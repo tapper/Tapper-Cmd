@@ -55,6 +55,12 @@ sub add {
         my $q = model('TestrunDB')->resultset('Queue')->update_or_create(\%args);
         $q->insert;
         my $all_queues = model('TestrunDB')->resultset('Queue');
+
+
+        # the new queue now has a much lower runcount than all others
+        # If we keep this situation the new queue would be scheduled
+        # until it catches up with the other queues. To prevent this we
+        # reset the runcount of all queues.
         foreach my $queue ($all_queues->all) {
                 $queue->runcount($queue->priority);
                 $queue->update;
@@ -67,25 +73,42 @@ sub add {
 
 Changes values of an existing queue.
 
-@param int      - queue id
-@param hash ref - overwrite these options
+@param int or object ref    - queue id or queue object
+@param hash ref             - overwrite these options
 
-@return success - queue id
-@return error   - undef
+@return success             - queue id
+@return error               - undef
 
 =cut
 
 sub update {
-        my ($self, $id, $args) = @_;
-        my %args = %{$args};    # copy
+        my ($self, $queue, $args) = @_;
 
-        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-        my $retval = $queue->update_content(\%args);
+        if (! (ref $queue && $queue->isa('Tapper::Schema::TestrunDB::Result::Queue')) ) {
+                $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
+        }
 
+        my $retval = $queue->update_content( $args );
         my $all_queues = model('TestrunDB')->resultset('Queue');
-        foreach my $queue ($all_queues->all) {
-                $queue->runcount($queue->priority);
-                $queue->update;
+
+        if (defined($args->{priority})) {
+                # The priority of the queue has changed. Without the following
+                # changes the queue would be scheduled/not scheduled until its
+                # runcount is in correct relation to all others. Therefore, we
+                # reset the runcount to have scheduling working correctly immediatelly.
+                foreach my $queue ($all_queues->all) {
+                        $queue->runcount($queue->priority);
+                        $queue->update;
+                }
+        }
+
+        require DateTime;
+        foreach my $queue ( model('TestrunDB')->resultset('Queue')->all ) {
+                if ( $queue->runcount ne $queue->priority ) {
+                        $queue->runcount( $queue->priority );
+                        $queue->updated_at( DateTime->now->strftime('%F %T') );
+                        $queue->update;
+                }
         }
 
         return $retval;
@@ -98,7 +121,7 @@ confusion with the buildin delete function. If the queue is not empty
 and force is not given, we keep the queue and only set it to deleted to
 not break showing old testruns and their results.
 
-@param int  - queue id
+@param      - queue result || queue id
 @param bool - force deleted
 
 @return success - 0
@@ -107,21 +130,33 @@ not break showing old testruns and their results.
 =cut
 
 sub del {
-        my ($self, $id, $force) = @_;
-        my $queue = model('TestrunDB')->resultset('Queue')->find($id);
-        $queue->is_deleted(1);
-        $queue->active(0);
+
+    my ( $self, $queue, $force ) = @_;
+
+    # queue is not a result object
+    if (! ref $queue ) {
+        $queue = model('TestrunDB')->resultset('Queue')->find( $queue );
+    }
+
+    # empty queues can be deleted, because it does not break anything
+    if ( $force || $queue->testrunschedulings->count == 0 ) {
+        $queue->delete;
+    }
+    else {
+
+        require DateTime;
+        $queue->is_deleted( 1 );
+        $queue->active( 0 );
+        $queue->updated_at( DateTime->now->strftime('%F %T') );
         $queue->update;
-        my $attached_jobs = $queue->testrunschedulings->search({status => 'schedule'});
-        while (my $job = $attached_jobs->next) {
-                $job->status('finished');
-                $job->update;
+
+        if ( my $or_attached_jobs = $queue->testrunschedulings->search({ status => 'schedule' }) ) {
+            $or_attached_jobs->update({ status => 'finished' });
         }
+    }
 
-        # empty queues can be deleted, because it does not break anything
-        $queue->delete if $queue->testrunschedulings->count == 0;
+    return 0;
 
-        return 0;
 }
 
 1; # End of Tapper::Cmd::Testrun

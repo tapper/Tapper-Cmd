@@ -42,25 +42,31 @@ sub find_matching_hosts
 
 =head2 create
 
-Create new testruns from one element of a test plan (actually a test
-plan instance) that contains all information including requested hosts
-and features. If the new testruns belong to a test plan instance the
-function expects the id of this instance as second parameter. If the
-instance id is empty the function can also be used to create testruns
-from a testplan like layout without actually using test plan features,
-i.e. without creating a link between the new testruns and a test plan
-(instance).
+Create new testruns from a data structure that contains all information
+including requested hosts and features. If the new testruns belong to a
+test plan instance the function expects the id of this instance as
+second parameter.
 
-@param hash ref - test plan element
-@param instance - test plan instance id
+@param hash ref - testrun description OR
+       string   - YAML
+@optparam instance - test plan instance id
 
 @return array   - testrun ids
+
+@throws die()
 
 =cut
 
 sub create
 {
         my ($self, $plan, $instance) = @_;
+        if (not ref($plan)) {
+                require YAML::Syck;
+                $plan = YAML::Syck::Load($plan);
+        }
+        die "'$plan' is not YAML containing a testrun description\n" if not ref($plan) eq 'HASH';
+
+
         my $cmd           = Tapper::Cmd::Precondition->new();
         my @preconditions = $cmd->add($plan->{preconditions});
         my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and lc($_) !~ /^requested/} keys %$plan;
@@ -159,7 +165,7 @@ sub add {
         if ($args{requested_hosts} and not $args{requested_host_ids}) {
                 foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
                         my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host}, {rows => 1})->first;
-                        die "Can not request host '$host'. This host is not known to tapper" if not $host_result;
+                        die "Can not request host '$host'. This host is not known to tapper\n" if not $host_result;
                         push @{$args{requested_host_ids}}, $host_result->id if $host_result;
                 }
         }
@@ -170,6 +176,7 @@ sub add {
                 die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
                 $args{queue_id}  = $queue_result->search({}, {rows => 1})->first->id;
         }
+
         my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
 
         if ($args{requested_features}) {
@@ -179,9 +186,11 @@ sub add {
                         $request->insert();
                 }
         }
-        if ($args{notify}) {
-                my $notify = Tapper::Cmd::Notification->new();
-                my $filter = "testrun('id') == $testrun_id";
+        my $s_error;
+        if ( exists $args{notify} ) {
+                my $s_notify = $args{notify} // q##;
+                my $notify   = Tapper::Cmd::Notification->new();
+                my $filter   = "testrun('id') == $testrun_id";
                 if (lc $args{notify} eq any('pass', 'ok','success')) {
                         $filter .= " and testrun('success_word') eq 'pass'";
                 } elsif (lc $args{notify} eq any('fail', 'not_ok','error')) {
@@ -193,12 +202,15 @@ sub add {
                                       event    => "testrun_finished",
                                      });
                 } catch {
-                        my $message = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n";
-                        $message   .= "$_\n";
-                        die $message;
+                        $s_error = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n$_";
                 }
         }
-        return $testrun_id;
+        if ( wantarray ) {
+            return ( $testrun_id, $s_error );
+        }
+        else {
+            return $testrun_id;
+        }
 }
 
 
@@ -288,9 +300,88 @@ sub rerun {
         my ($self, $id, $args) = @_;
         my %args = %{$args || {}}; # copy
         my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
-        return $testrun->rerun(\%args);
+        return $testrun->rerun(\%args)->id;
 }
 
+=head2 cancel
+
+Stop a running testrun by sending the appropriate message to MCP. As
+convenience to the user the function will also work on testruns that are
+not running. In that case the return value contains a warning that the
+caller should present to the user.
+
+@param int - testrun id
+@optparam string - comment
+
+@return success - success string
+@return error   - error string
+
+@throws die()
+
+=cut
+
+sub cancel
+{
+        my ($self, $testrun_id, $comment) = @_;
+        my $msg = { 'state' => 'quit', };
+        if ( $comment ) {
+                $msg->{error} = $comment;
+        }
+        my $testrun_result = model->resultset('Testrun')->find( $testrun_id ) or die "No such testrun '$testrun_id'\n";
+        if ($testrun_result->testrun_scheduling->status eq 'schedule' or
+            $testrun_result->testrun_scheduling->status eq 'prepare'
+           ) {
+                $testrun_result->testrun_scheduling->status('finished');
+                $testrun_result->testrun_scheduling->update;
+        } elsif ( $testrun_result->testrun_scheduling->status eq 'running') {
+                model->resultset('Message')->new({
+                                                  testrun_id => $testrun_id,
+                                                  message    => $msg,
+                                                 }
+                                                )->insert;
+        }
+        return 0;
+}
+
+
+=head2 status
+
+Get information of one testrun.
+
+@param int - testrun id
+
+@return - hash ref -
+* status - one of 'prepare', 'schedule', 'running', 'pass', 'fail'
+* success_ratio - percentage of success
+
+
+@throws - die
+
+=cut
+
+sub status
+{
+        my ($self, $id) = @_;
+        my $result;
+        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        die "No testrun with id '$id'\n" if not $testrun;
+
+        $result->{status}       .= $testrun->testrun_scheduling->status; # the dot (.=) stringifies the enum object that the status actually contains
+        $result->{success_ratio} = undef;
+
+        if ($result->{status} eq 'finished') {
+                my $stats = model('TestrunDB')->resultset('ReportgroupTestrunStats')->search({testrun_id => $id})->first;
+                return $result if not defined($stats);
+
+                $result->{success_ratio} = $stats->success_ratio;
+                if ($stats->success_ratio < 100) {
+                        $result->{status} = 'fail';
+                } else {
+                        $result->{status} = 'pass';
+                }
+        }
+        return $result;
+}
 
 
 =head1 AUTHOR

@@ -61,7 +61,7 @@ my $retval = {owner       => $testrun->owner_id,
               earliest    => $testrun->starttime_earliest,
               requested_hosts => [ map {$_->host->name} $testrun->testrun_scheduling->requested_hosts->all ],
              };
-my $notify = model('ReportsDB')->resultset('Notification')->search({},
+my $notify = model('TestrunDB')->resultset('Notification')->search({},
                                                                    {  result_class => 'DBIx::Class::ResultClass::HashRefInflator',}
                                                                   )->first;
 
@@ -161,6 +161,21 @@ $testrun = model('TestrunDB')->resultset('Testrun')->find(shift @testruns);
 is($testrun->testrun_scheduling->requested_features->count, 2, "requested_features_any testrun with two requested features");
 is($testrun->preconditions, 6, "requested_feature_any testrun has preconditions assigned");
 
+$testrun = model('TestrunDB')->resultset('Testrun')->find(3001);
+$retval = $cmd->cancel(3001);
+is($testrun->testrun_scheduling->status, 'finished', 'Testrun was not running and is now finished');
 
+$testrun->testrun_scheduling->status('running'); # can't use mark_as_running because database is incomplete (undefined values)
+$testrun->testrun_scheduling->update;
+$cmd->cancel(3001, 'Go away!');
+
+my $message = model('TestrunDB')->resultset('Message')->search({testrun_id => 3001})->first;
+is_deeply($message->message,{
+                             'error' => 'Go away!',
+                             'state' => 'quit'
+                            },
+          'Cancel message in DB'
+         );
+is_deeply($cmd->status(3004), { 'success_ratio' => undef, 'status' => 'schedule' }, 'Query scheduled testrun');
 
 done_testing;

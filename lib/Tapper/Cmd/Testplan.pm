@@ -8,6 +8,8 @@ use Try::Tiny;
 use YAML::Syck;
 use Tapper::Model 'model';
 use Tapper::Reports::DPath::TT;
+use File::Slurp 'slurp';
+use Perl6::Junction 'any';
 
 extends 'Tapper::Cmd';
 
@@ -101,6 +103,7 @@ sub add {
                 my $description = $plan->{testplan_description} || $plan->{description};
                 my @new_ids = $handler->create($description, $instance->id);
                 push @testrun_ids, @new_ids;
+
         }
         return $instance->id;
 }
@@ -125,7 +128,7 @@ not remove the associated testruns.
 sub del {
         my ($self, $id) = @_;
         my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
-        foreach my $testrun ($testplan->testruns->all) {
+        while(my $testrun = $testplan->testruns->next) {
                 if ($testrun->testrun_scheduling->status eq 'running') {
                         my $message = model('TestrunDB')->resultset('Message')->new({testrun_id => $testrun->id,
                                                                                      type       => 'state',
@@ -191,19 +194,16 @@ sub parse_path
 
 =head2 get_shortname
 
-Get the shortname for this testplan. The shortname is either given as
-command line option or inside the plan text.
+Get the shortname for this testplan.
 
 @param string - plan text
-@param string - value of $opt->{name}
 
 @return string - shortname
 
 =cut
 
 sub get_shortname{
-        my ($self, $plan, $name) = @_;
-        return $name if $name;
+        my ($self, $plan) = @_;
 
         foreach my $line (split "\n", $plan) {
                 if ($line =~/^###\s*(?:short)?name\s*:\s*(.+)$/i) {
@@ -213,87 +213,118 @@ sub get_shortname{
         return;
 }
 
+
+=head2 guide
+
+Get self documentation of a testplan file.
+
+@param string - file name of testplan file
+
+@return success - documentation text
+
+@throws - die()
+
+=cut
+
+sub guide
+{
+        my ($self, $file, $substitutes, $include) = @_;
+        my $text;
+        my $guide = $self->apply_macro($file,
+                                       $substitutes,
+                                       $include);
+
+        my @guide = grep { m/^###/ } split (qr/\n/, $guide);
+        $text = "Self-documentation:\n";
+        $text = join "\n", map { my $l = $_; $l =~ s/^###/ /; "$l" } @guide;
+        return $text;
+}
+
 =head2 testplannew
 
 Create a testplan instance from a file.
+
+@param hash ref - options containing
+
+required:
+* file: string, path of the testplan file
+* substitutes: hash ref, substitute variables for Template Toolkit
+
+optional:
+* include: array ref of strings containing include paths
+* path: string, alternative path instead of real path
+* name: string, overwrite shortname in plan
+
+@return success - testplan id
+
+@throws die
 
 =cut
 
 sub testplannew {
         my ($self, $opt) = @_;
 
-        use File::Slurp 'slurp';
-
-        my $file = $opt->{file};
-
-        my $plan = slurp($file);
-        $plan = $self->apply_macro($plan,
-                                   {
-                                    HOME => $ENV{HOME},
-                                    %{$opt->{D} || {}},
-                                   },
-                                   $opt->{include});
-
-        if ($opt->{guide}) {
-                my $guide = $plan;
-                my @guide = grep { m/^###/ } split (qr/\n/, $plan);
-                say "Self-documentation:";
-                say map { my $l = $_; $l =~ s/^###/ /; "$l\n" } @guide;
-                return 0;
-        }
-
-        my $cmd = Tapper::Cmd::Testplan->new;
-        my $path = $opt->{path} || $self->parse_path($opt->{file});
-        my $shortname = $self->get_shortname($plan, $opt->{name});
-
-        if ($opt->{dryrun}) {
-                say $plan;
-                return 0;
-        }
-
-        my $plan_id = $cmd->add($plan, $path, $shortname);
-        die "Plan not created" unless defined $plan_id;
-
-        if ($opt->{verbose}) {
-                my $url = Tapper::Config->subconfig->{base_url} || 'http://tapper/tapper';
-                say "Plan created";
-                say "  id:   $plan_id";
-                say "  url:  $url/testplan/id/$plan_id";
-                say "  path: $path";
-                say "  file: ".$opt->{file};
-        } else {
-                say $plan_id;
-        }
-        return 0;
+        my $plan = $self->apply_macro($opt->{file}, $opt->{substitutes}, $opt->{include});
+        my $path   = $opt->{path} || $self->parse_path($opt->{file});
+        my $shortname = $opt->{name} || $self->get_shortname($plan);
+        return $self->add($plan, $path, $shortname);
 }
 
-=head2 apply_macro
+=head2 status
 
-Process macros and substitute using Template::Toolkit.
+Get information of one testplan.
 
-@param string  - contains macros
-@param hashref - containing substitutions
-@optparam string - path to more include files
+@param int - testplan id
 
-@return success - text with applied macros
-@return error   - die with error string
+@return - hash ref -
+* status - one of 'schedule', 'running', 'pass', 'fail'
+* complete_percentage - percentage of finished testruns
+* started_percentage  - percentage of running and finished testruns
+* success_percentage  - average of success rates of finished testruns
+
+@throws - die
 
 =cut
 
-sub apply_macro
+sub status
 {
-        my ($self, $macro, $substitutes, $includes) = @_;
+        my ($self, $id) = @_;
+        my $results;
+        my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+        die "No testplan with id '$id'\n" if not $testplan;
+        if (not $testplan->testruns->count) {
+                return {status => 'fail'};
+        }
+        my ($started, $complete, $success_sum) = (0,0,0);
+        for my $testrun ($testplan->testruns->all) {
+                $started++  if $testrun->testrun_scheduling->status eq any('running', 'finished');
+                if ($testrun->testrun_scheduling->status eq 'finished') {
+                        $complete++ ;
+                        my $success_obj = model('ReportsDB')->resultset('ReportgroupTestrunStats')->find({testrun_id => $testrun->id});
+                        $success_sum+= int($success_obj->success_ratio);
+                }
+        }
+        my $result = {
+                      complete_percentage => ($complete * 100) / $testplan->testruns->count,
+                      started_percentage  => ($started * 100) / $testplan->testruns->count,
+                      success_percentage  => $complete ? $success_sum / $complete : undef,
+                     };
+        if ($started == 0) {
+                $result->{status} = 'schedule';
+        }
+        elsif ($started > 0 and $complete < $testplan->testruns->count) {
+                $result->{status} = 'running';
+        }
+        else {
+                if ($result->{success_percentage} < 100) {
+                        $result->{status} = 'fail';
+                } else {
+                        $result->{status} = 'pass';
+                }
+        }
 
-        my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
-        push @include_paths, @{$includes || [] };
-        my $include_path_list = join ":", @include_paths;
-
-        my $tt = Tapper::Reports::DPath::TT->new(include_path => $include_path_list,
-                                                 substitutes  => $substitutes,
-                                                );
-        return $tt->render_template($macro);
+        return $result;
 }
-
 
 
 1; # End of Tapper::Cmd::Testplan

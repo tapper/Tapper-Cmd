@@ -8,7 +8,6 @@ use warnings;
 use Moose;
 use Tapper::Config;
 use Tapper::Schema::TestrunDB;
-use Tapper::Schema::ReportsDB;
 
 extends 'Tapper::Cmd';
 
@@ -22,7 +21,6 @@ This module provides functions to initially set up Tapper in C<$HOME/.tapper/>.
 
     use Tapper::Cmd::DbDeploy;
     my $cmd = Tapper::Cmd::DbDeploy->new;
-    $cmd->dbdeploy("ReportsDB");
     $cmd->dbdeploy("TestrunDB");
 
 =head1 METHODS
@@ -107,8 +105,7 @@ sub dbdeploy
                 open STDERR, '>', \$stderr;
 
                 my $schema;
-                $schema = Tapper::Schema::TestrunDB->connect ($dsn, $user, $pw) if $db eq 'TestrunDB';
-                $schema = Tapper::Schema::ReportsDB->connect ($dsn, $user, $pw) if $db eq 'ReportsDB';
+                $schema = Tapper::Schema::TestrunDB->connect ($dsn, $user, $pw);
                 $schema->deploy({ add_drop_table => 1 }); # may fail, does not provide correct order to drop tables
                 insert_initial_values($schema, $db);
         }
