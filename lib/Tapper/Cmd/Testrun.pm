@@ -231,6 +231,9 @@ sub add {
             return ( $testrun_id, $exception );
         }
         else {
+            if ( $exception ) {
+                die $exception;
+            }
             return $testrun_id;
         }
 

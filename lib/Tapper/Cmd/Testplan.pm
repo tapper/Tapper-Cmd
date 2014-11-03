@@ -87,10 +87,11 @@ sub add {
         # print STDERR "plans: ".Dumper($plan_content);
         # print STDERR "plans: ".Dumper(\@plans);
 
-        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({evaluated_testplan => $plan_content,
-                                                                               path => $path,
-                                                                               name => $name,
-                                                                              });
+        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({
+            evaluated_testplan => $plan_content,
+            path               => $path,
+            name               => $name,
+        });
         $instance->insert;
 
         my @testrun_ids;
@@ -197,27 +198,26 @@ sub parse_path
         return $path;
 }
 
-=head2 get_shortname
+sub get_shortname {
 
-Get the shortname for this testplan.
+    my ( $or_self, $s_plan ) = @_;
 
-@param string - plan text
+    my @a_plans = YAML::Syck::Load($s_plan);
 
-@return string - shortname
+    my $s_name;
+    PLANS: for my $hr_plan ( @a_plans ) {
+        $s_name =
+               $hr_plan->{name}
+            || $hr_plan->{description}{name}
+            || $hr_plan->{shortname}
+            || $hr_plan->{description}{shortname}
+        ;
+        last PLANS if $s_name;
+    } # PLANS
 
-=cut
+    return $s_name;
 
-sub get_shortname{
-        my ($self, $plan) = @_;
-
-        foreach my $line (split "\n", $plan) {
-                if ($line =~/^###\s*(?:short)?name\s*:\s*(.+)$/i) {
-                        return $1;
-                }
-        }
-        return;
 }
-
 
 =head2 guide
 
@@ -270,9 +270,9 @@ sub testplannew {
         my ($self, $opt) = @_;
 
         my $plan = $self->apply_macro($opt->{file}, $opt->{substitutes}, $opt->{include});
-        my $path   = $opt->{path} || $self->parse_path($opt->{file});
-        my $shortname = $opt->{name} || $self->get_shortname($plan);
-        return $self->add($plan, $path, $shortname);
+        my $path = $opt->{path} || $self->parse_path($opt->{file});
+        my $name = $self->get_shortname($plan);
+        return $self->add($plan, $path, $name);
 }
 
 =head2 status
