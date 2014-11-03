@@ -50,10 +50,15 @@ the type given in the testplan should be telling for the testplan user.
 sub get_module_for_type
 {
         my ($self, $type) = @_;
-         given (lc($type)){
-                when('multitest') { return "Tapper::Cmd::Testrun"; }
-                when('scenario')  { return "Tapper::Cmd::Scenario" }
-                default           { $type = ucfirst($type); return "Tapper::Cmd::$type"; }
+        
+        if ( lc($type) eq 'multitest' ) {
+            return "Tapper::Cmd::Testrun";
+        }
+        elsif ( lc($type) eq 'scenario')  {
+            return "Tapper::Cmd::Scenario"
+        }
+        else {
+            $type = ucfirst($type); return "Tapper::Cmd::$type";
         }
 }
 
