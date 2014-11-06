@@ -62,7 +62,6 @@ sub get_module_for_type
         }
 }
 
-
 =head2 add
 
 Add a new testplan instance to database and create the associated
@@ -113,8 +112,6 @@ sub add {
         }
         return $instance->id;
 }
-
-
 
 =head2 del
 
@@ -202,20 +199,13 @@ sub get_shortname {
 
     my ( $or_self, $s_plan ) = @_;
 
-    my @a_plans = YAML::Syck::Load($s_plan);
+    foreach my $s_line ( split /\n/, $s_plan ) {
+        if ( $s_line =~ /^\s*-?\s*(?:short)?name\s*:\s*(.+?)\s*$/i ) {
+            return $1;
+        }
+    }
 
-    my $s_name;
-    PLANS: for my $hr_plan ( @a_plans ) {
-        $s_name =
-               $hr_plan->{name}
-            || $hr_plan->{description}{name}
-            || $hr_plan->{shortname}
-            || $hr_plan->{description}{shortname}
-        ;
-        last PLANS if $s_name;
-    } # PLANS
-
-    return $s_name;
+    return;
 
 }
 
