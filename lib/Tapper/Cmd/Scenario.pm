@@ -70,6 +70,7 @@ sub parse_interdep
         # TODO
         # 2.) check whether more than 2 testruns are local and prevent sync in this case
 
+        my $i_scenario_id;
         my $or_schema = model('TestrunDB');
         try {
                 $or_schema->txn_do(sub {
@@ -81,12 +82,12 @@ sub parse_interdep
                         });
                         $scenario->insert;
 
-                        my $sc_id   = $scenario->id;
-                        my $tr      = Tapper::Cmd::Testrun->new({ schema => $or_schema });
+                        $i_scenario_id  = $scenario->id;
+                        my $tr          = Tapper::Cmd::Testrun->new({ schema => $or_schema });
 
                         foreach my $plan (@{$conf->{scenario_description} || $conf->{description}}) {
 
-                                $plan->{scenario_id} ||= $sc_id;
+                                $plan->{scenario_id} ||= $i_scenario_id;
                                 $plan->{status}        = 'schedule';
 
                                 # backwards compatibility for old interdep descriptions
@@ -98,8 +99,6 @@ sub parse_interdep
 
                         }
 
-                        return $sc_id;
-
                 });
 
         }
@@ -107,7 +106,7 @@ sub parse_interdep
                 die $_;
         };
 
-        return;
+        return $i_scenario_id;
 }
 
 
@@ -128,32 +127,30 @@ sub add {
 
         my @ids;
         foreach my $conf (@{$list_of_confs || [] }) {
-                given ( $conf->{scenario_type} ) {
-                        when ('interdep') {
-                                push @ids, $self->parse_interdep($conf);
-                        }
-                        when ('multitest') {
+                if ( $conf->{scenario_type} eq 'interdep' ) {
+                        push @ids, $self->parse_interdep($conf);
+                }
+                elsif ( $conf->{scenario_type} eq 'multitest' ) {
 
-                                my $sc = $self->schema->resultset('Scenario')->new({
-                                        type    => 'multitest',
-                                        options => $conf->{scenario_options} || $conf->{options},
-                                        name    => $conf->{scenario_name} || $conf->{name},
-                                });
+                        my $sc = $self->schema->resultset('Scenario')->new({
+                                type    => 'multitest',
+                                options => $conf->{scenario_options} || $conf->{options},
+                                name    => $conf->{scenario_name} || $conf->{name},
+                        });
 
-                                $sc->insert;
+                        $sc->insert;
 
-                                my $description = $conf->{scenario_description} || $conf->{description};
-                                   $description->{scenario_id} = $sc->id;
+                        my $description = $conf->{scenario_description} || $conf->{description};
+                           $description->{scenario_id} = $sc->id;
 
-                                my $tr = Tapper::Cmd::Testrun->new( schema => $self->schema );
-                                   $tr->create($description);
+                        my $tr = Tapper::Cmd::Testrun->new( schema => $self->schema );
+                           $tr->create($description);
 
-                                push @ids, $sc->id;
+                        push @ids, $sc->id;
 
-                        }
-                        default {
-                                die "Unknown scenario type '" . ( $conf->{scenario_type} || q## ) . "'";
-                        }
+                }
+                else {
+                        die "Unknown scenario type '" . ( $conf->{scenario_type} || q## ) . "'";
                 }
         }
 
