@@ -8,6 +8,12 @@ extends 'Tapper::Base';
 use Tapper::Model 'model';
 use File::Slurp;
 
+has schema => (
+        is      => 'rw',
+        isa     => 'Tapper::Schema::TestrunDB',
+        default => sub { return model('TestrunDB') },
+);
+
 =head1 SYNOPSIS
 
 This project offers backend functions for all projects that manipulate

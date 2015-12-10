@@ -1,4 +1,5 @@
 package Tapper::Cmd::Testrun;
+
 use Moose;
 use Tapper::Model 'model';
 use DateTime;
@@ -10,7 +11,6 @@ use parent 'Tapper::Cmd';
 use Tapper::Cmd::Requested;
 use Tapper::Cmd::Precondition;
 use Tapper::Cmd::Notification;
-
 
 =head1 NAME
 
@@ -60,16 +60,22 @@ second parameter.
 sub create
 {
         my ($self, $plan, $instance) = @_;
-        if (not ref($plan)) {
+
+        if ( not ref($plan) ) {
                 require YAML::Syck;
                 $plan = YAML::Syck::Load($plan);
         }
-        die "'$plan' is not YAML containing a testrun description\n" if not ref($plan) eq 'HASH';
 
+        if ( not ref($plan) eq 'HASH' ) {
+                die "'$plan' is not YAML containing a testrun description\n";
+        }
 
-        my $cmd           = Tapper::Cmd::Precondition->new();
-        my @preconditions = $cmd->add($plan->{preconditions});
-        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and lc($_) !~ /^requested/} keys %$plan;
+        my @preconditions = Tapper::Cmd::Precondition
+            ->new({ schema => $self->schema })
+            ->add($plan->{preconditions})
+        ;
+
+        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and $_ !~ /^requested/i } keys %$plan;
 
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
@@ -105,7 +111,7 @@ sub create
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
-        if ( not grep { lc($_) =~ /^requested/} keys %$plan) {
+        if ( not grep { $_ =~ /^requested/i } keys %$plan) {
                 my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
                                                       testplan_id     => $instance,
                                                      };
@@ -113,7 +119,9 @@ sub create
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
+
         return @testruns;
+
 }
 
 
@@ -149,68 +157,94 @@ or
 =cut
 
 sub add {
+
         my ($self, $received_args) = @_;
+
         my %args = %{$received_args || {}}; # copy
 
         $args{notes}                 ||= '';
         $args{shortname}             ||= '';
 
-        $args{topic_name}              = $args{topic}    || 'Misc';
-        my $topic = model('TestrunDB')->resultset('Topic')->find_or_create({name => $args{topic_name}});
+        my ( $testrun_id, $exception );
+        my $or_schema = $self->schema;
 
-        $args{earliest}              ||= DateTime->now;
-        $args{owner}                 ||= $ENV{USER} || 'nobody';
-        $args{owner_id}              ||= Tapper::Model::get_or_create_owner( $args{owner} );
+        try {
+                $or_schema->txn_do(sub {
 
-        if ($args{requested_hosts} and not $args{requested_host_ids}) {
-                foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
-                        my $host_result = model('TestrunDB')->resultset('Host')->search({name => $host}, {rows => 1})->first;
-                        die "Can not request host '$host'. This host is not known to tapper\n" if not $host_result;
-                        push @{$args{requested_host_ids}}, $host_result->id if $host_result;
-                }
+                        $args{topic_name}              = $args{topic} || 'Misc';
+                        my $topic = $or_schema->resultset('Topic')->find_or_create({name => $args{topic_name}});
+                
+                        $args{earliest}              ||= DateTime->now;
+                        $args{owner}                 ||= $ENV{USER} || 'nobody';
+                        $args{owner_id}              ||= Tapper::Model::get_or_create_owner( $args{owner} );
+                
+                        if ($args{requested_hosts} and not $args{requested_host_ids}) {
+                                foreach my $host (@{ref $args{requested_hosts} eq 'ARRAY' ? $args{requested_hosts} : [ $args{requested_hosts} ]}) {
+                                        my $host_result = $or_schema->resultset('Host')->search({name => $host}, {rows => 1})->first;
+                                        die "Can not request host '$host'. This host is not known to tapper\n" if not $host_result;
+                                        push @{$args{requested_host_ids}}, $host_result->id if $host_result;
+                                }
+                        }
+                
+                        if ( not $args{queue_id} ) {
+                                $args{queue}   ||= 'AdHoc';
+                                my $queue_result = $or_schema->resultset('Queue')->search({name => $args{queue}});
+                                die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
+                                $args{queue_id}  = $queue_result->search({}, {rows => 1})->first->id;
+                        }
+
+                        $testrun_id = $or_schema->resultset('Testrun')->add(\%args);
+
+                        if ( $args{requested_features} ) {
+                                foreach my $feature (
+                                        @{
+                                                ref $args{requested_features} eq 'ARRAY'
+                                                        ? $args{requested_features}
+                                                        : [ $args{requested_features} ]
+                                        }
+                                ) {
+                                        $or_schema
+                                            ->resultset('TestrunRequestedFeature')
+                                            ->new({testrun_id => $testrun_id, feature => $feature})
+                                            ->insert()
+                                        ;
+                                }
+                        }
+
+                        if ( exists $args{notify} ) {
+                                my $s_notify = $args{notify} // q##;
+                                my $notify   = Tapper::Cmd::Notification->new();
+                                my $filter   = "testrun('id') == $testrun_id";
+                                if (lc $args{notify} eq any('pass', 'ok','success')) {
+                                        $filter .= " and testrun('success_word') eq 'pass'";
+                                } elsif (lc $args{notify} eq any('fail', 'not_ok','error')) {
+                                        $filter .= " and testrun('success_word') eq 'fail'";
+                                }
+                                try {
+                                        $notify->add({filter   => $filter,
+                                                      owner_id => $args{owner_id},
+                                                      event    => "testrun_finished",
+                                                     });
+                                } catch {
+                                        $exception = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n$_";
+                                }
+                        }
+                });
         }
+        catch {
+                $exception = $_;
+        };
 
-        if (not $args{queue_id}) {
-                $args{queue}   ||= 'AdHoc';
-                my $queue_result = model('TestrunDB')->resultset('Queue')->search({name => $args{queue}});
-                die qq{Queue "$args{queue}" does not exists\n} if not $queue_result->count;
-                $args{queue_id}  = $queue_result->search({}, {rows => 1})->first->id;
-        }
-
-        my $testrun_id = model('TestrunDB')->resultset('Testrun')->add(\%args);
-
-        if ($args{requested_features}) {
-                foreach my $feature (@{ref $args{requested_features} eq 'ARRAY' ?
-                                         $args{requested_features} : [ $args{requested_features} ]}) {
-                        my $request = model('TestrunDB')->resultset('TestrunRequestedFeature')->new({testrun_id => $testrun_id, feature => $feature});
-                        $request->insert();
-                }
-        }
-        my $s_error;
-        if ( exists $args{notify} ) {
-                my $s_notify = $args{notify} // q##;
-                my $notify   = Tapper::Cmd::Notification->new();
-                my $filter   = "testrun('id') == $testrun_id";
-                if (lc $args{notify} eq any('pass', 'ok','success')) {
-                        $filter .= " and testrun('success_word') eq 'pass'";
-                } elsif (lc $args{notify} eq any('fail', 'not_ok','error')) {
-                        $filter .= " and testrun('success_word') eq 'fail'";
-                }
-                try {
-                        $notify->add({filter   => $filter,
-                                      owner_id => $args{owner_id},
-                                      event    => "testrun_finished",
-                                     });
-                } catch {
-                        $s_error = "Successfully created your testrun with id $testrun_id but failed to add a notification request\n$_";
-                }
-        }
         if ( wantarray ) {
-            return ( $testrun_id, $s_error );
+            return ( $testrun_id, $exception );
         }
         else {
+            if ( $exception ) {
+                die $exception;
+            }
             return $testrun_id;
         }
+
 }
 
 
@@ -240,7 +274,7 @@ sub update {
         my ($self, $id, $args) = @_;
         my %args = %{$args};    # copy
 
-        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        my $testrun = $self->schema->resultset('Testrun')->find($id);
 
         $args{owner_id} = $args{owner_id} || Tapper::Model::get_or_create_owner( $args{owner} ) if $args{owner};
 
@@ -261,7 +295,7 @@ prevent confusion with the buildin delete function.
 
 sub del {
         my ($self, $id) = @_;
-        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        my $testrun = $self->schema->resultset('Testrun')->find($id);
         if ($testrun->testrun_scheduling) {
                 return "Running testruns can not be deleted. Try freehost or wait till the testrun is finished."
                   if $testrun->testrun_scheduling->status eq 'running';
@@ -299,7 +333,7 @@ the existing testrun given as first argument.
 sub rerun {
         my ($self, $id, $args) = @_;
         my %args = %{$args || {}}; # copy
-        my $testrun = model('TestrunDB')->resultset('Testrun')->find( $id );
+        my $testrun = $self->schema->resultset('Testrun')->find( $id );
         return $testrun->rerun(\%args)->id;
 }
 
@@ -327,14 +361,14 @@ sub cancel
         if ( $comment ) {
                 $msg->{error} = $comment;
         }
-        my $testrun_result = model->resultset('Testrun')->find( $testrun_id ) or die "No such testrun '$testrun_id'\n";
+        my $testrun_result = $self->schema->resultset('Testrun')->find( $testrun_id ) or die "No such testrun '$testrun_id'\n";
         if ($testrun_result->testrun_scheduling->status eq 'schedule' or
             $testrun_result->testrun_scheduling->status eq 'prepare'
            ) {
                 $testrun_result->testrun_scheduling->status('finished');
                 $testrun_result->testrun_scheduling->update;
         } elsif ( $testrun_result->testrun_scheduling->status eq 'running') {
-                model->resultset('Message')->new({
+                $self->schema->resultset('Message')->new({
                                                   testrun_id => $testrun_id,
                                                   message    => $msg,
                                                  }
@@ -363,14 +397,23 @@ sub status
 {
         my ($self, $id) = @_;
         my $result;
-        my $testrun = model('TestrunDB')->resultset('Testrun')->find($id);
+        my $testrun = $self->schema->resultset('Testrun')->find($id);
         die "No testrun with id '$id'\n" if not $testrun;
 
         $result->{status}       .= $testrun->testrun_scheduling->status; # the dot (.=) stringifies the enum object that the status actually contains
         $result->{success_ratio} = undef;
 
+        my $reportgroup = $self->schema->resultset('ReportgroupTestrun')->search({testrun_id => $id});
+        if ($reportgroup->count > 0) {
+                $result->{reports} = [];
+                foreach my $group_element ($reportgroup->all) {
+                        push @{$result->{reports}}, $group_element->report_id;
+                        $result->{primaryreport} = $group_element->report_id if $group_element->primaryreport;
+                }
+        }
+
         if ($result->{status} eq 'finished') {
-                my $stats = model('TestrunDB')->resultset('ReportgroupTestrunStats')->search({testrun_id => $id})->first;
+                my $stats = $self->schema->resultset('ReportgroupTestrunStats')->search({testrun_id => $id})->first;
                 return $result if not defined($stats);
 
                 $result->{success_ratio} = $stats->success_ratio;

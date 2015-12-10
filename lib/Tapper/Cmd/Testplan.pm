@@ -50,13 +50,17 @@ the type given in the testplan should be telling for the testplan user.
 sub get_module_for_type
 {
         my ($self, $type) = @_;
-         given (lc($type)){
-                when('multitest') { return "Tapper::Cmd::Testrun"; }
-                when('scenario')  { return "Tapper::Cmd::Scenario" }
-                default           { $type = ucfirst($type); return "Tapper::Cmd::$type"; }
+        
+        if ( lc($type) eq 'multitest' ) {
+            return "Tapper::Cmd::Testrun";
+        }
+        elsif ( lc($type) eq 'scenario')  {
+            return "Tapper::Cmd::Scenario"
+        }
+        else {
+            $type = ucfirst($type); return "Tapper::Cmd::$type";
         }
 }
-
 
 =head2 add
 
@@ -82,10 +86,11 @@ sub add {
         # print STDERR "plans: ".Dumper($plan_content);
         # print STDERR "plans: ".Dumper(\@plans);
 
-        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({evaluated_testplan => $plan_content,
-                                                                               path => $path,
-                                                                               name => $name,
-                                                                              });
+        my $instance = model('TestrunDB')->resultset('TestplanInstance')->new({
+            evaluated_testplan => $plan_content,
+            path               => $path,
+            name               => $name,
+        });
         $instance->insert;
 
         my @testrun_ids;
@@ -107,8 +112,6 @@ sub add {
         }
         return $instance->id;
 }
-
-
 
 =head2 del
 
@@ -192,27 +195,19 @@ sub parse_path
         return $path;
 }
 
-=head2 get_shortname
+sub get_shortname {
 
-Get the shortname for this testplan.
+    my ( $or_self, $s_plan ) = @_;
 
-@param string - plan text
-
-@return string - shortname
-
-=cut
-
-sub get_shortname{
-        my ($self, $plan) = @_;
-
-        foreach my $line (split "\n", $plan) {
-                if ($line =~/^###\s*(?:short)?name\s*:\s*(.+)$/i) {
-                        return $1;
-                }
+    foreach my $s_line ( split /\n/, $s_plan ) {
+        if ( $s_line =~ /^\s*-?\s*(?:short)?name\s*:\s*(.+?)\s*$/i ) {
+            return $1;
         }
-        return;
-}
+    }
 
+    return;
+
+}
 
 =head2 guide
 
@@ -265,9 +260,9 @@ sub testplannew {
         my ($self, $opt) = @_;
 
         my $plan = $self->apply_macro($opt->{file}, $opt->{substitutes}, $opt->{include});
-        my $path   = $opt->{path} || $self->parse_path($opt->{file});
-        my $shortname = $opt->{name} || $self->get_shortname($plan);
-        return $self->add($plan, $path, $shortname);
+        my $path = $opt->{path} || $self->parse_path($opt->{file});
+        my $name = $self->get_shortname($plan);
+        return $self->add($plan, $path, $name);
 }
 
 =head2 status
@@ -277,10 +272,14 @@ Get information of one testplan.
 @param int - testplan id
 
 @return - hash ref -
-* status - one of 'schedule', 'running', 'pass', 'fail'
-* complete_percentage - percentage of finished testruns
-* started_percentage  - percentage of running and finished testruns
-* success_percentage  - average of success rates of finished testruns
+* count_fail      0,
+* count_pass      2,
+* count_pending   0,
+* name            "HWXYZ",
+* path            undef,
+* testplan_date   "2014-03-24",
+* testplan_id     1040,
+* testplan_time   "14:17"
 
 @throws - die
 
@@ -289,41 +288,46 @@ Get information of one testplan.
 sub status
 {
         my ($self, $id) = @_;
-        my $results;
-        my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
-        die "No testplan with id '$id'\n" if not $testplan;
-        if (not $testplan->testruns->count) {
-                return {status => 'fail'};
-        }
-        my ($started, $complete, $success_sum) = (0,0,0);
-        for my $testrun ($testplan->testruns->all) {
-                $started++  if $testrun->testrun_scheduling->status eq any('running', 'finished');
-                if ($testrun->testrun_scheduling->status eq 'finished') {
-                        $complete++ ;
-                        my $success_obj = model('ReportsDB')->resultset('ReportgroupTestrunStats')->find({testrun_id => $testrun->id});
-                        $success_sum+= int($success_obj->success_ratio);
-                }
-        }
-        my $result = {
-                      complete_percentage => ($complete * 100) / $testplan->testruns->count,
-                      started_percentage  => ($started * 100) / $testplan->testruns->count,
-                      success_percentage  => $complete ? $success_sum / $complete : undef,
-                     };
-        if ($started == 0) {
-                $result->{status} = 'schedule';
-        }
-        elsif ($started > 0 and $complete < $testplan->testruns->count) {
-                $result->{status} = 'running';
-        }
-        else {
-                if ($result->{success_percentage} < 100) {
-                        $result->{status} = 'fail';
-                } else {
-                        $result->{status} = 'pass';
-                }
-        }
+        my $results = model('TestrunDB')->fetch_raw_sql({
+                                                        query_name  => 'testplans::testplan_status',
+                                                        fetch_type  => '$%',
+                                                        query_vals  => {testplan_id => $id},
+                                                       });
+        my $testruns_rs = model->resultset("Testrun")->search({testplan_id => $id});
+        my %testrun_ids = map { $_->id => $_->topic_name} $testruns_rs->all;
+        $results->{testruns} = \%testrun_ids;
+        return $results;
 
-        return $result;
+# TODO check how we can get old infos back in
+# * status - one of 'schedule', 'running', 'pass', 'fail'
+# * complete_percentage - percentage of finished testruns
+# * started_percentage  - percentage of running and finished testruns
+# * success_percentage  - average of success rates of finished testruns
+}
+
+=head2 testplan_files
+
+Get all files that belong to a testplan.
+
+@param int    - testplan id
+@param string - filter
+
+@return array ref - list of report file ids
+
+@throws - die
+
+=cut
+
+sub testplan_files
+{
+        my ($self, $testplan_id, $filter) = @_;
+        my $results_rawsql = model('TestrunDB')->fetch_raw_sql({
+                                                                query_name  => 'testplans::reportfile',
+                                                                fetch_type  => '@@',
+                                                                query_vals  => {testplan_id => $testplan_id, filter => $filter},
+                                                               });
+        my @results = map { $_->[0] } @$results_rawsql;
+        return \@results;
 }
 
 

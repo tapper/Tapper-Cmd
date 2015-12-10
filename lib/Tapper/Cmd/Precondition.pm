@@ -1,7 +1,6 @@
 package Tapper::Cmd::Precondition;
 use Moose;
 
-use Tapper::Model 'model';
 use YAML::Syck;
 use Kwalify;
 
@@ -71,7 +70,6 @@ sub die_on_invalid_precondition
         return 0;
 }
 
-
 =head2 add
 
 Add a new precondition. Expects a precondition in YAML format. Multiple
@@ -91,17 +89,16 @@ useful for macro preconditions.
 
 =cut
 
-
 sub add {
         my ($self, $input, $schema) = @_;
         if (ref $input eq 'ARRAY') {
                 $self->die_on_invalid_precondition($input, $schema);
-                return model('TestrunDB')->resultset('Precondition')->add($input);
+                return $self->schema->resultset('Precondition')->add($input);
         } else {
                 $input .= "\n" unless $input =~ /\n$/;
                 my @yaml = Load($input);
                 $self->die_on_invalid_precondition(\@yaml, $schema);
-                return model('TestrunDB')->resultset('Precondition')->add(\@yaml);
+                return $self->schema->resultset('Precondition')->add(\@yaml);
         }
 }
 
@@ -122,7 +119,7 @@ Update a given precondition.
 
 sub update {
         my ($self, $id, $condition) = @_;
-        my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+        my $precondition = $self->schema->resultset('Precondition')->find($id);
         die "Precondition with id $id not found\n" if not $precondition;
 
         return $precondition->update_content($condition);
@@ -143,7 +140,7 @@ prevent confusion with the buildin delete function.
 
 sub del {
         my ($self, $id) = @_;
-        my $precondition = model('TestrunDB')->resultset('Precondition')->find($id);
+        my $precondition = $self->schema->resultset('Precondition')->find($id);
         return qq(No precondition with id "$id" found) if not $precondition;;
         $precondition->delete();
         return 0;
