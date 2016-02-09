@@ -107,7 +107,7 @@ sub del
         return 0;
 }
 
-=head update
+=head2 update
 
 Update a given host with new data.
 
@@ -117,7 +117,7 @@ sub update
 {
 }
 
-=head list
+=head2 list
 
 Get a filtered list of hosts.
 
