@@ -1,6 +1,11 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - big refactoring complementing the CLI rework
+        - performance tweaks
+        - bugfixes on handling queues, hosts, testruns
+        - find all files that belong to a testrun
+        - db transaction awareness
 
 4.1.8     2013-03-14
         - helloworld: example_kernel_install.sh: example installer
