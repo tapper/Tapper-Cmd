@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.0     2016-02-15
         - big refactoring complementing the CLI rework
         - performance tweaks
         - bugfixes on handling queues, hosts, testruns
