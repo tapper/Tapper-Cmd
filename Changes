@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - 'tapper init' also prepares benchmark subsystem
 
 5.0.0     2016-02-15
         - big refactoring complementing the CLI rework
