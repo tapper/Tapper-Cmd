@@ -36,18 +36,28 @@ inclusive rewriting values dedicated for the user.
 =cut
 
 sub mint_file {
-        my ($init_dir, $basename) = @_;
+        my ($init_dir, $basename, $force) = @_;
 
         my $HOME = $ENV{HOME};
         my $USER = $ENV{USER} || 'nobody';
 
         my $file = "$init_dir/$basename";
-        if (-e $file) {
+        if (-e $file and !$force) {
                 say "SKIP    $file - already exists";
         } else {
                 my $content = slurp module_file('Tapper::Cmd::Init', $basename);
                 $content =~ s/__HOME__/$HOME/g;
                 $content =~ s/__USER__/$USER/g;
+
+                # set write permissions when $force is set
+                if (-e $file) {
+                  open my $INITCFG, "<", $file or die "Can not read file $file.\n";
+                  my $perm = (stat $INITCFG)[2] & 07777;
+                  chmod ($perm|0600, $INITCFG);
+                  close $INITCFG;
+                }
+
+                # actually patch file
                 open my $INITCFG, ">", $file or die "Can not create file $file.\n";
                 print $INITCFG $content;
                 close $INITCFG;
@@ -190,6 +200,10 @@ sub init
                                              testplans/include/defaults
                                              testplans/include/defaultbenchmarks
                                            );
+
+        #  force __HOME__ replacement for BenchmarkAnything config file
+        mint_file ($init_dir, $_, 1) foreach qw(hello-world/00-set-environment/local-tapper-env.inc);
+
         dbdeploy;
         benchmarkdeploy;
 }
