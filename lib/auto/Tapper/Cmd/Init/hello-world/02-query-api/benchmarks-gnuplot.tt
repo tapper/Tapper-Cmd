@@ -5,6 +5,7 @@ set title TITLE offset char 0, char -1
 set style data linespoints
 set xtics rotate by 45
 set xtics out offset 0,-2.0
+set yrange [0:*]
 set term png size 1200, 800
 set output "example-03-benchmarks.png"
 #set yrange [0:2000]
