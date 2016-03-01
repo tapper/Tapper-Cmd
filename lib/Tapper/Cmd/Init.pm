@@ -91,7 +91,7 @@ sub make_subdir {
 
 =head2 dbdeploy
 
-Initialize databases in $HOME/.tapper/
+Initialize database in $HOME/.tapper/
 
 =cut
 
@@ -111,6 +111,24 @@ sub dbdeploy
                         say "SKIP    $dbname - already exists";
                 }
         }
+}
+
+=head2 benchmarkdeploy
+
+Initialize benchmarkanything database in $HOME/.tapper/
+
+=cut
+
+sub benchmarkdeploy
+{
+        Tapper::Config::_switch_context; # reload config
+
+        my $HOME = $ENV{HOME};
+        my $dsn = Tapper::Config->subconfig->{benchmarkanything}{storage}{backend}{sql}{dsn};
+        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
+         or die "Can't parse DBI DSN '$dsn'";
+        $ENV{BENCHMARKANYTHING_CONFIGFILE} = "$HOME/.tapper/tapper.cfg";
+        system ("benchmarkanything-storage createdb") and die "Could not initialize BenchmarkAnything subsystem";
 }
 
 =head2 init($defaults)
@@ -173,6 +191,7 @@ sub init
                                              testplans/include/defaultbenchmarks
                                            );
         dbdeploy;
+        benchmarkdeploy;
 }
 
 1;

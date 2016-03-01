@@ -41,6 +41,8 @@ sub insert_initial_values
         {
                 # ---------- Topic ----------
 
+                require DateTime;
+
                 # official topics
                 my %topic_description = %Tapper::Schema::TestrunDB::Result::Topic::topic_description;
 
@@ -58,6 +60,38 @@ sub insert_initial_values
                    });
                 $queue->insert;
 
+                my $charttype;
+                $charttype = $schema->resultset('ChartTypes')->new
+                  ({ chart_type_name        => 'points',
+                     chart_type_description => 'points',
+                     chart_type_flot_name   => 'points',
+                     created_at             => DateTime->now(),
+                   });
+                $charttype->insert;
+                $charttype = $schema->resultset('ChartTypes')->new
+                  ({ chart_type_name        => 'lines',
+                     chart_type_description => 'lines',
+                     chart_type_flot_name   => 'lines',
+                     created_at             => DateTime->now(),
+                   });
+                $charttype->insert;
+
+                my $chart_axis_type;
+                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                  ({ chart_axis_type_name => 'numeric',
+                     created_at           => DateTime->now(),
+                   });
+                $chart_axis_type->insert;
+                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                  ({ chart_axis_type_name => 'alphanumeric',
+                     created_at           => DateTime->now(),
+                   });
+                $chart_axis_type->insert;
+                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                  ({ chart_axis_type_name => 'date',
+                     created_at           => DateTime->now(),
+                   });
+                $chart_axis_type->insert;
         }
 }
 
