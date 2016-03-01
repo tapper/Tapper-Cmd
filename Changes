@@ -1,7 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-        - 'tapper init' also prepares benchmark subsystem
+        - 'tapper init' polishing
+          * prepare benchmark subsystem
+          * update examples for latest TAP::DOM
+          * Web UI log config
 
 5.0.0     2016-02-15
         - big refactoring complementing the CLI rework
