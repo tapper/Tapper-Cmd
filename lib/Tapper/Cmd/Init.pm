@@ -142,6 +142,7 @@ sub init
 
         mint_file ($init_dir, "tapper.cfg");
         mint_file ($init_dir, "log4perl.cfg");
+        mint_file ($init_dir, "log4perl_webgui.cfg");
         mint_file ($init_dir, "tapper-mcp-messagereceiver.conf");
 
         # Allow more fine-grained updates for testplans,
