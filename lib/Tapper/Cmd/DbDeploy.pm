@@ -133,16 +133,11 @@ sub dbdeploy
 
         my $stderr = '';
         {
-                # capture known errors to hide them from printing
-                local *STDERR;
-                open STDERR, '>', \$stderr;
-
                 my $schema;
                 $schema = Tapper::Schema::TestrunDB->connect ($dsn, $user, $pw);
-                $schema->deploy({ add_drop_table => 1 }); # may fail, does not provide correct order to drop tables
+                $schema->deploy({add_drop_table => 1}); # fails with {add_drop_table => 1}, does not provide correct order to drop tables
                 insert_initial_values($schema, $db);
         }
-        say STDERR $stderr if $stderr && $stderr !~ /Please call upgrade on your schema/;
 }
 
 1;
