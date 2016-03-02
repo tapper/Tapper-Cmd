@@ -119,8 +119,7 @@ sub dbdeploy
         my $answer;
 
         # ----- really? -----
-        print "dsn: $dsn\n";
-        print "     Really delete all existing content and initialize from scratch (y/N)? ";
+        print "REALLY DROP AND RE-CREATE DATABASE TABLES [$dsn] (y/N)? ";
         if ( lc substr(<STDIN>, 0, 1) ne 'y') {
                 say "Skip.";
                 return;
