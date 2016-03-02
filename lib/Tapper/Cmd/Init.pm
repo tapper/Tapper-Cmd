@@ -45,23 +45,30 @@ sub mint_file {
         if (-e $file and !$force) {
                 say "SKIP    $file - already exists";
         } else {
-                my $content = slurp module_file('Tapper::Cmd::Init', $basename);
-                $content =~ s/__HOME__/$HOME/g;
-                $content =~ s/__USER__/$USER/g;
-
                 # set write permissions when $force is set
+                my $content;
                 if (-e $file) {
+                  $content = slurp $file;
+
                   open my $INITCFG, "<", $file or die "Can not read file $file.\n";
                   my $perm = (stat $INITCFG)[2] & 07777;
                   chmod ($perm|0600, $INITCFG);
                   close $INITCFG;
+
+                  print "UPDATED ";
+                } else {
+                  $content = slurp module_file('Tapper::Cmd::Init', $basename);
+                  print "CREATED ";
                 }
+
+                $content =~ s/__HOME__/$HOME/g;
+                $content =~ s/__USER__/$USER/g;
 
                 # actually patch file
                 open my $INITCFG, ">", $file or die "Can not create file $file.\n";
                 print $INITCFG $content;
                 close $INITCFG;
-                say "CREATED $file";
+                say $file;
         }
 }
 
@@ -120,7 +127,11 @@ sub dbdeploy
                 } else {
                         say "SKIP    $dbname - already exists";
                 }
+        } else {
+                my $cmd = Tapper::Cmd::DbDeploy->new;
+                $cmd->dbdeploy('TestrunDB');
         }
+
 }
 
 =head2 benchmarkdeploy
