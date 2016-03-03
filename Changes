@@ -1,8 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-        - fix TT filter 'autoformat' -> 'Autoformat'
-        - dependencies declared to Template-Toolkit plugins
+        - testplan template tweaking
+          * drop quote characters from name/shortname
+          * fix TT filter 'autoformat' -> 'Autoformat'
+          * dependencies declared to Template-Toolkit plugins
 
 5.0.1     2016-03-03
         - 'tapper init' polishing
