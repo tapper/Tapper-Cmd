@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.2     2016-03-03
         - testplan template tweaking
           * drop quote characters from name/shortname
           * fix TT filter 'autoformat' -> 'Autoformat'
