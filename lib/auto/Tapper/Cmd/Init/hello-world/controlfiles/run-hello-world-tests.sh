@@ -27,7 +27,7 @@ main () {
         echo "1..1"
         NOT=""
         start_a_test "$TAPPER_TESTRUN" "$TAPPER_HOSTNAME" || NOT="not "
-        echo "${NOT}ok - executed hello-world tests"
+        echo -e "\n${NOT}ok - executed hello-world tests"
 }
 
 main
