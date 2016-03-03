@@ -37,10 +37,10 @@ build_kernel ()
 
     # create builder report outside of STDOUT
     echo "1..3"                                               > $BUILER_TAP
-    echo "# Tapper-suite-name: " $(basename $0)              >> $BUILER_TAP
-    echo "# Tapper-machine-name: " $(hostname)               >> $BUILER_TAP   # alternative: use $TAPPER_HOSTNAME (the *target* hostname)
+    echo "# Test-suite-name: " $(basename $0)              >> $BUILER_TAP
+    echo "# Test-machine-name: " $(hostname)               >> $BUILER_TAP   # alternative: use $TAPPER_HOSTNAME (the *target* hostname)
     if [ -n "$TAPPER_TESTRUN" ] ; then
-        echo "# Tapper-reportgroup-testrun: $TAPPER_TESTRUN" >> $BUILER_TAP
+        echo "# Test-reportgroup-testrun: $TAPPER_TESTRUN" >> $BUILER_TAP
     fi
     if [ ! -d "$tempdir" ] ; then echo -n "not "             >> $BUILER_TAP ; fi
     echo "ok - tempdir created"                              >> $BUILER_TAP
