@@ -83,7 +83,7 @@
 ### Available values:
 ###
 ###   builder:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH m = builder_list -%][% m %], [% END %]
 [% END %]
 ###      Mnemonics:
@@ -95,21 +95,21 @@
 ###       - "vmcb"   means "with vmcb cleanbit debug patch" (implicit "pv")
 ###       - "decode" means "with decode assist debug patch" (implicit "pv")
 ###   machines:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH m = machine_list -%][% m %], [% END %]
 [% END %]
 ##   distros:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ##      [% FOREACH d = distro_list -%][% d %], [% END %]
 [% END %]
 ##   guestimages:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ##      [% FOREACH d = image_list -%][% d %], [% END %]
 [% END %]
 ###   tests (tests_host, tests_guest):
 ###      - non-path words are interpreted as Autotest subtests:
 ###
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###          [% FOREACH t = useful_autotest_tests -%][% t %], [% END %]
 [%- END -%]
 ###

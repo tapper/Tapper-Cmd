@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - fix TT filter 'autoformat' -> 'Autoformat'
 
 5.0.1     2016-03-03
         - 'tapper init' polishing

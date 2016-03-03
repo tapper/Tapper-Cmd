@@ -60,23 +60,23 @@
 ### Available values:
 ###
 ###   builder:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH m = kernel_builder_list -%][% m %], [% END %]
 [% END %]
 ###      Mnemonics:
 ###       - "*"     means "use the minor wanted number"
 ###   machines:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH m = machine_list -%][% m %], [% END %]
 [% END %]
 ###   distros:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH d = distro_list -%][% d %], [% END %]
 [% END %]
 ###   tests_host:
 ###      - non-path words are interpreted as Autotest subtests:
 ###
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###          [% FOREACH t = useful_autotest_tests -%][% t %], [% END %]
 [%- END -%]
 ###

@@ -38,13 +38,13 @@
 ### Available values:
 ###
 ###   machines:
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ###      [% FOREACH m = machine_list -%][% m %], [% END %]
 [% END %]
 ##   tests (tests_host, tests_guest):
 ##      - non-path words are interpreted as Autotest subtests:
 ##
-[%- FILTER autoformat(all => 1) %]
+[%- FILTER Autoformat(all => 1) %]
 ##          [% FOREACH t = useful_autotest_tests -%][% t %], [% END %]
 [%- END -%]
 ##      - absolute path names, like "/data/tapper/autoreport/mytest.t"
