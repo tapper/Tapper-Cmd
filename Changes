@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.1     2016-03-03
         - 'tapper init' polishing
           * prepare benchmark subsystem
           * update examples for latest TAP::DOM
