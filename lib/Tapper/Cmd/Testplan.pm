@@ -201,7 +201,9 @@ sub get_shortname {
 
     foreach my $s_line ( split /\n/, $s_plan ) {
         if ( $s_line =~ /^\s*-?\s*(?:short)?name\s*:\s*(.+?)\s*$/i ) {
-            return $1;
+            my $shortname = $1;
+            $shortname =~ s/['"]+//g;
+            return $shortname;
         }
     }
 
