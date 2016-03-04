@@ -1,5 +1,6 @@
 [%#- -*- mode: tt -*- %]
 [%- PROCESS 'include/defaults' -%]
+[% USE env = EnvHash %]
 [% USE Autoformat %]
 [%- IF machine           != '' %][% THROW LEGACY "Use '-Dmachines=...' (plural).\n" %][% END -%]
 [%- IF queue             == '' %][% queue           = 'AdHoc' %][% END -%]
@@ -62,9 +63,9 @@
 ###
 ### Typical command lines (User tapper@tapper):
 ###
-###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local
-###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=machine1,machine2
-###   $ tapper testplan-new --file [%HOME%]/.tapper/testplans/topic/any/generic/local -Dmachines=lemure -Dtests_host=/PATH/TO/STARTSCRIPT1.sh,/PATH/TO/STARTSCRIPT2.sh
+###   $ tapper testplan-new --file [% env.HOME %]/.tapper/testplans/topic/any/generic/local
+###   $ tapper testplan-new --file [% env.HOME %]/.tapper/testplans/topic/any/generic/local -Dmachines=machine1,machine2
+###   $ tapper testplan-new --file [% env.HOME %]/.tapper/testplans/topic/any/generic/local -Dmachines=lemure -Dtests_host=/PATH/TO/STARTSCRIPT1.sh,/PATH/TO/STARTSCRIPT2.sh
 ###
 [%- FOREACH machine = AllMachines %]
 ---
