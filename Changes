@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - testplan bugfixes
 
 5.0.2     2016-03-03
         - testplan template tweaking
