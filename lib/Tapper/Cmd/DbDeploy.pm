@@ -27,7 +27,7 @@ This module provides functions to initially set up Tapper in C<$HOME/.tapper/>.
 
 =cut
 
-=head2 insert_initial_values($schema, $db)
+=head2 $self->insert_initial_values($db)
 
 Insert required minimal set of values.
 
@@ -35,10 +35,15 @@ Insert required minimal set of values.
 
 sub insert_initial_values
 {
-        my ($schema, $db) = @_;
+        my ($self, $db) = @_;
 
         if ($db eq 'TestrunDB')
         {
+                my $dsn    = Tapper::Config->subconfig->{database}{$db}{dsn};
+                my $user   = Tapper::Config->subconfig->{database}{$db}{username};
+                my $pw     = Tapper::Config->subconfig->{database}{$db}{password};
+                my $schema = Tapper::Schema::TestrunDB->connect ($dsn, $user, $pw);
+
                 # ---------- Topic ----------
 
                 require DateTime;
@@ -47,51 +52,42 @@ sub insert_initial_values
                 my %topic_description = %Tapper::Schema::TestrunDB::Result::Topic::topic_description;
 
                 foreach my $topic_name(keys %topic_description) {
-                        my $topic = $schema->resultset('Topic')->new
+                        $schema->resultset('Topic')->find_or_create
                             ({ name        => $topic_name,
                                description => $topic_description{$topic_name},
                              });
-                        $topic->insert;
                 }
-                my $queue = $schema->resultset('Queue')->new
+                $schema->resultset('Queue')->find_or_create
                   ({ name     => 'AdHoc',
                      priority => 1000,
                      active   => 1,
                    });
-                $queue->insert;
 
-                my $charttype;
-                $charttype = $schema->resultset('ChartTypes')->new
+                $schema->resultset('ChartTypes')->find_or_create
                   ({ chart_type_name        => 'points',
                      chart_type_description => 'points',
                      chart_type_flot_name   => 'points',
                      created_at             => DateTime->now(),
                    });
-                $charttype->insert;
-                $charttype = $schema->resultset('ChartTypes')->new
+                $schema->resultset('ChartTypes')->find_or_create
                   ({ chart_type_name        => 'lines',
                      chart_type_description => 'lines',
                      chart_type_flot_name   => 'lines',
                      created_at             => DateTime->now(),
                    });
-                $charttype->insert;
 
-                my $chart_axis_type;
-                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                $schema->resultset('ChartAxisTypes')->find_or_create
                   ({ chart_axis_type_name => 'numeric',
                      created_at           => DateTime->now(),
                    });
-                $chart_axis_type->insert;
-                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                $schema->resultset('ChartAxisTypes')->find_or_create
                   ({ chart_axis_type_name => 'alphanumeric',
                      created_at           => DateTime->now(),
                    });
-                $chart_axis_type->insert;
-                $chart_axis_type = $schema->resultset('ChartAxisTypes')->new
+                $schema->resultset('ChartAxisTypes')->find_or_create
                   ({ chart_axis_type_name => 'date',
                      created_at           => DateTime->now(),
                    });
-                $chart_axis_type->insert;
         }
 }
 
@@ -136,7 +132,6 @@ sub dbdeploy
                 my $schema;
                 $schema = Tapper::Schema::TestrunDB->connect ($dsn, $user, $pw);
                 $schema->deploy({add_drop_table => 1}); # fails with {add_drop_table => 1}, does not provide correct order to drop tables
-                insert_initial_values($schema, $db);
         }
 }
 
