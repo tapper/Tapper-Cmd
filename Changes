@@ -1,7 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-        - testplan bugfixes
+        - hello-world - bugfixes in exampel testplans, benchmarks
+        - tapper init - separated createdb from initializing rows
 
 5.0.2     2016-03-03
         - testplan template tweaking
