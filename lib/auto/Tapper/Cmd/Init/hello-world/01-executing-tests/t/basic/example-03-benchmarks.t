@@ -25,7 +25,7 @@ append_tapdata "    bar: 7.75"
 
 # Same data but utilizing the new BenchmarkAnything subsystem
 append_tapdata "BenchmarkAnythingData:"
-append_tapdata "  - NAME: hello-world.example.bogomips:"
+append_tapdata "  - NAME: hello-world.example.bogomips"
 append_tapdata "    VALUE: ${bogomips:-0.0}"
 append_tapdata "    sleeptime: $sleeptime"
 append_tapdata "    foo: 12.34"
