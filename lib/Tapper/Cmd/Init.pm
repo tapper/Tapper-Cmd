@@ -124,14 +124,15 @@ sub dbdeploy
                 if (! -e $dbname) {
                         my $cmd = Tapper::Cmd::DbDeploy->new;
                         $cmd->dbdeploy('TestrunDB');
+                        $cmd->insert_initial_values('TestrunDB', );
                 } else {
                         say "SKIP    $dbname - already exists";
                 }
         } else {
                 my $cmd = Tapper::Cmd::DbDeploy->new;
                 $cmd->dbdeploy('TestrunDB');
+                $cmd->insert_initial_values('TestrunDB', );
         }
-
 }
 
 =head2 benchmarkdeploy
