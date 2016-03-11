@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.3     2016-03-11
         - hello-world - bugfixes in exampel testplans, benchmarks
         - tapper init - separated createdb from initializing rows
 
