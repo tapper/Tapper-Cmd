@@ -1,9 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - hello-world - povide example tapper-selftest with preconditions
 
 5.0.3     2016-03-11
-        - hello-world - bugfixes in exampel testplans, benchmarks
+        - hello-world - bugfixes in example testplans, benchmarks
         - tapper init - separated createdb from initializing rows
 
 5.0.2     2016-03-03
