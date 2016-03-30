@@ -4,6 +4,7 @@
 [% USE Autoformat %]
 [%- IF machine           != '' %][% THROW LEGACY "Use '-Dmachines=...' (plural).\n" %][% END -%]
 [%- IF queue             == '' %][% queue           = 'AdHoc' %][% END -%]
+[%- IF topic             == '' %][% topic           = 'Misc' %][% END -%]
 [%- IF tests_host        == '' %][% tests_host      = '/PATH/TO/STARTSCRIPT.sh' %][% END -%]
 [%- IF test_timeout      == '' %][% test_timeout    = '10800' %][% END -%]
 [%- IF machines          == '' %][% machines        = 'einstein,hawking,turing' %][% END -%]
@@ -72,7 +73,7 @@
 type: multitest
 description:
    shortname: "[% title %] - [% kernelpkg %]"
-   topic: [% benchmark %]
+   topic: [% topic %]
    queue: [% queue %]
    requested_hosts_all:
         - [% machine %]
