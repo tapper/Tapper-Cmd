@@ -81,7 +81,9 @@ sub apply_macro
         $substitutes ||= {};
         my $plan = File::Slurp::slurp($file);
 
-        my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
+        require Tapper::Config;
+        my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path},
+                             Tapper::Config->subconfig->{paths}{use_case_path});
         push @include_paths, @{$includes || [] };
         my $include_path_list = join ":", @include_paths;
         require Tapper::Reports::DPath::TT;
