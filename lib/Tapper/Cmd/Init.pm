@@ -176,6 +176,7 @@ sub init
         make_subdir my $pkg_dir      = "$HOME/.tapper/repository/packages";
         make_subdir my $prg_dir      = "$HOME/.tapper/testprogram";
         make_subdir my $producer_dir = "$HOME/.tapper/producers";
+        make_subdir my $precond_dir  = "$HOME/.tapper/macropreconditions";
         make_subdir my $localdata_dir = "$HOME/.tapper/localdata";
 
         copy_subdir ($init_dir, "hello-world");
@@ -184,9 +185,12 @@ sub init
         mint_file ($init_dir, "log4perl.cfg");
         mint_file ($init_dir, "log4perl_webgui.cfg");
         mint_file ($init_dir, "tapper-mcp-messagereceiver.conf");
+        mint_file ($init_dir, "testprogram/tapper-selftest.sh");
 
-        # Allow more fine-grained updates for testplans,
+        # Allow more fine-grained updates for testplans and macropreconditions,
         # as we expect the user to have his own stuff in there.
+        mint_file ($init_dir, $_) foreach qw(macropreconditions/tapper-selftest.mpc);
+
         make_subdir my $tplan_dir = "$HOME/.tapper/testplans";
 
         make_subdir "$tplan_dir/$_" foreach qw(topic
@@ -197,6 +201,7 @@ sub init
                                                topic/kernel
                                                topic/kernel/generic
                                                topic/helloworld
+                                               topic/tapper
                                                include
                                              );
         mint_file ($init_dir, $_) foreach qw(testplans/topic/xen/generic/upload-xen-dmesg.sh
@@ -208,6 +213,7 @@ sub init
                                              testplans/topic/helloworld/example01
                                              testplans/topic/helloworld/example02
                                              testplans/topic/helloworld/example03-builder
+                                             testplans/topic/tapper/tapper-selftest
                                              testplans/include/distrodetails
                                              testplans/include/defaults
                                              testplans/include/defaultbenchmarks
