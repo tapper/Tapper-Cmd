@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - apply_macro() also looks into include path paths.use_case_path
 
 5.0.4     2016-03-30
         - hello-world - povide example tapper-selftest with preconditions
