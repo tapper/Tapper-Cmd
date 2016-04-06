@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.6     2016-04-06
         - log4perl timestamps in GMT
 
 5.0.5     2016-03-30
