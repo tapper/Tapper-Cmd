@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - default config for tapper_prc: tapper-client without path
 
 5.0.6     2016-04-06
         - log4perl timestamps in GMT
