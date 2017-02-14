@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+5.0.8     2017-02-14
         - support for testrun pause/continue
 
 5.0.7     2016-11-11
