@@ -337,6 +337,59 @@ sub rerun {
         return $testrun->rerun(\%args)->id;
 }
 
+=head2 pause
+
+Pause an existing testrun by setting its state to 'prepare'.
+
+@param int      - id of original testrun
+
+@return success - testrun id
+@return error   - exception
+
+@throws exception without class
+
+=cut
+
+sub pause {
+        my ($self, $id) = @_;
+        my $testrun = $self->schema->resultset('TestrunScheduling')->search
+            ({
+                testrun_id => $id,
+                status => 'schedule',
+             })->first;
+        if ($testrun and $testrun->testrun_id) {
+            return $testrun->update_content({status => 'prepare'});
+        }
+        return;
+}
+
+=head2 continue
+
+Continue a paused testrun (status 'prepare') by setting its state back
+to 'schedule'.
+
+@param int      - id of original testrun
+
+@return success - testrun id
+@return error   - exception
+
+@throws exception without class
+
+=cut
+
+sub continue {
+        my ($self, $id) = @_;
+        my $testrun = $self->schema->resultset('TestrunScheduling')->search
+            ({
+                testrun_id => $id,
+                status => 'prepare',
+             })->first;
+        if ($testrun and $testrun->testrun_id) {
+            return $testrun->update_content({status => 'schedule'});
+        }
+        return;
+}
+
 =head2 cancel
 
 Stop a running testrun by sending the appropriate message to MCP. As

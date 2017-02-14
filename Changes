@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - support for testrun pause/continue
 
 5.0.7     2016-11-11
         - default config for tapper_prc: tapper-client without path
