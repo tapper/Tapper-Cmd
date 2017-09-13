@@ -150,6 +150,32 @@ sub del {
         return 0;
 }
 
+=head2 cancel
+
+Cancel testplan by canceling all of its testruns.
+
+@param int - testplan instance id
+
+@return success - 0
+@return error - exception
+
+@throws die()
+
+=cut
+
+sub cancel {
+    my ($self, $id, $comment) = @_;
+
+    $comment ||= 'Testplan cancelled';
+    my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+    my $cmd = Tapper::Cmd::Testrun->new;
+    my $testruns = $testplan->testruns;
+    while(my $testrun = $testruns->next) {
+        $cmd->cancel($testrun->id, $comment);
+    }
+    return 0;
+}
+
 =head2 rerun
 
 Reapply the evaluated testplan of the given testplan instance.
