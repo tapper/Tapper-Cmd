@@ -11,8 +11,8 @@ use Tapper::Config;
 use Tapper::Model 'model';
 use File::ShareDir 'module_file', 'module_dir';
 use File::Copy::Recursive 'dircopy';
-use File::Slurp 'slurp';
 use DBI;
+use Path::Tiny;
 
 extends 'Tapper::Cmd';
 
@@ -45,7 +45,7 @@ sub mint_file {
         if (-e $file) {
                 say "SKIP    $file - already exists";
         } else {
-                my $content = slurp module_file('Tapper::Cmd::Init', $basename);
+                my $content = path(module_file('Tapper::Cmd::Init', $basename))->slurp;
                 $content =~ s/__HOME__/$HOME/g;
                 $content =~ s/__USER__/$USER/g;
                 open my $INITCFG, ">", $file or die "Can not create file $file.\n";

@@ -6,7 +6,7 @@ use Moose;
 extends 'Tapper::Base';
 
 use Tapper::Model 'model';
-use File::Slurp;
+use Path::Tiny;
 
 has schema => (
         is      => 'rw',
@@ -79,7 +79,7 @@ sub apply_macro
         my ($self, $file, $substitutes, $includes) = @_;
 
         $substitutes ||= {};
-        my $plan = File::Slurp::slurp($file);
+        my $plan = path($file)->slurp;
 
         my @include_paths = (Tapper::Config->subconfig->{paths}{testplan_path});
         push @include_paths, @{$includes || [] };

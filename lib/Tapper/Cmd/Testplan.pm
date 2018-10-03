@@ -8,7 +8,6 @@ use Try::Tiny;
 use YAML::Syck;
 use Tapper::Model 'model';
 use Tapper::Reports::DPath::TT;
-use File::Slurp 'slurp';
 use Perl6::Junction 'any';
 
 extends 'Tapper::Cmd';
