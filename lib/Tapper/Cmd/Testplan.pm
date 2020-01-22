@@ -25,9 +25,9 @@ instances in the database.
     use Tapper::Cmd::Testplan;
 
     my $cmd = Tapper::Cmd::Testplan->new();
-    my $plan_id = $cmd->add($plan);
-    $cmd->update($plan_id, $new_plan);
-    $cmd->del($plan_id);
+    my $res = $cmd->add($plan);
+    $cmd->update($res->{testplan_id}, $new_plan);
+    $cmd->del($res->{testplan_id});
 
     ...
 
@@ -110,7 +110,7 @@ sub add {
                 push @testrun_ids, @new_ids;
 
         }
-        return $instance->id;
+        return { testplan_id => $instance->id, testrun_ids => \@testrun_ids };
 }
 
 =head2 del

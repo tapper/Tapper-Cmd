@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - [API change!] testplan add returns its created testruns, too
 
 5.0.10    2018-10-08
         - distro maintenance
