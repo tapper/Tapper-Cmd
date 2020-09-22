@@ -168,6 +168,7 @@ sub cancel {
 
     $comment ||= 'Testplan cancelled';
     my $testplan = model('TestrunDB')->resultset('TestplanInstance')->find($id);
+    require Tapper::Cmd::Testrun;
     my $cmd = Tapper::Cmd::Testrun->new;
     my $testruns = $testplan->testruns;
     while(my $testrun = $testruns->next) {
