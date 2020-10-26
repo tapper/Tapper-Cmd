@@ -70,16 +70,24 @@ sub create
                 die "'$plan' is not YAML containing a testrun description\n";
         }
 
+        # pass testplan context down to preconditions,
+        # merged into their potentially own context
+        my @plan_preconditions = map {
+          $_->{context} = merge($_->{context}, $plan->{context})
+            if $_->{precondition_type} eq 'testprogram';
+          $_;
+        } @{$plan->{preconditions} // []};
+
         my @preconditions = Tapper::Cmd::Precondition
             ->new({ schema => $self->schema })
-            ->add($plan->{preconditions})
+            ->add(\@plan_preconditions)
         ;
 
         my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and $_ !~ /^requested/i } keys %$plan;
 
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
-                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                my $merged_arguments = merge \%args, {precondition    => \@plan_preconditions,
                                                       requested_hosts => $host,
                                                       testplan_id     => $instance,
                                                      };
@@ -88,7 +96,7 @@ sub create
                 push @testruns, $testrun_id;
         }
         if ($plan->{requested_hosts_any}) {
-                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                my $merged_arguments = merge \%args, {precondition    => \@plan_preconditions,
                                                       requested_hosts => $plan->{requested_hosts_any},
                                                       testplan_id     => $instance};
                 my $testrun_id = $self->add($merged_arguments );
@@ -96,7 +104,7 @@ sub create
                 push @testruns, $testrun_id;
         }
         foreach my $host ($self->find_matching_hosts($plan->{requested_features_all})) {
-                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                my $merged_arguments = merge \%args, {precondition    => \@plan_preconditions,
                                                       requested_hosts => $host,
                                                       testplan_id     => $instance};
                 my $testrun_id = $self->add($merged_arguments );
@@ -104,7 +112,7 @@ sub create
                 push @testruns, $testrun_id;
         }
         if ($plan->{requested_features_any}) {
-                my $merged_arguments = merge \%args, {precondition       => $plan->{preconditions},
+                my $merged_arguments = merge \%args, {precondition       => \@plan_preconditions,
                                                       requested_features => $plan->{requested_features_any},
                                                       testplan_id        => $instance};
                 my $testrun_id = $self->add($merged_arguments );
@@ -112,7 +120,7 @@ sub create
                 push @testruns, $testrun_id;
         }
         if ( not grep { $_ =~ /^requested/i } keys %$plan) {
-                my $merged_arguments = merge \%args, {precondition    => $plan->{preconditions},
+                my $merged_arguments = merge \%args, {precondition    => \@plan_preconditions,
                                                       testplan_id     => $instance,
                                                      };
                 my $testrun_id = $self->add($merged_arguments);
