@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - introduce 'context' to testplans/testruns
 
 5.0.11    2020-01-22
         - [API change!] testplan add returns its created testruns, too
