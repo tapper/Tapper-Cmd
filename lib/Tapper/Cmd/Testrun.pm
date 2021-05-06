@@ -83,7 +83,7 @@ sub create
             ->add(\@plan_preconditions)
         ;
 
-        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and $_ !~ /^requested/i } keys %$plan;
+        my %args          = map { lc($_) => $plan->{$_} } grep { lc($_) ne 'preconditions' and $_ !~ /^requested_(hosts|features)/i } keys %$plan;
 
         my @testruns;
         foreach my $host (@{$plan->{requested_hosts_all} || [] }) {
@@ -119,7 +119,7 @@ sub create
                 $self->assign_preconditions($testrun_id, @preconditions);
                 push @testruns, $testrun_id;
         }
-        if ( not grep { $_ =~ /^requested/i } keys %$plan) {
+        if ( not grep { $_ =~ /^requested_(hosts|features)/i } keys %$plan) {
                 my $merged_arguments = merge \%args, {precondition    => \@plan_preconditions,
                                                       testplan_id     => $instance,
                                                      };
@@ -216,6 +216,13 @@ sub add {
                                             ->new({testrun_id => $testrun_id, feature => $feature})
                                             ->insert()
                                         ;
+                                }
+                        }
+
+                        if ( $args{requested_resources} ) {
+                                my $testrun = $or_schema->resultset('Testrun')->find($testrun_id);
+                                foreach my $request (@{$args{requested_resources}}) {
+                                        $testrun->add_requested_resource_by_name( ref($request) eq "ARRAY" ? @$request : ($request) );
                                 }
                         }
 
