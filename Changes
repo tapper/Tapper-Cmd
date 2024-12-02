@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - re-upload
+        - Implement dependencies between testruns in a testplan
+        - Implement abstract resource scheduling
 
 5.0.12    2020-12-09
         - introduce 'context' to testplans/testruns
